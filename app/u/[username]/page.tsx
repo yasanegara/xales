@@ -64,10 +64,20 @@ export default async function ProfilePage({ params }: Props) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '2.5rem', fontWeight: 700, color: '#6e6a65',
             flexShrink: 0, overflow: 'hidden',
+            position: 'relative',
           }}>
             {user.profilePic ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.profilePic} alt={user.name ?? username} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', alignSelf: 'stretch' }} />
+              <img
+                src={user.profilePic}
+                alt={user.name ?? username}
+                style={{
+                  position: 'absolute', inset: 0,
+                  width: '100%', height: '100%',
+                  objectFit: 'cover', objectPosition: 'center center',
+                  display: 'block',
+                }}
+              />
             ) : (
               (user.name?.[0] ?? username[0]).toUpperCase()
             )}
