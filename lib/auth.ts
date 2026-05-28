@@ -31,43 +31,37 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null
         const user = await db.user.findUnique({ where: { email: credentials.email } })
         if (!user || !user.passwordHash) return null
+        if (user.banned) return null
         const valid = await bcrypt.compare(credentials.password, user.passwordHash)
         if (!valid) return null
-        return { id: user.id, email: user.email, name: user.name, username: user.username }
+        return { id: user.id, email: user.email, name: user.name, username: user.username, role: user.role }
       },
     }),
   ],
   callbacks: {
     async signIn({ user, account }) {
-      // Handle Google OAuth — create user if first login
       if (account?.provider === 'google') {
         if (!user.email) return false
-
         const existing = await db.user.findUnique({ where: { email: user.email } })
+
+        if (existing?.banned) return false
 
         if (!existing) {
           const username = await generateUniqueUsername(
             user.name?.split(' ')[0] ?? user.email.split('@')[0]
           )
           const newUser = await db.user.create({
-            data: {
-              email: user.email,
-              username,
-              name: user.name,
-              profilePic: user.image,
-            },
+            data: { email: user.email, username, name: user.name, profilePic: user.image },
           })
           user.id = newUser.id
-          ;(user as { username?: string }).username = newUser.username
+          ;(user as { username?: string; role?: string }).username = newUser.username
+          ;(user as { username?: string; role?: string }).role = newUser.role
         } else {
           user.id = existing.id
-          ;(user as { username?: string }).username = existing.username
-          // Update profile pic from Google if not set
+          ;(user as { username?: string; role?: string }).username = existing.username
+          ;(user as { username?: string; role?: string }).role = existing.role
           if (!existing.profilePic && user.image) {
-            await db.user.update({
-              where: { id: existing.id },
-              data: { profilePic: user.image },
-            })
+            await db.user.update({ where: { id: existing.id }, data: { profilePic: user.image } })
           }
         }
       }
@@ -78,6 +72,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.username = (user as unknown as { username: string }).username
+        token.role = (user as unknown as { role: string }).role ?? 'user'
       }
       return token
     },
@@ -86,6 +81,7 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id as string
         session.user.username = token.username as string
+        session.user.role = (token.role as string) ?? 'user'
       }
       return session
     },

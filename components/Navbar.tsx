@@ -103,6 +103,7 @@ export default function Navbar() {
                       { href: '/dashboard/discounts', label: '% Kode Diskon' },
                       { href: '/dashboard/affiliate', label: '↗ Affiliate' },
                       { href: '/dashboard/settings', label: 'Settings' },
+                      ...(session.user.role === 'admin' ? [{ href: '/admin', label: '⚙ Admin Panel' }] : []),
                     ].map((item) => (
                       <Link
                         key={item.href}
