@@ -10,6 +10,9 @@ interface PostFile {
   mimeType: string
   size: number
   isFree: boolean
+  price?: number | null
+  discount?: number | null
+  url?: string | null
 }
 
 interface Props {
@@ -113,29 +116,65 @@ export default function Paywall({ slug, title, price, authorName, authorWaNumber
         </div>
       )}
 
-      {/* Paid files locked */}
+      {/* Paid files — with separate pricing */}
       {files.filter(f => !f.isFree).length > 0 && (
         <div>
           <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#6e6a65', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>
-            File Berbayar (perlu beli artikel)
+            File Tambahan
           </div>
-          {files.filter(f => !f.isFree).map(file => (
-            <div
-              key={file.id}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.75rem',
-                background: '#f7f5f2', border: '1px solid #e5e0d8', borderRadius: '8px',
-                padding: '0.75rem 1rem', marginBottom: '0.5rem', opacity: 0.7,
-              }}
-            >
-              <span style={{ fontSize: '1.25rem' }}>🔒</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6e6a65' }}>{file.name}</div>
-                <div style={{ fontSize: '0.75rem', color: '#9c9690' }}>{formatBytes(file.size)}</div>
+          {files.filter(f => !f.isFree).map(file => {
+            const effectivePrice = file.price && file.discount
+              ? Math.round(file.price * (1 - file.discount / 100))
+              : file.price
+            const fileIcon = file.mimeType === 'url/link' ? '🔗' : file.mimeType.startsWith('image/') ? '🖼' : '📎'
+            return (
+              <div
+                key={file.id}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.75rem',
+                  background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '8px',
+                  padding: '0.75rem 1rem', marginBottom: '0.5rem',
+                }}
+              >
+                <span style={{ fontSize: '1.25rem' }}>{fileIcon}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {file.name}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#9c9690' }}>
+                    {file.mimeType === 'url/link' ? 'Link eksternal' : formatBytes(file.size)}
+                  </div>
+                </div>
+                {file.price ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.375rem' }}>
+                    <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#059669' }}>
+                      {file.discount && file.discount > 0 ? (
+                        <>
+                          <span style={{ textDecoration: 'line-through', color: '#9c9690', marginRight: '0.25rem', fontSize: '0.75rem' }}>
+                            Rp {new Intl.NumberFormat('id-ID').format(file.price)}
+                          </span>
+                          <span>Rp {new Intl.NumberFormat('id-ID').format(effectivePrice!)}</span>
+                        </>
+                      ) : (
+                        `Rp ${new Intl.NumberFormat('id-ID').format(file.price)}`
+                      )}
+                    </div>
+                    <button
+                      onClick={() => window.location.href = file.mimeType === 'url/link' && file.url ? file.url : `/api/posts/${slug}/files/${file.id}/purchase`}
+                      style={{
+                        fontSize: '0.75rem', fontWeight: 500, color: '#0070f3',
+                        background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline',
+                      }}
+                    >
+                      {file.mimeType === 'url/link' ? 'Buka' : 'Beli'}
+                    </button>
+                  </div>
+                ) : (
+                  <span style={{ fontSize: '0.8125rem', color: '#6e6a65' }}>Perlu beli artikel</span>
+                )}
               </div>
-              <span style={{ fontSize: '0.8125rem', color: '#9c9690' }}>Terkunci</span>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

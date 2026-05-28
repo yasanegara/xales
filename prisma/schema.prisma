@@ -33,6 +33,7 @@ model User {
   likes         Like[]
   savedPosts    SavedPost[]
   purchases     Purchase[]
+  filePurchases FilePurchase[]
   discounts     Discount[]
   followers     Follow[]  @relation("following")
   following     Follow[]  @relation("follower")
@@ -56,7 +57,8 @@ model Post {
   likeCount   Int       @default(0)
   coverImage  String?   @db.Text
   isPremium   Boolean   @default(false)
-  price       Int?      // IDR, e.g. 25000 = Rp 25.000
+  price       Int?      // IDR
+  discount    Int?      // % off, e.g. 20 = 20% off
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -72,15 +74,20 @@ model Post {
 }
 
 model PostFile {
-  id        String   @id @default(cuid())
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  id        String    @id @default(cuid())
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    String
   name      String
-  mimeType  String
-  size      Int      // bytes
-  data      String   @db.Text // base64
-  isFree    Boolean  @default(true)
-  createdAt DateTime @default(now())
+  mimeType  String    // "url/link" for external links
+  size      Int       @default(0)
+  data      String?   @db.Text  // base64; null for URL attachments
+  url       String?             // external URL for link-type attachments
+  isFree    Boolean   @default(true)
+  price     Int?      // IDR — file can be sold separately
+  discount  Int?      // % off on file price
+  createdAt DateTime  @default(now())
+
+  filePurchases FilePurchase[]
 }
 
 model Purchase {
@@ -89,13 +96,27 @@ model Purchase {
   userId    String
   post      Post     @relation(fields: [postId], references: [id])
   postId    String
-  amount    Int      // IDR actually paid (after discount)
-  status    String   @default("pending") // pending | paid | failed
+  amount    Int
+  status    String   @default("pending")
   orderId   String   @unique
-  refCode   String?  // affiliate username who referred
+  refCode   String?
   createdAt DateTime @default(now())
 
   @@unique([userId, postId])
+}
+
+model FilePurchase {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  file      PostFile @relation(fields: [fileId], references: [id])
+  fileId    String
+  amount    Int
+  status    String   @default("pending")
+  orderId   String   @unique
+  createdAt DateTime @default(now())
+
+  @@unique([userId, fileId])
 }
 
 model Discount {

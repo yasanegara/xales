@@ -13,6 +13,7 @@ export interface PostFormData {
   tags: string
   isPremium: boolean
   price: string
+  discount: string   // % off article price
   files: AttachedFile[]
 }
 
@@ -132,25 +133,43 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
 
         {form.isPremium && (
           <div>
-            <label style={labelStyle}>Harga (IDR)</label>
-            <div style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#6e6a65', fontSize: '0.9375rem', fontWeight: 500 }}>
-                Rp
-              </span>
-              <input
-                type="text"
-                value={form.price}
-                onChange={(e) => {
-                  const raw = e.target.value.replace(/\D/g, '')
-                  set({ price: raw })
-                }}
-                style={{ ...inputStyle, paddingLeft: '2.75rem' }}
-                placeholder="25000"
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: '0.75rem', alignItems: 'flex-end' }}>
+              <div>
+                <label style={labelStyle}>Harga (IDR) *</label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#6e6a65', fontSize: '0.9375rem', fontWeight: 500 }}>Rp</span>
+                  <input type="text" value={form.price}
+                    onChange={(e) => set({ price: e.target.value.replace(/\D/g, '') })}
+                    style={{ ...inputStyle, paddingLeft: '2.75rem' }} placeholder="25000" />
+                </div>
+              </div>
+              <div>
+                <label style={labelStyle}>Diskon %</label>
+                <div style={{ position: 'relative' }}>
+                  <input type="number" min={0} max={99} value={form.discount}
+                    onChange={(e) => set({ discount: e.target.value })}
+                    style={{ ...inputStyle, paddingRight: '1.75rem' }} placeholder="0" />
+                  <span style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9c9690', fontSize: '0.875rem' }}>%</span>
+                </div>
+              </div>
             </div>
             {form.price && (
-              <p style={{ fontSize: '0.75rem', color: '#059669', marginTop: '0.375rem' }}>
-                = Rp {new Intl.NumberFormat('id-ID').format(parseInt(form.price))}
+              <p style={{ fontSize: '0.8125rem', marginTop: '0.5rem' }}>
+                {form.discount && parseInt(form.discount) > 0 ? (
+                  <>
+                    <span style={{ color: '#9c9690', textDecoration: 'line-through', marginRight: '0.375rem' }}>
+                      Rp {new Intl.NumberFormat('id-ID').format(parseInt(form.price))}
+                    </span>
+                    <span style={{ color: '#059669', fontWeight: 600 }}>
+                      Rp {new Intl.NumberFormat('id-ID').format(Math.round(parseInt(form.price) * (1 - parseInt(form.discount) / 100)))}
+                    </span>
+                    <span style={{ color: '#9c9690', marginLeft: '0.375rem' }}>
+                      (hemat {form.discount}%)
+                    </span>
+                  </>
+                ) : (
+                  <span style={{ color: '#059669' }}>= Rp {new Intl.NumberFormat('id-ID').format(parseInt(form.price))}</span>
+                )}
               </p>
             )}
           </div>

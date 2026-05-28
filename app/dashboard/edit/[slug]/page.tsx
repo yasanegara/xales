@@ -27,6 +27,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
         tags: (data.tags ?? []).join(', '),
         isPremium: data.isPremium ?? false,
         price: data.price ? String(data.price) : '',
+        discount: data.discount ? String(data.discount) : '',
         files: [],  // existing files fetched separately via API
       })
     })

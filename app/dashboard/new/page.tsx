@@ -10,7 +10,7 @@ export default function NewPostPage() {
   const { data: session } = useSession()
   const [form, setForm] = useState<PostFormData>({
     title: '', description: '', type: 'markdown', content: '',
-    category: '', tags: '', isPremium: false, price: '', files: [],
+    category: '', tags: '', isPremium: false, price: '', discount: '', files: [],
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')

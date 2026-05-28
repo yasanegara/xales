@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const { title, description, type, content, category, tags, published, isPremium, price, files } = await req.json()
+    const { title, description, type, content, category, tags, published, isPremium, price, discount, files } = await req.json()
 
     if (!title || !type || !content)
       return NextResponse.json({ error: 'Title, type, dan content wajib diisi' }, { status: 400 })
@@ -49,12 +49,20 @@ export async function POST(req: NextRequest) {
         publishedAt: published ? new Date() : null,
         isPremium: isPremium ?? false,
         price: isPremium ? (price ?? null) : null,
+        discount: isPremium ? (discount ?? null) : null,
         authorId: session.user.id,
         ...(files?.length
           ? {
               files: {
-                create: files.map((f: { name: string; mimeType: string; size: number; data: string; isFree: boolean }) => ({
-                  name: f.name, mimeType: f.mimeType, size: f.size, data: f.data, isFree: f.isFree,
+                create: files.map((f: any) => ({
+                  name: f.name,
+                  mimeType: f.mimeType,
+                  size: f.size,
+                  data: f.data ?? null,
+                  url: f.url ?? null,
+                  isFree: f.isFree,
+                  price: f.price ?? null,
+                  discount: f.discount ?? null,
                 })),
               },
             }
