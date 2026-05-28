@@ -16,6 +16,15 @@ interface Props {
   following: number
   totalViews: number
   totalLikes: number
+  verified: boolean
+  reputationScore: number
+}
+
+function reputationLevel(score: number) {
+  if (score >= 2000) return { label: 'Master',       color: '#7c3aed', bg: '#f5f3ff' }
+  if (score >= 500)  return { label: 'Kreator Pro',  color: '#0284c7', bg: '#f0f9ff' }
+  if (score >= 100)  return { label: 'Kontributor',  color: '#059669', bg: '#f0fdf4' }
+  return               { label: 'Pemula',          color: '#9c9690', bg: '#f7f5f2' }
 }
 
 // Badge rules — active when condition met
@@ -48,7 +57,8 @@ const BADGES = [
 
 export default function ProfileHeader(props: Props) {
   const { username, name, profilePic, bio, status, createdAt,
-    postCount, followers, following, totalViews, totalLikes } = props
+    postCount, followers, following, totalViews, totalLikes,
+    verified, reputationScore } = props
 
   const [mobile, setMobile] = useState(false)
 
@@ -102,17 +112,14 @@ export default function ProfileHeader(props: Props) {
                 key={badge.label}
                 title={on ? `${badge.label} — ${badge.desc}` : `${badge.label} (belum aktif: ${badge.desc})`}
                 style={{
-                  flex: 1,
-                  aspectRatio: '1',
-                  borderRadius: '8px',
+                  flex: 1, aspectRatio: '1', borderRadius: '8px',
                   background: on ? badge.bg : '#f0ede8',
                   border: `1px solid ${on ? badge.color + '55' : '#e5e0d8'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '1rem',
                   filter: on ? 'none' : 'grayscale(1)',
                   opacity: on ? 1 : 0.35,
-                  cursor: 'default',
-                  transition: 'all 0.2s',
+                  cursor: 'default', transition: 'all 0.2s',
                 }}
               >
                 {badge.icon}
@@ -120,6 +127,44 @@ export default function ProfileHeader(props: Props) {
             )
           })}
         </div>
+
+        {/* Verified */}
+        <div
+          title={verified ? 'Akun terverifikasi' : 'Belum terverifikasi'}
+          style={{
+            marginTop: '5px', width: '100%',
+            display: 'flex', alignItems: 'center', gap: '0.375rem',
+            background: verified ? '#eff6ff' : '#f0ede8',
+            border: `1px solid ${verified ? '#93c5fd' : '#e5e0d8'}`,
+            borderRadius: '8px', padding: '0.3rem 0.5rem',
+            filter: verified ? 'none' : 'grayscale(1)',
+            opacity: verified ? 1 : 0.35,
+          }}
+        >
+          <span style={{ fontSize: '0.85rem' }}>✓</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: 600, color: verified ? '#1d4ed8' : '#6e6a65' }}>
+            Terverifikasi
+          </span>
+        </div>
+
+        {/* Reputation score */}
+        {(() => {
+          const lvl = reputationLevel(reputationScore)
+          return (
+            <div
+              title={`Skor reputasi: ${reputationScore} poin`}
+              style={{
+                marginTop: '5px', width: '100%',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: lvl.bg, border: `1px solid ${lvl.color}44`,
+                borderRadius: '8px', padding: '0.3rem 0.5rem',
+              }}
+            >
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: lvl.color }}>{lvl.label}</span>
+              <span style={{ fontSize: '0.7rem', fontWeight: 600, color: lvl.color }}>{reputationScore}</span>
+            </div>
+          )
+        })()}
       </div>
 
       {/* Right col: username, stats, name, status, bio */}

@@ -51,6 +51,12 @@ export default async function ProfilePage({ params }: Props) {
 
   const totalViews = user.posts.reduce((s, p) => s + p.viewCount, 0)
   const totalLikes = user.posts.reduce((s, p) => s + p.likeCount, 0)
+  const reputationScore = Math.floor(
+    user.posts.length * 20 +
+    totalViews / 10 +
+    totalLikes * 5 +
+    user._count.followers * 10
+  )
 
   return (
     <>
@@ -69,6 +75,8 @@ export default async function ProfilePage({ params }: Props) {
           following={user._count.following}
           totalViews={totalViews}
           totalLikes={totalLikes}
+          verified={user.verified}
+          reputationScore={reputationScore}
         />
 
         {/* Bundles */}
