@@ -1,11 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import dynamic from 'next/dynamic'
 import PostViewer from './PostViewer'
-import ImageUploadButton from './ImageUploadButton'
-
-const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
+import MarkdownEditor from './MarkdownEditor'
 
 interface PostEditorProps {
   type: 'markdown' | 'html'
@@ -16,7 +13,7 @@ interface PostEditorProps {
 export default function PostEditor({ type, value, onChange }: PostEditorProps) {
   const [tab, setTab] = useState<'edit' | 'preview'>('edit')
 
-  const tabStyle = (active: boolean) => ({
+  const tabStyle = (active: boolean): React.CSSProperties => ({
     padding: '0.375rem 0.875rem',
     borderRadius: '6px',
     fontSize: '0.8125rem',
@@ -29,26 +26,14 @@ export default function PostEditor({ type, value, onChange }: PostEditorProps) {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
         <button style={tabStyle(tab === 'edit')} onClick={() => setTab('edit')}>Edit</button>
         <button style={tabStyle(tab === 'preview')} onClick={() => setTab('preview')}>Preview</button>
-        {type === 'markdown' && tab === 'edit' && (
-          <div style={{ marginLeft: 'auto' }}>
-            <ImageUploadButton onInsert={(md) => onChange(value + md)} />
-          </div>
-        )}
       </div>
 
       {tab === 'edit' ? (
         type === 'markdown' ? (
-          <div data-color-mode="light">
-            <MDEditor
-              value={value}
-              onChange={(v) => onChange(v ?? '')}
-              height={500}
-              preview="edit"
-            />
-          </div>
+          <MarkdownEditor value={value} onChange={onChange} />
         ) : (
           <textarea
             value={value}
