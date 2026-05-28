@@ -1,9 +1,22 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-function formatIDR(n: number) { return new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(n) }
+const ARTICLE_GRADIENTS = [
+  'linear-gradient(145deg, #b8865a 0%, #8b5e3c 100%)',
+  'linear-gradient(145deg, #9a7a50 0%, #705a38 100%)',
+  'linear-gradient(145deg, #c4956a 0%, #946040 100%)',
+  'linear-gradient(145deg, #a07850 0%, #7a5a34 100%)',
+  'linear-gradient(145deg, #b09060 0%, #886840 100%)',
+]
+const APP_GRADIENTS = [
+  'linear-gradient(145deg, #4a6a8a 0%, #2e4e6a 100%)',
+  'linear-gradient(145deg, #5a7a96 0%, #3a5a76 100%)',
+  'linear-gradient(145deg, #3e6278 0%, #264858 100%)',
+  'linear-gradient(145deg, #4e7090 0%, #305070 100%)',
+  'linear-gradient(145deg, #5a7888 0%, #385868 100%)',
+]
 
 interface GridPost {
   id: string
@@ -24,228 +37,168 @@ interface Props {
   username: string
 }
 
-// Article card colors — warm paper tones
-const ARTICLE_ACCENTS = ['#c4956a', '#8b7355', '#a07850', '#b08968', '#9a7a60']
-// App card colors — cooler tones
-const APP_ACCENTS     = ['#5b7fa6', '#6b8fa0', '#4a7a8a', '#5a8096', '#4e7090']
-
 function PostCard({ post, idx, username }: { post: GridPost; idx: number; username: string }) {
   const [hovered, setHovered] = useState(false)
-
   const isApp = post.type === 'html'
-  const accent = isApp
-    ? APP_ACCENTS[idx % APP_ACCENTS.length]
-    : ARTICLE_ACCENTS[idx % ARTICLE_ACCENTS.length]
-
-  // Large decorative letter from title
+  const gradient = isApp
+    ? APP_GRADIENTS[idx % APP_GRADIENTS.length]
+    : ARTICLE_GRADIENTS[idx % ARTICLE_GRADIENTS.length]
   const bigLetter = post.title.trimStart()[0]?.toUpperCase() ?? '✦'
 
   return (
     <Link
       href={`/@${username}/${post.slug}`}
-      style={{ textDecoration: 'none', display: 'block' }}
+      style={{ textDecoration: 'none', display: 'block', aspectRatio: '1 / 1', position: 'relative', borderRadius: '10px', overflow: 'hidden' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <article style={{
-        borderRadius: '12px',
-        border: `1px solid ${hovered ? accent : '#e5e0d8'}`,
-        overflow: 'hidden',
-        background: '#ffffff',
-        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
-        boxShadow: hovered
-          ? `0 12px 32px rgba(0,0,0,0.10), 0 0 0 1px ${accent}33`
-          : '0 1px 3px rgba(0,0,0,0.05)',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
-        display: 'flex',
-        flexDirection: 'column',
-        cursor: 'pointer',
-      }}>
-
-        {/* Accent top bar */}
-        <div style={{ height: 3, background: accent, flexShrink: 0 }} />
-
-        {/* Cover image */}
-        {post.coverImage && (
-          <div style={{ height: 130, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={post.coverImage}
-              alt={post.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            />
-          </div>
-        )}
-
-        {/* Body */}
+      {/* Background */}
+      {post.coverImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={post.coverImage}
+          alt={post.title}
+          style={{
+            position: 'absolute',
+            top: '50%', left: '50%',
+            transform: `translate(-50%, -50%) scale(${hovered ? 1.04 : 1})`,
+            minWidth: '100%', minHeight: '100%',
+            width: 'auto', height: 'auto',
+            maxWidth: 'none',
+            transition: 'transform 0.35s ease',
+          }}
+        />
+      ) : (
         <div style={{
-          flex: 1,
-          padding: '1rem',
-          background: post.coverImage ? '#ffffff' : '#faf8f5',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.625rem',
-          position: 'relative',
+          position: 'absolute', inset: 0,
+          background: gradient,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
           overflow: 'hidden',
         }}>
-          {/* Decorative letter — only when no cover image */}
-          {!post.coverImage && (
-            <div style={{
-              position: 'absolute',
-              right: '0.625rem',
-              top: '0.25rem',
-              fontSize: '5rem',
-              fontWeight: 900,
-              color: accent,
-              opacity: 0.07,
-              lineHeight: 1,
-              pointerEvents: 'none',
-              userSelect: 'none',
-              fontFamily: 'Georgia, serif',
-            }}>
-              {bigLetter}
-            </div>
-          )}
-
-          {/* Type + category */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
-            <span style={{
-              fontSize: '0.65rem',
-              fontWeight: 700,
-              letterSpacing: '0.07em',
-              textTransform: 'uppercase',
-              color: '#ffffff',
-              background: accent,
-              padding: '0.15rem 0.45rem',
-              borderRadius: '3px',
-            }}>
-              {isApp ? 'App' : 'Artikel'}
-            </span>
-            {post.category && (
-              <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>{post.category}</span>
-            )}
-            {post.isPremium && (
-              <span style={{
-                fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.05em',
-                textTransform: 'uppercase', color: '#b45309',
-                background: '#fef3c7', padding: '0.15rem 0.45rem', borderRadius: '3px',
-              }}>
-                {post.price ? `Rp ${formatIDR(post.price)}` : 'Premium'}
-              </span>
-            )}
-          </div>
-
-          {/* Title */}
-          <h3 style={{
-            fontSize: '0.9375rem',
-            fontWeight: 700,
-            lineHeight: 1.45,
-            color: '#1a1a1a',
-            margin: 0,
-            display: '-webkit-box',
-            WebkitLineClamp: post.coverImage ? 3 : 4,
-            WebkitBoxOrient: 'vertical' as const,
-            overflow: 'hidden',
-            fontFamily: 'Georgia, serif',
-            position: 'relative',
-          }}>
-            {post.title}
-          </h3>
-
-          {/* Description — only without cover */}
-          {!post.coverImage && post.description && (
-            <p style={{
-              fontSize: '0.8125rem',
-              color: '#6e6a65',
-              lineHeight: 1.55,
-              margin: 0,
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical' as const,
-              overflow: 'hidden',
-              position: 'relative',
-            }}>
-              {post.description}
-            </p>
-          )}
-
-          {/* Footer stats */}
+          {/* Decorative letter */}
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.625rem',
-            marginTop: 'auto',
-            paddingTop: '0.5rem',
-            borderTop: '1px solid #f0ede8',
-            fontSize: '0.75rem',
-            color: '#9c9690',
+            fontSize: 'clamp(4rem, 20vw, 7rem)',
+            fontWeight: 900,
+            color: 'rgba(255,255,255,0.12)',
+            lineHeight: 1,
+            userSelect: 'none',
+            fontFamily: 'Georgia, serif',
+            position: 'absolute',
+            bottom: '-0.1em', right: '0.05em',
           }}>
-            <span>👁 {post.viewCount.toLocaleString()}</span>
-            <span style={{ color: '#d0c9b8' }}>·</span>
-            <span>♥ {post.likeCount.toLocaleString()}</span>
+            {bigLetter}
           </div>
         </div>
-      </article>
+      )}
+
+      {/* Bottom overlay */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)',
+        padding: 'clamp(0.5rem, 3vw, 0.875rem)',
+        paddingTop: 'clamp(1.5rem, 8vw, 2.5rem)',
+        transform: hovered ? 'translateY(0)' : 'translateY(0)',
+      }}>
+        {/* Type + category */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+          <span style={{
+            fontSize: 'clamp(0.5rem, 1.4vw, 0.65rem)',
+            fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+            background: isApp ? '#3b82f6' : '#c4956a',
+            color: '#ffffff',
+            padding: '0.1rem 0.35rem', borderRadius: '3px',
+          }}>
+            {isApp ? 'App' : 'Artikel'}
+          </span>
+          {post.isPremium && (
+            <span style={{
+              fontSize: 'clamp(0.5rem, 1.4vw, 0.6rem)',
+              fontWeight: 700, letterSpacing: '0.04em',
+              color: '#fbbf24',
+            }}>★</span>
+          )}
+        </div>
+
+        {/* Title */}
+        <div style={{
+          fontSize: 'clamp(0.625rem, 2vw, 0.8125rem)',
+          fontWeight: 700,
+          color: '#ffffff',
+          lineHeight: 1.35,
+          display: '-webkit-box',
+          WebkitLineClamp: 3,
+          WebkitBoxOrient: 'vertical' as const,
+          overflow: 'hidden',
+          marginBottom: '0.25rem',
+          textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+          fontFamily: 'Georgia, serif',
+        }}>
+          {post.title}
+        </div>
+
+        {/* Stats */}
+        <div style={{
+          fontSize: 'clamp(0.5rem, 1.5vw, 0.7rem)',
+          color: 'rgba(255,255,255,0.7)',
+          display: 'flex', gap: '0.5rem',
+        }}>
+          <span>👁 {post.viewCount.toLocaleString()}</span>
+          <span>♥ {post.likeCount.toLocaleString()}</span>
+        </div>
+      </div>
     </Link>
   )
 }
 
 export default function ProfileGrid({ posts, username }: Props) {
-  const [tab, setTab] = useState<'artikel' | 'app'>('artikel')
+  const [tab, setTab]   = useState<'artikel' | 'app'>('artikel')
+  const [cols, setCols] = useState(3)
+
+  useEffect(() => {
+    const check = () => setCols(window.innerWidth < 600 ? 2 : 3)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   const articles = posts.filter(p => p.type === 'markdown')
   const apps     = posts.filter(p => p.type === 'html')
   const visible  = tab === 'artikel' ? articles : apps
 
-  const tabs = [
-    { key: 'artikel' as const, label: 'Artikel', count: articles.length, accent: '#8b7355' },
-    { key: 'app'     as const, label: 'App',     count: apps.length,      accent: '#5b7fa6' },
+  const tabList = [
+    { key: 'artikel' as const, label: 'Artikel', count: articles.length, color: '#c4956a' },
+    { key: 'app'     as const, label: 'App',     count: apps.length,      color: '#4a6a8a' },
   ]
-
-  if (posts.length === 0) return null
 
   return (
     <div>
-      {/* Tab bar */}
-      <div style={{
-        display: 'flex',
-        borderBottom: '1px solid #e5e0d8',
-        marginBottom: '1.5rem',
-        gap: 0,
-      }}>
-        {tabs.map(t => {
+      {/* Tabs */}
+      <div style={{ display: 'flex', borderBottom: '1px solid #e5e0d8', marginBottom: '1.25rem' }}>
+        {tabList.map(t => {
           const active = tab === t.key
           return (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
               style={{
-                flex: 1,
-                padding: '0.75rem 0',
-                background: 'none',
-                border: 'none',
-                borderBottom: active ? `2px solid ${t.accent}` : '2px solid transparent',
-                marginBottom: -1,
-                cursor: 'pointer',
+                flex: 1, padding: '0.625rem 0',
+                background: 'none', border: 'none',
+                borderBottom: active ? `2px solid ${t.color}` : '2px solid transparent',
+                marginBottom: -1, cursor: 'pointer',
                 fontSize: '0.875rem',
                 fontWeight: active ? 700 : 400,
                 color: active ? '#1a1a1a' : '#9c9690',
-                transition: 'color 0.15s, border-color 0.15s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.375rem',
+                transition: 'all 0.15s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem',
               }}
             >
               {t.label}
               <span style={{
-                fontSize: '0.7rem',
-                fontWeight: 600,
-                background: active ? t.accent : '#f0ede8',
-                color: active ? '#ffffff' : '#9c9690',
-                borderRadius: '10px',
-                padding: '0.1rem 0.45rem',
-                transition: 'background 0.15s, color 0.15s',
+                fontSize: '0.7rem', fontWeight: 600,
+                background: active ? t.color : '#f0ede8',
+                color: active ? '#fff' : '#9c9690',
+                borderRadius: '10px', padding: '0.1rem 0.45rem',
+                transition: 'all 0.15s',
               }}>
                 {t.count}
               </span>
@@ -254,7 +207,7 @@ export default function ProfileGrid({ posts, username }: Props) {
         })}
       </div>
 
-      {/* Grid — 2 columns */}
+      {/* Grid */}
       {visible.length === 0 ? (
         <p style={{ textAlign: 'center', color: '#9c9690', padding: '3rem 0', fontSize: '0.9375rem' }}>
           Belum ada {tab === 'artikel' ? 'artikel' : 'app'}.
@@ -262,8 +215,8 @@ export default function ProfileGrid({ posts, username }: Props) {
       ) : (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '1rem',
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          gap: '0.5rem',
         }}>
           {visible.map((post, i) => (
             <PostCard key={post.id} post={post} idx={i} username={username} />
