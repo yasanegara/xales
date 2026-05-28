@@ -156,7 +156,7 @@ export default async function PostPage({ params, searchParams }: Props) {
               }}>
                 {post.author.profilePic ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={post.author.profilePic} alt={authorName} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', minWidth: '100%', minHeight: '100%', width: 'auto', height: 'auto', maxWidth: 'none' }} />
+                  <img src={post.author.profilePic} alt={authorName} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
                 ) : (
                   (post.author.name?.[0] ?? post.author.username[0]).toUpperCase()
                 )}

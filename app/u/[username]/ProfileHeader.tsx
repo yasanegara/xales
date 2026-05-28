@@ -56,12 +56,8 @@ export default function ProfileHeader({
           src={profilePic}
           alt={name ?? username}
           style={{
-            position: 'absolute',
-            top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            minWidth: '100%', minHeight: '100%',
-            width: 'auto', height: 'auto',
-            maxWidth: 'none',
+            width: '100%', height: '100%',
+            objectFit: 'contain', display: 'block',
           }}
         />
       ) : (

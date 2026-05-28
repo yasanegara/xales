@@ -91,12 +91,8 @@ export default function Navbar() {
                       src={session.user.profilePic}
                       alt={session.user.name ?? session.user.username}
                       style={{
-                        position: 'absolute',
-                        top: '50%', left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        minWidth: '100%', minHeight: '100%',
-                        width: 'auto', height: 'auto',
-                        maxWidth: 'none',
+                        width: '100%', height: '100%',
+                        objectFit: 'contain', display: 'block',
                       }}
                     />
                   ) : (
