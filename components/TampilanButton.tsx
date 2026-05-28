@@ -52,16 +52,15 @@ export default function TampilanButton() {
         onClick={() => setShowPanel(p => !p)}
         title="Pengaturan tampilan baca"
         style={{
-          display: 'flex', alignItems: 'center', gap: '0.375rem',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: showPanel ? '#1a1a1a' : '#f0ede8',
           border: `1px solid ${showPanel ? '#1a1a1a' : '#e5e0d8'}`,
-          borderRadius: '6px', padding: '0.375rem 0.75rem',
-          fontSize: '0.8125rem', color: showPanel ? '#f7f5f2' : '#6e6a65',
-          cursor: 'pointer', fontWeight: 500, transition: 'all 0.15s',
+          borderRadius: '6px', padding: '0.3rem 0.5rem',
+          fontSize: '1rem', color: showPanel ? '#f7f5f2' : '#6e6a65',
+          cursor: 'pointer', transition: 'all 0.15s',
         }}
       >
-        <span style={{ fontSize: '0.875rem' }}>⚙</span>
-        <span>Tampilan</span>
+        ⚙
       </button>
 
       {showPanel && (

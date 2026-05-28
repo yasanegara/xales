@@ -273,15 +273,15 @@ export default function ShareModal({
     <>
       <button
         onClick={() => setOpen(true)}
+        title="Bagikan"
         style={{
-          display: 'flex', alignItems: 'center', gap: '0.375rem',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: '#f7f5f2', border: '1px solid #e5e0d8', borderRadius: '6px',
-          padding: '0.375rem 0.75rem', fontSize: '0.8125rem', color: '#6e6a65',
-          cursor: 'pointer', fontWeight: 500,
+          padding: '0.3rem 0.5rem', fontSize: '1rem', color: '#6e6a65',
+          cursor: 'pointer',
         }}
       >
         <span>↗</span>
-        <span>Bagikan</span>
       </button>
 
       {open && (

@@ -36,23 +36,19 @@ export default function LikeButton({ slug, initialCount }: LikeButtonProps) {
       onClick={toggle}
       disabled={!session || loading}
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
+        display: 'flex', alignItems: 'center', gap: '0.25rem',
         background: liked ? '#fef2f2' : '#f7f5f2',
         border: `1px solid ${liked ? '#fca5a5' : '#e5e0d8'}`,
-        borderRadius: '8px',
-        padding: '0.5rem 1rem',
+        borderRadius: '6px', padding: '0.3rem 0.5rem',
         color: liked ? '#dc2626' : '#6e6a65',
-        fontSize: '0.875rem',
+        fontSize: '0.8125rem',
         cursor: session ? 'pointer' : 'default',
-        transition: 'all 0.15s',
-        opacity: loading ? 0.6 : 1,
+        transition: 'all 0.15s', opacity: loading ? 0.6 : 1,
       }}
-      title={!session ? 'Login untuk like' : undefined}
+      title={!session ? 'Login untuk like' : `${count} like`}
     >
-      <span style={{ fontSize: '1.125rem' }}>{liked ? '♥' : '♡'}</span>
-      <span style={{ fontWeight: 500 }}>{count.toLocaleString()}</span>
+      <span>{liked ? '♥' : '♡'}</span>
+      <span>{count.toLocaleString()}</span>
     </button>
   )
 }

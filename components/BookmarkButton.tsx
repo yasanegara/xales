@@ -106,23 +106,16 @@ export default function BookmarkButton({ slug }: { slug: string }) {
       <button
         onClick={save}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.375rem',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: saved ? '#f0fdf4' : '#f7f5f2',
           border: `1px solid ${saved ? '#86efac' : '#e5e0d8'}`,
-          borderRadius: '6px',
-          padding: '0.375rem 0.75rem',
-          fontSize: '0.8125rem',
-          color: saved ? '#16a34a' : '#6e6a65',
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-          fontWeight: 500,
+          borderRadius: '6px', padding: '0.3rem 0.5rem',
+          fontSize: '1rem', color: saved ? '#16a34a' : '#6e6a65',
+          cursor: 'pointer', transition: 'all 0.2s',
         }}
-        title="Simpan posisi baca"
+        title={saved ? 'Tersimpan!' : 'Simpan posisi baca'}
       >
-        <span>{saved ? '✓' : '🔖'}</span>
-        <span>{saved ? 'Tersimpan!' : 'Bookmark'}</span>
+        {saved ? '✓' : '🔖'}
       </button>
     </div>
   )
