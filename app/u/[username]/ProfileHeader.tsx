@@ -78,12 +78,12 @@ export default function ProfileHeader({
   )
 
   const info = (
-    <div style={{ flex: 1, minWidth: 0, textAlign: mobile ? 'center' : 'left' }}>
+    <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
       {/* Username + follow */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: '0.875rem',
         flexWrap: 'wrap', marginBottom: '0.875rem',
-        justifyContent: mobile ? 'center' : 'flex-start',
+        justifyContent: 'flex-start',
       }}>
         <h1 style={{ fontSize: '1.1875rem', fontWeight: 500, color: '#1a1a1a', margin: 0 }}>
           {username}
@@ -94,7 +94,7 @@ export default function ProfileHeader({
       {/* Stats */}
       <div style={{
         display: 'flex', gap: '1.75rem', marginBottom: '0.875rem',
-        justifyContent: mobile ? 'center' : 'flex-start',
+        justifyContent: 'flex-start',
       }}>
         {stats.map(s => (
           <div key={s.label} style={{ fontSize: '0.9rem', color: '#1a1a1a', whiteSpace: 'nowrap' }}>
@@ -136,9 +136,9 @@ export default function ProfileHeader({
   return (
     <div style={{
       display: 'flex',
-      flexDirection: mobile ? 'column' : 'row',
-      alignItems: mobile ? 'center' : 'stretch',
-      gap: mobile ? '1rem' : '2.5rem',
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      gap: mobile ? '1.25rem' : '2.5rem',
       marginBottom: '2rem',
     }}>
       {avatar}
