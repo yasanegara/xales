@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import FollowButton from '@/components/FollowButton'
-import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 
 interface Props {
@@ -19,10 +18,38 @@ interface Props {
   totalLikes: number
 }
 
-export default function ProfileHeader({
-  username, name, profilePic, bio, status, createdAt,
-  postCount, followers, following, totalViews, totalLikes,
-}: Props) {
+// Badge rules — active when condition met
+const BADGES = [
+  {
+    icon: '✍️',
+    label: 'Kreator',
+    desc: 'Sudah publish minimal 1 konten',
+    color: '#6366f1',
+    bg: '#eef2ff',
+    active: (p: Props) => p.postCount >= 1,
+  },
+  {
+    icon: '🔥',
+    label: 'Populer',
+    desc: 'Meraih 1.000+ total views',
+    color: '#f97316',
+    bg: '#fff7ed',
+    active: (p: Props) => p.totalViews >= 1000,
+  },
+  {
+    icon: '⭐',
+    label: 'Dikenal',
+    desc: 'Memiliki 50+ pengikut',
+    color: '#f59e0b',
+    bg: '#fffbeb',
+    active: (p: Props) => p.followers >= 50,
+  },
+]
+
+export default function ProfileHeader(props: Props) {
+  const { username, name, profilePic, bio, status, createdAt,
+    postCount, followers, following, totalViews, totalLikes } = props
+
   const [mobile, setMobile] = useState(false)
 
   useEffect(() => {
@@ -32,13 +59,12 @@ export default function ProfileHeader({
     return () => window.removeEventListener('resize', check)
   }, [])
 
+  const sz = mobile ? '88px' : '110px'
   const stats = [
     { label: 'post',      value: postCount },
     { label: 'pengikut',  value: followers },
     { label: 'mengikuti', value: following },
   ]
-
-  const sz = mobile ? '88px' : '110px'
 
   return (
     <div style={{
@@ -46,8 +72,10 @@ export default function ProfileHeader({
       gap: mobile ? '1.25rem' : '2rem', marginBottom: '2rem',
     }}>
 
-      {/* Left col: avatar + nama lengkap */}
+      {/* Left col: avatar + badges */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flexShrink: 0, width: sz }}>
+
+        {/* Avatar */}
         <div style={{
           width: sz, height: sz, borderRadius: '12px',
           background: '#f0ede8', border: '1px solid #e5e0d8',
@@ -64,15 +92,39 @@ export default function ProfileHeader({
             </div>
           )}
         </div>
-        {name && (
-          <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1a1a1a', marginTop: '0.5rem', lineHeight: 1.3, wordBreak: 'break-word' }}>
-            {name}
-          </div>
-        )}
+
+        {/* Badge slots */}
+        <div style={{ display: 'flex', gap: '5px', marginTop: '0.625rem', width: '100%' }}>
+          {BADGES.map(badge => {
+            const on = badge.active(props)
+            return (
+              <div
+                key={badge.label}
+                title={on ? `${badge.label} — ${badge.desc}` : `${badge.label} (belum aktif: ${badge.desc})`}
+                style={{
+                  flex: 1,
+                  aspectRatio: '1',
+                  borderRadius: '8px',
+                  background: on ? badge.bg : '#f0ede8',
+                  border: `1px solid ${on ? badge.color + '55' : '#e5e0d8'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '1rem',
+                  filter: on ? 'none' : 'grayscale(1)',
+                  opacity: on ? 1 : 0.35,
+                  cursor: 'default',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {badge.icon}
+              </div>
+            )
+          })}
+        </div>
       </div>
 
-      {/* Right col: username, stats, status, bio */}
+      {/* Right col: username, stats, name, status, bio */}
       <div style={{ flex: 1, minWidth: 0 }}>
+
         {/* Username + follow */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', flexWrap: 'wrap', marginBottom: '0.875rem' }}>
           <h1 style={{ fontSize: '1.1875rem', fontWeight: 500, color: '#1a1a1a', margin: 0 }}>
@@ -92,6 +144,13 @@ export default function ProfileHeader({
             </div>
           ))}
         </div>
+
+        {/* Display name */}
+        {name && (
+          <div style={{ fontWeight: 600, fontSize: '0.9375rem', color: '#1a1a1a', marginBottom: '0.2rem' }}>
+            {name}
+          </div>
+        )}
 
         {/* Status */}
         {status && (
