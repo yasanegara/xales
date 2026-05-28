@@ -7,11 +7,16 @@ export async function PUT(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { name, bio, profilePic } = await req.json()
+  const { name, bio, status, profilePic } = await req.json()
 
   const updated = await db.user.update({
     where: { id: session.user.id },
-    data: { name, bio, profilePic },
+    data: {
+      name: name || null,
+      bio: bio || null,
+      status: status || null,
+      profilePic: profilePic || null,
+    },
   })
 
   return NextResponse.json({ ok: true, name: updated.name })

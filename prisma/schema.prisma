@@ -14,14 +14,16 @@ model User {
   passwordHash String?
   name         String?
   bio          String?
-  profilePic   String?
+  profilePic   String?  @db.Text
+  status       String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  posts    Post[]
-  likes    Like[]
-  sessions Session[]
-  accounts Account[]
+  posts      Post[]
+  likes      Like[]
+  savedPosts SavedPost[]
+  sessions   Session[]
+  accounts   Account[]
 }
 
 model Post {
@@ -37,13 +39,16 @@ model Post {
   publishedAt DateTime?
   viewCount   Int       @default(0)
   likeCount   Int       @default(0)
+  coverImage  String?   @db.Text
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId String
 
-  likes Like[]
+  likes      Like[]
+  savedPosts SavedPost[]
+  views      PostView[]
 }
 
 model Like {
@@ -55,6 +60,27 @@ model Like {
   createdAt DateTime @default(now())
 
   @@unique([postId, userId])
+}
+
+model PostView {
+  id       String   @id @default(cuid())
+  post     Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId   String
+  deviceId String
+  viewedAt DateTime @default(now())
+
+  @@unique([postId, deviceId])
+}
+
+model SavedPost {
+  id      String   @id @default(cuid())
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  post    Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId  String
+  savedAt DateTime @default(now())
+
+  @@unique([userId, postId])
 }
 
 model Account {

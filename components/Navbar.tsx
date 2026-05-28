@@ -99,6 +99,7 @@ export default function Navbar() {
                     {[
                       { href: `/@${session.user.username}`, label: 'Profile' },
                       { href: '/dashboard', label: 'Dashboard' },
+                      { href: '/dashboard/library', label: '★ Library' },
                       { href: '/dashboard/settings', label: 'Settings' },
                     ].map((item) => (
                       <Link

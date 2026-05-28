@@ -54,33 +54,52 @@ export default function BookmarkButton({ slug }: { slug: string }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
       {/* Resume reading banner */}
       {bookmark && (
-        <button
-          onClick={resume}
+        <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.375rem',
             background: '#fffbeb',
             border: '1px solid #fcd34d',
             borderRadius: '6px',
-            padding: '0.375rem 0.75rem',
-            fontSize: '0.8125rem',
-            color: '#92400e',
-            cursor: 'pointer',
-            fontWeight: 500,
+            overflow: 'hidden',
           }}
-          title={bookmark.heading ? `Lanjut dari: "${bookmark.heading}"` : 'Lanjut membaca'}
         >
-          <span>↩</span>
-          <span>Lanjut baca</span>
           <button
-            onClick={(e) => { e.stopPropagation(); clear() }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d97706', marginLeft: '0.125rem', padding: 0, fontSize: '0.875rem', lineHeight: 1 }}
+            onClick={resume}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              background: 'none',
+              border: 'none',
+              padding: '0.375rem 0.625rem',
+              fontSize: '0.8125rem',
+              color: '#92400e',
+              cursor: 'pointer',
+              fontWeight: 500,
+            }}
+            title={bookmark.heading ? `Lanjut dari: "${bookmark.heading}"` : 'Lanjut membaca'}
+          >
+            <span>↩</span>
+            <span>Lanjut baca</span>
+          </button>
+          <button
+            onClick={clear}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderLeft: '1px solid #fcd34d',
+              cursor: 'pointer',
+              color: '#d97706',
+              padding: '0.375rem 0.5rem',
+              fontSize: '0.875rem',
+              lineHeight: 1,
+            }}
             title="Hapus bookmark"
           >
             ×
           </button>
-        </button>
+        </div>
       )}
 
       {/* Save bookmark button */}

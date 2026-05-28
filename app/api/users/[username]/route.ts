@@ -11,6 +11,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ use
       username: true,
       name: true,
       bio: true,
+      status: true,
       profilePic: true,
       createdAt: true,
       posts: {

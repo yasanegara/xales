@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import type React from 'react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { formatDate } from '@/lib/utils'
 
 interface Post {
@@ -16,9 +18,13 @@ interface Post {
   updatedAt: string
 }
 
+type Tab = 'all' | 'markdown' | 'html'
+
 export default function PostsPage() {
+  const { data: session } = useSession()
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<Tab>('all')
 
   const fetchPosts = useCallback(async () => {
     const res = await fetch('/api/dashboard/posts')
@@ -44,9 +50,30 @@ export default function PostsPage() {
     fetchPosts()
   }
 
+  const filtered = activeTab === 'all' ? posts : posts.filter((p) => p.type === activeTab)
+
+  const tabStyle = (tab: Tab): React.CSSProperties => ({
+    padding: '0.5rem 1rem',
+    fontSize: '0.875rem',
+    fontWeight: activeTab === tab ? 600 : 400,
+    color: activeTab === tab ? '#1a1a1a' : '#6e6a65',
+    background: 'none',
+    border: 'none',
+    borderBottom: `2px solid ${activeTab === tab ? '#1a1a1a' : 'transparent'}`,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap' as const,
+    transition: 'all 0.15s',
+  })
+
+  const counts = {
+    all: posts.length,
+    markdown: posts.filter((p) => p.type === 'markdown').length,
+    html: posts.filter((p) => p.type === 'html').length,
+  }
+
   return (
     <div>
-      <div style={{ marginBottom: '1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a' }}>Posts</h1>
         <Link
           href="/dashboard/new"
@@ -54,6 +81,18 @@ export default function PostsPage() {
         >
           + New Post
         </Link>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '0', borderBottom: '1px solid #e5e0d8', marginBottom: '1rem' }}>
+        {([['all', 'Semua'], ['markdown', 'Artikel'], ['html', 'Apps']] as [Tab, string][]).map(([tab, label]) => (
+          <button key={tab} onClick={() => setActiveTab(tab)} style={tabStyle(tab)}>
+            {label}
+            <span style={{ marginLeft: '0.375rem', fontSize: '0.75rem', color: activeTab === tab ? '#6e6a65' : '#9c9690' }}>
+              {counts[tab]}
+            </span>
+          </button>
+        ))}
       </div>
 
       <div style={{ background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '10px', overflow: 'hidden' }}>
@@ -76,13 +115,19 @@ export default function PostsPage() {
 
         {loading ? (
           <div style={{ padding: '3rem', textAlign: 'center', color: '#6e6a65' }}>Loading...</div>
-        ) : posts.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div style={{ padding: '3rem', textAlign: 'center', color: '#6e6a65' }}>
-            Belum ada post.{' '}
-            <Link href="/dashboard/new" style={{ color: '#0070f3', textDecoration: 'none' }}>Buat sekarang</Link>
+            {posts.length === 0 ? (
+              <></>
+            ) : (
+              <span>Tidak ada {activeTab === 'markdown' ? 'artikel' : 'apps'} yang dibuat.</span>
+            )}
+            {posts.length === 0 && (
+              <>Belum ada post.{' '}<Link href="/dashboard/new" style={{ color: '#0070f3', textDecoration: 'none' }}>Buat sekarang</Link></>
+            )}
           </div>
         ) : (
-          posts.map((post, i) => (
+          filtered.map((post, i) => (
             <div
               key={post.id}
               style={{
@@ -90,7 +135,7 @@ export default function PostsPage() {
                 gridTemplateColumns: '1fr auto auto auto auto auto',
                 gap: '1rem',
                 padding: '1rem 1.25rem',
-                borderBottom: i < posts.length - 1 ? '1px solid #f0ede8' : 'none',
+                borderBottom: i < filtered.length - 1 ? '1px solid #f0ede8' : 'none',
                 alignItems: 'center',
               }}
             >
@@ -111,6 +156,11 @@ export default function PostsPage() {
               <span style={{ fontSize: '0.8125rem', color: '#6e6a65', whiteSpace: 'nowrap' }}>{post.likeCount.toLocaleString()}</span>
 
               <div style={{ display: 'flex', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+                {post.published && session?.user.username && (
+                  <Link href={`/@${session.user.username}/${post.slug}`} style={{ fontSize: '0.8125rem', color: '#6e6a65', textDecoration: 'none' }} target="_blank" rel="noopener noreferrer">
+                    Baca
+                  </Link>
+                )}
                 <Link href={`/dashboard/edit/${post.slug}`} style={{ fontSize: '0.8125rem', color: '#0070f3', textDecoration: 'none' }}>Edit</Link>
                 <button onClick={() => togglePublish(post.slug, post.published)} style={{ fontSize: '0.8125rem', color: post.published ? '#d97706' : '#059669', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                   {post.published ? 'Unpublish' : 'Publish'}

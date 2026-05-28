@@ -6,6 +6,9 @@ import PostViewer from '@/components/PostViewer'
 import LikeButton from '@/components/LikeButton'
 import TableOfContents from '@/components/TableOfContents'
 import BookmarkButton from '@/components/BookmarkButton'
+import SaveButton from '@/components/SaveButton'
+import ShareModal from '@/components/ShareModal'
+import ReadingWrapper from '@/components/ReadingWrapper'
 import ViewTracker from './ViewTracker'
 import { db } from '@/lib/prisma'
 import { extractHeadings } from '@/lib/headings'
@@ -28,6 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: post.description ?? undefined,
       type: 'article',
       authors: [post.author.name ?? `@${post.author.username}`],
+      images: post.coverImage ? [{ url: post.coverImage, width: 1200, height: 630 }] : [],
     },
   }
 }
@@ -44,13 +48,15 @@ export default async function PostPage({ params }: Props) {
 
   const headings = post.type === 'markdown' ? extractHeadings(post.content) : []
   const isMarkdown = post.type === 'markdown'
+  const authorName = post.author.name ?? `@${post.author.username}`
 
   return (
     <>
       <Navbar />
+
       <div style={{ maxWidth: post.type === 'html' ? '100%' : '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
 
-        {/* Post header — full width */}
+        {/* Post header */}
         <div style={{ maxWidth: isMarkdown ? '760px' : '100%', marginBottom: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
             <span
@@ -102,6 +108,7 @@ export default async function PostPage({ params }: Props) {
               borderTop: '1px solid #e5e0d8',
             }}
           >
+            {/* Author */}
             <Link
               href={`/@${post.author.username}`}
               style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}
@@ -117,15 +124,13 @@ export default async function PostPage({ params }: Props) {
               >
                 {post.author.profilePic ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={post.author.profilePic} alt={post.author.name ?? post.author.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={post.author.profilePic} alt={authorName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   (post.author.name?.[0] ?? post.author.username[0]).toUpperCase()
                 )}
               </div>
               <div>
-                <div style={{ color: '#1a1a1a', fontSize: '0.875rem', fontWeight: 500 }}>
-                  {post.author.name ?? `@${post.author.username}`}
-                </div>
+                <div style={{ color: '#1a1a1a', fontSize: '0.875rem', fontWeight: 500 }}>{authorName}</div>
                 <div style={{ color: '#9c9690', fontSize: '0.75rem' }}>
                   {formatDate(post.publishedAt ?? post.createdAt)}
                   {isMarkdown && ` · ${readingTime(post.content)}`}
@@ -133,23 +138,35 @@ export default async function PostPage({ params }: Props) {
               </div>
             </Link>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            {/* Actions */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.8125rem', color: '#9c9690' }}>👁 {post.viewCount.toLocaleString()}</span>
               <LikeButton slug={post.slug} initialCount={post.likeCount} />
               {isMarkdown && <BookmarkButton slug={post.slug} />}
+              <SaveButton slug={post.slug} />
+              <ShareModal
+                slug={post.slug}
+                title={post.title}
+                description={post.description}
+                authorName={authorName}
+                authorUsername={post.author.username}
+                coverImage={post.coverImage}
+              />
               <ViewTracker slug={post.slug} />
             </div>
           </div>
         </div>
 
-        {/* TOC — fixed overlay drawer (only for markdown) */}
+        {/* TOC */}
         {isMarkdown && headings.length > 0 && (
           <TableOfContents headings={headings} />
         )}
 
-        {/* Article body — always full width */}
+        {/* Article body */}
         <div style={{ borderTop: '1px solid #e5e0d8', paddingTop: '2rem' }}>
-          <PostViewer type={post.type} content={post.content} title={post.title} />
+          <ReadingWrapper isMarkdown={isMarkdown}>
+            <PostViewer type={post.type} content={post.content} title={post.title} />
+          </ReadingWrapper>
 
           {/* Tags */}
           {post.tags.length > 0 && (

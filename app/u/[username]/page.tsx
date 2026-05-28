@@ -66,6 +66,11 @@ export default async function ProfilePage({ params }: Props) {
               {user.name ?? `@${username}`}
             </h1>
             <p style={{ color: '#6e6a65', fontSize: '0.875rem', marginBottom: '0.75rem' }}>@{username}</p>
+            {user.status && (
+              <p style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', color: '#6e6a65', fontSize: '0.875rem', background: '#f0ede8', border: '1px solid #e5e0d8', borderRadius: '20px', padding: '0.25rem 0.75rem', marginBottom: '0.75rem' }}>
+                <span>·</span> {user.status}
+              </p>
+            )}
             {user.bio && <p style={{ color: '#3d3a36', fontSize: '0.9375rem', lineHeight: 1.6, marginBottom: '0.75rem' }}>{user.bio}</p>}
             <p style={{ color: '#9c9690', fontSize: '0.8125rem' }}>Bergabung {formatDate(user.createdAt)}</p>
           </div>
