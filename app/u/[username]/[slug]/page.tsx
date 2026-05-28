@@ -100,28 +100,25 @@ export default async function PostPage({ params, searchParams }: Props) {
 
         {/* Post header */}
         <div style={{ maxWidth: isMarkdown ? '760px' : '100%', marginBottom: '2rem' }}>
-          {/* Top bar: type + category | view count */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span
-                style={{
-                  background: post.type === 'html' ? '#ecfdf5' : '#eff6ff',
-                  color: post.type === 'html' ? '#059669' : '#2563eb',
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  padding: '0.2rem 0.6rem',
-                  borderRadius: '4px',
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {post.type === 'html' ? 'App' : 'Article'}
-              </span>
-              {post.category && (
-                <span style={{ fontSize: '0.8125rem', color: '#6e6a65' }}>{post.category}</span>
-              )}
-            </div>
-            <span style={{ fontSize: '0.8125rem', color: '#9c9690' }}>👁 {post.viewCount.toLocaleString()}</span>
+          {/* Top bar: type + category */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
+            <span
+              style={{
+                background: post.type === 'html' ? '#ecfdf5' : '#eff6ff',
+                color: post.type === 'html' ? '#059669' : '#2563eb',
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                padding: '0.2rem 0.6rem',
+                borderRadius: '4px',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+              }}
+            >
+              {post.type === 'html' ? 'App' : 'Article'}
+            </span>
+            {post.category && (
+              <span style={{ fontSize: '0.8125rem', color: '#6e6a65' }}>{post.category}</span>
+            )}
           </div>
 
           <h1
@@ -183,6 +180,7 @@ export default async function PostPage({ params, searchParams }: Props) {
                 authorUsername={post.author.username}
                 coverImage={post.coverImage}
               />
+              <span style={{ fontSize: '0.8125rem', color: '#9c9690' }}>👁 {post.viewCount.toLocaleString()}</span>
               <ViewTracker slug={post.slug} />
             </div>
           </div>
