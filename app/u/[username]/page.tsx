@@ -59,12 +59,10 @@ export default async function ProfilePage({ params }: Props) {
         <div style={{ display: 'flex', gap: '3rem', alignItems: 'stretch', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
           {/* Avatar */}
           <div style={{
-            width: '110px', minHeight: '140px', borderRadius: '16px',
-            background: '#f0ede8', border: '1px solid #e5e0d8',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '2.5rem', fontWeight: 700, color: '#6e6a65',
-            flexShrink: 0, overflow: 'hidden',
-            position: 'relative',
+            width: '110px', minHeight: '140px', alignSelf: 'stretch',
+            borderRadius: '16px', border: '1px solid #e5e0d8',
+            background: '#f0ede8', flexShrink: 0,
+            overflow: 'hidden', position: 'relative',
           }}>
             {user.profilePic ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -72,14 +70,22 @@ export default async function ProfilePage({ params }: Props) {
                 src={user.profilePic}
                 alt={user.name ?? username}
                 style={{
-                  position: 'absolute', inset: 0,
-                  width: '100%', height: '100%',
-                  objectFit: 'cover', objectPosition: 'center center',
-                  display: 'block',
+                  position: 'absolute',
+                  top: '50%', left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  minWidth: '100%', minHeight: '100%',
+                  width: 'auto', height: 'auto',
+                  maxWidth: 'none',
                 }}
               />
             ) : (
-              (user.name?.[0] ?? username[0]).toUpperCase()
+              <div style={{
+                position: 'absolute', inset: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '2.5rem', fontWeight: 700, color: '#6e6a65',
+              }}>
+                {(user.name?.[0] ?? username[0]).toUpperCase()}
+              </div>
             )}
           </div>
 
