@@ -39,11 +39,12 @@ model User {
   bundlePurchases BundlePurchase[]
   discounts       Discount[]
   bundles         Bundle[]
-  followers       Follow[]  @relation("following")
-  following       Follow[]  @relation("follower")
+  followers       Follow[]     @relation("following")
+  following       Follow[]     @relation("follower")
   images          Image[]
   sessions        Session[]
   accounts        Account[]
+  withdrawals     Withdrawal[]
 }
 
 model Post {
@@ -268,6 +269,20 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Withdrawal {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  amount      Int
+  status      String   @default("pending") // pending | approved | paid | rejected
+  bankName    String
+  bankAccount String
+  bankHolder  String
+  adminNote   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model VerificationToken {

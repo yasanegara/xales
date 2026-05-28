@@ -118,13 +118,17 @@ export default function Navbar() {
                     {[
                       { href: `/@${session.user.username}`, label: 'Profile' },
                       { href: '/dashboard', label: 'Dashboard' },
+                      { href: '/dashboard/earnings', label: '💰 Saldo & Penghasilan' },
                       { href: '/dashboard/orders', label: '📦 Pesanan' },
                       { href: '/dashboard/bundles', label: '🎁 Bundle' },
                       { href: '/dashboard/library', label: '★ Library' },
                       { href: '/dashboard/discounts', label: '% Kode Diskon' },
                       { href: '/dashboard/affiliate', label: '↗ Affiliate' },
                       { href: '/dashboard/settings', label: 'Settings' },
-                      ...(session.user.role === 'admin' ? [{ href: '/admin', label: '⚙ Admin Panel' }] : []),
+                      ...(session.user.role === 'admin' ? [
+                        { href: '/admin', label: '⚙ Admin Panel' },
+                        { href: '/admin/withdrawals', label: '💸 Pencairan Dana' },
+                      ] : []),
                     ].map((item) => (
                       <Link
                         key={item.href}
