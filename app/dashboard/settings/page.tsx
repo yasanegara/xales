@@ -10,11 +10,18 @@ interface Profile {
   status: string
   profilePic: string
   affiliateRate: number
+  bankName: string
+  bankAccount: string
+  bankHolder: string
+  waNumber: string
+  waMessage: string
 }
 
 export default function SettingsPage() {
   const { data: session, update } = useSession()
-  const [form, setForm] = useState<Profile>({ name: '', bio: '', status: '', profilePic: '', affiliateRate: 20 })
+  const [form, setForm] = useState<Profile>({ name: '', bio: '', status: '', profilePic: '', affiliateRate: 20, bankName: '', bankAccount: '', bankHolder: '', waNumber: '', waMessage: '' })
+  const [bankMsg, setBankMsg] = useState('')
+  const [waMsg, setWaMsg] = useState('')
   const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' })
   const [profileMsg, setProfileMsg] = useState('')
   const [passwordMsg, setPasswordMsg] = useState('')
@@ -31,6 +38,11 @@ export default function SettingsPage() {
           status: d.status ?? '',
           profilePic: d.profilePic ?? '',
           affiliateRate: d.affiliateRate ?? 20,
+          bankName: d.bankName ?? '',
+          bankAccount: d.bankAccount ?? '',
+          bankHolder: d.bankHolder ?? '',
+          waNumber: d.waNumber ?? '',
+          waMessage: d.waMessage ?? '',
         })
       )
   }, [session])
@@ -51,6 +63,30 @@ export default function SettingsPage() {
     } else {
       setProfileMsg('Gagal menyimpan.')
     }
+  }
+
+  const saveBank = async (e: FormEvent) => {
+    e.preventDefault()
+    setLoading(true); setBankMsg('')
+    const res = await fetch('/api/dashboard/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bankName: form.bankName, bankAccount: form.bankAccount, bankHolder: form.bankHolder }),
+    })
+    setLoading(false)
+    setBankMsg(res.ok ? 'Rekening disimpan! ✓' : 'Gagal menyimpan.')
+  }
+
+  const saveWA = async (e: FormEvent) => {
+    e.preventDefault()
+    setLoading(true); setWaMsg('')
+    const res = await fetch('/api/dashboard/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ waNumber: form.waNumber, waMessage: form.waMessage }),
+    })
+    setLoading(false)
+    setWaMsg(res.ok ? 'WA Responder disimpan! ✓' : 'Gagal menyimpan.')
   }
 
   const changePassword = async (e: FormEvent) => {
@@ -263,6 +299,87 @@ export default function SettingsPage() {
             }}
           >
             Ganti Password
+          </button>
+        </form>
+      </div>
+
+      {/* Rekening card */}
+      <div style={cardStyle}>
+        <h2 style={{ fontSize: '1.0625rem', fontWeight: 600, color: '#1a1a1a', marginBottom: '0.375rem' }}>
+          Rekening Pencairan
+        </h2>
+        <p style={{ fontSize: '0.8125rem', color: '#6e6a65', marginBottom: '1.25rem' }}>
+          Untuk pencairan revenue dan komisi affiliate
+        </p>
+        <form onSubmit={saveBank}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label style={labelStyle}>Nama Bank</label>
+              <input type="text" value={form.bankName} onChange={(e) => setForm({ ...form, bankName: e.target.value })}
+                style={inputStyle} placeholder="BCA, Mandiri, BNI, BRI..." />
+            </div>
+            <div>
+              <label style={labelStyle}>Nomor Rekening</label>
+              <input type="text" value={form.bankAccount} onChange={(e) => setForm({ ...form, bankAccount: e.target.value })}
+                style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.05em' }} placeholder="1234567890" />
+            </div>
+          </div>
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label style={labelStyle}>Atas Nama</label>
+            <input type="text" value={form.bankHolder} onChange={(e) => setForm({ ...form, bankHolder: e.target.value })}
+              style={inputStyle} placeholder="Nama pemilik rekening (sesuai KTP)" />
+          </div>
+          {bankMsg && <p style={{ color: bankMsg.includes('✓') ? '#059669' : '#dc2626', fontSize: '0.875rem', marginBottom: '1rem' }}>{bankMsg}</p>}
+          <button type="submit" disabled={loading}
+            style={{ background: '#ffffff', border: '1px solid #e5e0d8', color: '#1a1a1a', borderRadius: '8px', padding: '0.625rem 1.5rem', fontSize: '0.9375rem', fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer' }}>
+            Simpan Rekening
+          </button>
+        </form>
+      </div>
+
+      {/* WA Responder card */}
+      <div style={cardStyle}>
+        <h2 style={{ fontSize: '1.0625rem', fontWeight: 600, color: '#1a1a1a', marginBottom: '0.375rem' }}>
+          WA Responder
+        </h2>
+        <p style={{ fontSize: '0.8125rem', color: '#6e6a65', marginBottom: '1.25rem' }}>
+          Setelah seseorang membeli artikelmu, mereka akan melihat tombol WhatsApp dengan pesan otomatis
+        </p>
+        <form onSubmit={saveWA}>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={labelStyle}>Nomor WhatsApp</label>
+            <div style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#6e6a65', fontSize: '0.875rem' }}>+62</span>
+              <input type="text" value={form.waNumber} onChange={(e) => setForm({ ...form, waNumber: e.target.value.replace(/\D/g, '') })}
+                style={{ ...inputStyle, paddingLeft: '3rem', fontFamily: 'monospace' }} placeholder="81234567890" />
+            </div>
+          </div>
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label style={labelStyle}>
+              Pesan Otomatis{' '}
+              <span style={{ color: '#9c9690', fontWeight: 400 }}>({form.waMessage.length}/300)</span>
+            </label>
+            <textarea
+              value={form.waMessage}
+              onChange={(e) => setForm({ ...form, waMessage: e.target.value.slice(0, 300) })}
+              rows={4}
+              style={{ ...inputStyle, resize: 'vertical' }}
+              placeholder="Halo! Terima kasih sudah membeli artikel ini. Bergabunglah ke grup eksklusifku di sini: https://..."
+            />
+            {form.waNumber && form.waMessage && (
+              <a
+                href={`https://wa.me/62${form.waNumber.replace(/^0/, '')}?text=${encodeURIComponent(form.waMessage)}`}
+                target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-block', marginTop: '0.5rem', fontSize: '0.8125rem', color: '#25d366', textDecoration: 'none', fontWeight: 500 }}
+              >
+                ↗ Preview link WA
+              </a>
+            )}
+          </div>
+          {waMsg && <p style={{ color: waMsg.includes('✓') ? '#059669' : '#dc2626', fontSize: '0.875rem', marginBottom: '1rem' }}>{waMsg}</p>}
+          <button type="submit" disabled={loading}
+            style={{ background: '#25d366', border: 'none', color: '#ffffff', borderRadius: '8px', padding: '0.625rem 1.5rem', fontSize: '0.9375rem', fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer' }}>
+            Simpan WA Responder
           </button>
         </form>
       </div>

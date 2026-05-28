@@ -9,6 +9,8 @@ interface Props {
   title: string
   price: number
   authorName: string
+  authorWaNumber?: string | null
+  authorWaMessage?: string | null
   refCode?: string
   onSuccess: () => void
 }
@@ -17,7 +19,7 @@ function formatIDR(n: number) {
   return new Intl.NumberFormat('id-ID').format(n)
 }
 
-export default function BuyModal({ slug, title, price, authorName, refCode, onSuccess }: Props) {
+export default function BuyModal({ slug, title, price, authorName, authorWaNumber, authorWaMessage, refCode, onSuccess }: Props) {
   const { data: session } = useSession()
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -102,7 +104,16 @@ export default function BuyModal({ slug, title, price, authorName, refCode, onSu
                 <div style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1a1a1a', marginBottom: '0.5rem' }}>
                   Pembelian Berhasil!
                 </div>
-                <div style={{ color: '#6e6a65', fontSize: '0.875rem' }}>Kamu sekarang bisa membaca artikel ini sepenuhnya.</div>
+                <div style={{ color: '#6e6a65', fontSize: '0.875rem', marginBottom: '1.25rem' }}>Kamu sekarang bisa membaca artikel ini sepenuhnya.</div>
+                {authorWaNumber && (
+                  <a
+                    href={`https://wa.me/62${authorWaNumber.replace(/^0/, '')}${authorWaMessage ? `?text=${encodeURIComponent(authorWaMessage)}` : ''}`}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#25d366', color: '#ffffff', padding: '0.625rem 1.25rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}
+                  >
+                    <span>💬</span><span>Chat Penulis via WhatsApp</span>
+                  </a>
+                )}
               </div>
             ) : (
               <>

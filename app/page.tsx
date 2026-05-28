@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar'
 import PostCard from '@/components/PostCard'
+import SuggestedUsers from '@/components/SuggestedUsers'
 import { db } from '@/lib/prisma'
 
 interface SearchParams {
@@ -140,6 +141,9 @@ export default async function HomePage({
             ))}
           </div>
         )}
+
+        {/* Suggested creators */}
+        <SuggestedUsers />
       </main>
     </>
   )

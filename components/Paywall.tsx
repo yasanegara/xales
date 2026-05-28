@@ -18,6 +18,8 @@ interface Props {
   price: number
   authorName: string
   authorUsername: string
+  authorWaNumber?: string | null
+  authorWaMessage?: string | null
   refCode?: string
   files?: PostFile[]
   isPurchased?: boolean
@@ -28,7 +30,7 @@ function formatBytes(b: number) {
   return `${(b / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export default function Paywall({ slug, title, price, authorName, refCode, files = [], isPurchased: initialPurchased = false }: Props) {
+export default function Paywall({ slug, title, price, authorName, authorWaNumber, authorWaMessage, refCode, files = [], isPurchased: initialPurchased = false }: Props) {
   const router = useRouter()
   const [purchased, setPurchased] = useState(initialPurchased)
 
@@ -75,6 +77,8 @@ export default function Paywall({ slug, title, price, authorName, refCode, files
             title={title}
             price={price}
             authorName={authorName}
+            authorWaNumber={authorWaNumber}
+            authorWaMessage={authorWaMessage}
             refCode={refCode}
             onSuccess={() => { setPurchased(true); router.refresh() }}
           />

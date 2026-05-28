@@ -13,6 +13,12 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ use
       bio: true,
       status: true,
       profilePic: true,
+      affiliateRate: true,
+      bankName: true,
+      bankAccount: true,
+      bankHolder: true,
+      waNumber: true,
+      waMessage: true,
       createdAt: true,
       posts: {
         where: { published: true },

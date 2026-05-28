@@ -16,7 +16,14 @@ model User {
   bio           String?
   profilePic    String?  @db.Text
   status        String?
-  affiliateRate Int      @default(20) // % commission paid to affiliates
+  affiliateRate Int      @default(20)
+  // Rekening (withdrawal)
+  bankName      String?
+  bankAccount   String?
+  bankHolder    String?
+  // WhatsApp Responder
+  waNumber      String?
+  waMessage     String?  // auto-reply template after purchase
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -25,6 +32,8 @@ model User {
   savedPosts    SavedPost[]
   purchases     Purchase[]
   discounts     Discount[]
+  followers     Follow[]  @relation("following")
+  following     Follow[]  @relation("follower")
   sessions      Session[]
   accounts      Account[]
 }
@@ -100,6 +109,17 @@ model Discount {
   expiresAt  DateTime?
   active     Boolean   @default(true)
   createdAt  DateTime  @default(now())
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  follower    User     @relation("follower",  fields: [followerId],  references: [id], onDelete: Cascade)
+  followerId  String
+  following   User     @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  followingId String
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
 }
 
 model Like {

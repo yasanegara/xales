@@ -59,7 +59,7 @@ export default async function PostPage({ params, searchParams }: Props) {
   const post = await db.post.findUnique({
     where: { slug },
     include: {
-      author: { select: { username: true, name: true, profilePic: true, bio: true } },
+      author: { select: { username: true, name: true, profilePic: true, bio: true, waNumber: true, waMessage: true } },
       files: { select: { id: true, name: true, mimeType: true, size: true, isFree: true } },
     },
   })
@@ -236,6 +236,8 @@ export default async function PostPage({ params, searchParams }: Props) {
               price={post.price!}
               authorName={authorName}
               authorUsername={post.author.username}
+              authorWaNumber={post.author.waNumber}
+              authorWaMessage={post.author.waMessage}
               refCode={refCode}
               files={post.files}
               isPurchased={false}
