@@ -35,9 +35,11 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
 
+  const getRedirectTarget = () => safeFrom(new URLSearchParams(window.location.search).get('from'))
+
   const handleGoogle = async () => {
     setGoogleLoading(true)
-    await signIn('google', { callbackUrl: from })
+    await signIn('google', { callbackUrl: getRedirectTarget() })
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -61,7 +63,7 @@ export default function RegisterPage() {
     if (!res.ok) { setError(data.error); setLoading(false); return }
     const result = await signIn('credentials', { email: form.email, password: form.password, redirect: false })
     setLoading(false)
-    router.push(result?.ok ? from : '/login')
+    router.push(result?.ok ? getRedirectTarget() : '/login')
   }
 
   const inputStyle = {

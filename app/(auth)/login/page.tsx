@@ -36,9 +36,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
 
+  const getRedirectTarget = () => safeFrom(new URLSearchParams(window.location.search).get('from'))
+
   const handleGoogle = async () => {
     setGoogleLoading(true)
-    await signIn('google', { callbackUrl: from })
+    await signIn('google', { callbackUrl: getRedirectTarget() })
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -50,7 +52,7 @@ export default function LoginPage() {
     if (result?.error) {
       setError('Email atau password salah')
     } else {
-      router.push(from)
+      router.push(getRedirectTarget())
       router.refresh()
     }
   }
