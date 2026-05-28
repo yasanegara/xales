@@ -1,150 +1,148 @@
 import Navbar from '@/components/Navbar'
-import PostCard from '@/components/PostCard'
-import SuggestedUsers from '@/components/SuggestedUsers'
 import { db } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import FeedGrid from '@/components/feed/FeedGrid'
+import Link from 'next/link'
 
-interface SearchParams {
-  type?: string
-  sort?: string
-}
+interface SearchParams { tab?: string; type?: string }
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>
-}) {
-  const sp = await searchParams
-  const type = sp.type
-  const sort = sp.sort ?? 'latest'
+const TAKE = 12
 
-  const where = {
+export default async function HomePage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const sp      = await searchParams
+  const tab     = sp.tab ?? 'terbaru'
+  const type    = sp.type ?? 'all'
+  const session = await getServerSession(authOptions)
+
+  const baseWhere = {
     published: true,
     isPrivate: false,
-    ...(type && type !== 'all' ? { type } : {}),
+    ...(type !== 'all' ? { type } : {}),
   }
 
-  const orderBy =
-    sort === 'trending'
-      ? [{ viewCount: 'desc' as const }, { likeCount: 'desc' as const }]
-      : { publishedAt: 'desc' as const }
+  let where = baseWhere as Record<string, unknown>
 
-  const posts = await db.post.findMany({
-    where,
-    orderBy,
-    take: 30,
-    include: {
+  if (tab === 'diikuti' && session) {
+    where = { ...baseWhere, author: { followers: { some: { followerId: session.user.id } } } }
+  }
+
+  const orderBy = tab === 'trending'
+    ? [{ viewCount: 'desc' as const }, { likeCount: 'desc' as const }]
+    : { publishedAt: 'desc' as const }
+
+  const rawPosts = await db.post.findMany({
+    where, orderBy,
+    take: TAKE + 1,
+    select: {
+      id: true, slug: true, title: true, description: true, type: true,
+      category: true, coverImage: true, isPremium: true, price: true,
+      viewCount: true, likeCount: true, publishedAt: true, createdAt: true,
       author: { select: { username: true, name: true, profilePic: true } },
     },
   })
 
-  const tabLinks = [
-    { label: 'Semua', value: 'all' },
-    { label: 'Artikel', value: 'markdown' },
-    { label: 'Apps', value: 'html' },
+  const hasMore = rawPosts.length > TAKE
+  const posts   = hasMore ? rawPosts.slice(0, TAKE) : rawPosts
+  const nextCursor = posts[posts.length - 1]?.id ?? null
+
+  const tabs = [
+    { key: 'terbaru',  label: 'Terbaru' },
+    { key: 'trending', label: 'Trending' },
+    { key: 'diikuti',  label: 'Diikuti', needsAuth: true },
   ]
 
-  const sortLinks = [
-    { label: 'Terbaru', value: 'latest' },
-    { label: 'Trending', value: 'trending' },
+  const typeLinks = [
+    { value: 'all',      label: 'Semua' },
+    { value: 'markdown', label: 'Artikel' },
+    { value: 'html',     label: 'App' },
   ]
 
   return (
     <>
       <Navbar />
-      <main style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-        {/* Hero */}
-        <div style={{ textAlign: 'center', padding: '2.5rem 0 2rem' }}>
-          <h1
-            style={{
-              fontSize: 'clamp(2rem, 5vw, 3rem)',
-              fontWeight: 700,
-              letterSpacing: '-0.03em',
-              color: '#1a1a1a',
-              marginBottom: '0.75rem',
-            }}
-          >
-            Publish. Share. Earn.
-          </h1>
-          <p style={{ color: '#6e6a65', fontSize: '1.0625rem', lineHeight: 1.6 }}>
-            Platform untuk kreator: publish artikel &amp; web app, bangun audiens, monetisasi karya.
-          </p>
-        </div>
 
-        {/* Filters */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '1.5rem',
-            flexWrap: 'wrap',
-            gap: '0.75rem',
-          }}
-        >
-          <div style={{ display: 'flex', gap: '0.375rem' }}>
-            {tabLinks.map((t) => {
-              const active = (!type && t.value === 'all') || type === t.value
+      {/* Sticky filter bar */}
+      <div style={{
+        position: 'sticky', top: '56px', zIndex: 40,
+        background: 'rgba(247,245,242,0.92)', backdropFilter: 'blur(8px)',
+        borderBottom: '1px solid #e5e0d8',
+      }}>
+        <div style={{ maxWidth: '860px', margin: '0 auto', padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', height: '44px' }}>
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: '0.25rem' }}>
+            {tabs.map(t => {
+              if (t.needsAuth && !session) return null
+              const active = tab === t.key
               return (
-                <a
-                  key={t.value}
-                  href={`/?type=${t.value}&sort=${sort}`}
+                <Link
+                  key={t.key}
+                  href={`/?tab=${t.key}&type=${type}`}
                   style={{
-                    padding: '0.375rem 0.875rem',
-                    borderRadius: '6px',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
+                    padding: '0.3rem 0.875rem', borderRadius: '20px',
+                    fontSize: '0.875rem', fontWeight: active ? 600 : 400,
                     textDecoration: 'none',
                     background: active ? '#1a1a1a' : 'transparent',
                     color: active ? '#f7f5f2' : '#6e6a65',
-                    border: active ? '1px solid #1a1a1a' : '1px solid transparent',
+                    transition: 'all 0.15s',
                   }}
                 >
                   {t.label}
-                </a>
+                </Link>
               )
             })}
           </div>
 
-          <div style={{ display: 'flex', gap: '0.375rem' }}>
-            {sortLinks.map((s) => {
-              const active = sort === s.value
+          {/* Type filter */}
+          <div style={{ display: 'flex', gap: '0.25rem' }}>
+            {typeLinks.map(t => {
+              const active = type === t.value
               return (
-                <a
-                  key={s.value}
-                  href={`/?type=${type ?? 'all'}&sort=${s.value}`}
+                <Link
+                  key={t.value}
+                  href={`/?tab=${tab}&type=${t.value}`}
                   style={{
-                    padding: '0.375rem 0.875rem',
-                    borderRadius: '6px',
-                    fontSize: '0.8125rem',
+                    padding: '0.25rem 0.75rem', borderRadius: '20px',
+                    fontSize: '0.8125rem', fontWeight: active ? 600 : 400,
                     textDecoration: 'none',
-                    background: active ? '#0070f3' : 'transparent',
-                    color: active ? '#fff' : '#6e6a65',
-                    border: '1px solid transparent',
+                    background: active ? '#f0ede8' : 'transparent',
+                    color: active ? '#1a1a1a' : '#9c9690',
+                    border: active ? '1px solid #d5c9b0' : '1px solid transparent',
                   }}
                 >
-                  {s.label}
-                </a>
+                  {t.label}
+                </Link>
               )
             })}
           </div>
         </div>
+      </div>
 
-        {/* Posts */}
-        {posts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem 0', color: '#6e6a65' }}>
-            <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>📝</p>
-            <p>Belum ada post. Jadilah yang pertama!</p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
+      <main style={{ maxWidth: '860px', margin: '0 auto', padding: '1.25rem 1rem 3rem' }}>
+
+        {/* Hero — only for guests */}
+        {!session && (
+          <div style={{ textAlign: 'center', padding: '2rem 0 1.75rem', borderBottom: '1px solid #e5e0d8', marginBottom: '1.5rem' }}>
+            <h1 style={{ fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#1a1a1a', marginBottom: '0.625rem' }}>
+              Publish. Share. Earn.
+            </h1>
+            <p style={{ color: '#6e6a65', fontSize: '1rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+              Platform untuk kreator Indonesia: tulis artikel, bangun audiens, monetisasi karya.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+              <Link href="/register" style={{ background: '#1a1a1a', color: '#f7f5f2', padding: '0.625rem 1.5rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 600 }}>Mulai gratis</Link>
+              <Link href="/login" style={{ background: '#ffffff', color: '#1a1a1a', padding: '0.625rem 1.5rem', borderRadius: '8px', border: '1px solid #e5e0d8', textDecoration: 'none', fontSize: '0.9375rem' }}>Masuk</Link>
+            </div>
           </div>
         )}
 
-        {/* Suggested creators */}
-        <SuggestedUsers />
+        <FeedGrid
+          initialPosts={posts as Parameters<typeof FeedGrid>[0]['initialPosts']}
+          initialHasMore={hasMore}
+          initialCursor={nextCursor}
+          tab={tab}
+          postType={type}
+        />
       </main>
     </>
   )

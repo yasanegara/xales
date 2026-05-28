@@ -17,7 +17,7 @@ interface SuggestedUser {
   topCategories: string[]
 }
 
-export default function SuggestedUsers() {
+export default function SuggestedUsers({ compact }: { compact?: boolean } = {}) {
   const [users, setUsers] = useState<SuggestedUser[]>([])
   const [loading, setLoading] = useState(true)
 
