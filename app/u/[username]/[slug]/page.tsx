@@ -100,24 +100,44 @@ export default async function PostPage({ params, searchParams }: Props) {
 
         {/* Post header */}
         <div style={{ maxWidth: isMarkdown ? '760px' : '100%', marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <span
-              style={{
-                background: post.type === 'html' ? '#ecfdf5' : '#eff6ff',
-                color: post.type === 'html' ? '#059669' : '#2563eb',
-                fontSize: '0.7rem',
-                fontWeight: 600,
-                padding: '0.2rem 0.6rem',
-                borderRadius: '4px',
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-              }}
-            >
-              {post.type === 'html' ? 'App' : 'Article'}
-            </span>
-            {post.category && (
-              <span style={{ fontSize: '0.8125rem', color: '#6e6a65' }}>{post.category}</span>
-            )}
+          {/* Top bar: type + category | actions */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span
+                style={{
+                  background: post.type === 'html' ? '#ecfdf5' : '#eff6ff',
+                  color: post.type === 'html' ? '#059669' : '#2563eb',
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: '4px',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {post.type === 'html' ? 'App' : 'Article'}
+              </span>
+              {post.category && (
+                <span style={{ fontSize: '0.8125rem', color: '#6e6a65' }}>{post.category}</span>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.8125rem', color: '#9c9690' }}>👁 {post.viewCount.toLocaleString()}</span>
+              <LikeButton slug={post.slug} initialCount={post.likeCount} />
+              {isMarkdown && <BookmarkButton slug={post.slug} />}
+              <SaveButton slug={post.slug} />
+              <ShareModal
+                slug={post.slug}
+                title={post.title}
+                description={post.description}
+                authorName={authorName}
+                authorUsername={post.author.username}
+                coverImage={post.coverImage}
+              />
+              <ViewTracker slug={post.slug} />
+            </div>
           </div>
 
           <h1
@@ -139,34 +159,22 @@ export default async function PostPage({ params, searchParams }: Props) {
             </p>
           )}
 
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '1rem',
-              paddingTop: '1rem',
-              borderTop: '1px solid #e5e0d8',
-            }}
-          >
-            {/* Author */}
+          {/* Author */}
+          <div style={{ paddingTop: '1rem', borderTop: '1px solid #e5e0d8' }}>
             <Link
               href={`/@${post.author.username}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}
             >
-              <div
-                style={{
-                  width: '36px', height: '36px', borderRadius: '50%',
-                  background: '#f0ede8', border: '1px solid #e5e0d8',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '0.875rem', fontWeight: 700, color: '#6e6a65',
-                  overflow: 'hidden', flexShrink: 0,
-                }}
-              >
+              <div style={{
+                width: '30px', height: '38px', borderRadius: '7px',
+                background: '#f0ede8', border: '1px solid #e5e0d8',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '0.8125rem', fontWeight: 700, color: '#6e6a65',
+                overflow: 'hidden', flexShrink: 0, position: 'relative',
+              }}>
                 {post.author.profilePic ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={post.author.profilePic} alt={authorName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={post.author.profilePic} alt={authorName} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', minWidth: '100%', minHeight: '100%', width: 'auto', height: 'auto', maxWidth: 'none' }} />
                 ) : (
                   (post.author.name?.[0] ?? post.author.username[0]).toUpperCase()
                 )}
@@ -179,23 +187,6 @@ export default async function PostPage({ params, searchParams }: Props) {
                 </div>
               </div>
             </Link>
-
-            {/* Actions */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.8125rem', color: '#9c9690' }}>👁 {post.viewCount.toLocaleString()}</span>
-              <LikeButton slug={post.slug} initialCount={post.likeCount} />
-              {isMarkdown && <BookmarkButton slug={post.slug} />}
-              <SaveButton slug={post.slug} />
-              <ShareModal
-                slug={post.slug}
-                title={post.title}
-                description={post.description}
-                authorName={authorName}
-                authorUsername={post.author.username}
-                coverImage={post.coverImage}
-              />
-              <ViewTracker slug={post.slug} />
-            </div>
           </div>
         </div>
 
