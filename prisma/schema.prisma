@@ -30,17 +30,19 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  posts         Post[]
-  likes         Like[]
-  savedPosts    SavedPost[]
-  purchases     Purchase[]
-  filePurchases FilePurchase[]
-  discounts     Discount[]
-  followers     Follow[]  @relation("following")
-  following     Follow[]  @relation("follower")
-  images        Image[]
-  sessions      Session[]
-  accounts      Account[]
+  posts           Post[]
+  likes           Like[]
+  savedPosts      SavedPost[]
+  purchases       Purchase[]
+  filePurchases   FilePurchase[]
+  bundlePurchases BundlePurchase[]
+  discounts       Discount[]
+  bundles         Bundle[]
+  followers       Follow[]  @relation("following")
+  following       Follow[]  @relation("follower")
+  images          Image[]
+  sessions        Session[]
+  accounts        Account[]
 }
 
 model Post {
@@ -53,6 +55,7 @@ model Post {
   category    String?
   tags        String[]
   published   Boolean   @default(false)
+  isPrivate   Boolean   @default(false)  // private note: visible to author only, not in feed
   publishedAt DateTime?
   viewCount   Int       @default(0)
   likeCount   Int       @default(0)
@@ -66,12 +69,13 @@ model Post {
   author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId String
 
-  likes      Like[]
-  savedPosts SavedPost[]
-  views      PostView[]
-  files      PostFile[]
-  purchases  Purchase[]
-  discounts  Discount[]
+  likes       Like[]
+  savedPosts  SavedPost[]
+  views       PostView[]
+  files       PostFile[]
+  purchases   Purchase[]
+  discounts   Discount[]
+  bundleItems BundleItem[]
 }
 
 model PostFile {
@@ -89,6 +93,7 @@ model PostFile {
   createdAt DateTime  @default(now())
 
   filePurchases FilePurchase[]
+  bundleItems   BundleItem[]
 }
 
 model Purchase {
@@ -122,6 +127,51 @@ model FilePurchase {
   createdAt  DateTime @default(now())
 
   @@unique([userId, fileId])
+}
+
+model Bundle {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  description String?
+  price       Int
+  discount    Int?      // % off
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+
+  items     BundleItem[]
+  purchases BundlePurchase[]
+}
+
+model BundleItem {
+  id       String    @id @default(cuid())
+  bundle   Bundle    @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  bundleId String
+  post     Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId   String?
+  file     PostFile? @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  fileId   String?
+  order    Int       @default(0)
+}
+
+model BundlePurchase {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  bundle    Bundle   @relation(fields: [bundleId], references: [id])
+  bundleId  String
+  amount    Int
+  status    String   @default("pending")
+  orderId   String   @unique
+  payerName String?
+  payerWa   String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bundleId])
 }
 
 model Discount {

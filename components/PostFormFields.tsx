@@ -11,6 +11,7 @@ export interface PostFormData {
   content: string
   category: string
   tags: string
+  isPrivate: boolean
   isPremium: boolean
   price: string
   discount: string   // % off article price
@@ -104,8 +105,30 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
         <PostEditor type={form.type} value={form.content} onChange={(v) => set({ content: v })} />
       </div>
 
-      {/* Monetization */}
+      {/* Visibility — Private toggle */}
       <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1a1a1a' }}>Catatan Pribadi</div>
+            <div style={{ fontSize: '0.8125rem', color: '#6e6a65', marginTop: '2px' }}>
+              Tidak muncul di feed publik — hanya bisa diakses oleh kamu
+            </div>
+          </div>
+          <button type="button"
+            onClick={() => set({ isPrivate: !form.isPrivate, isPremium: false, price: '', discount: '' })}
+            style={{ flexShrink: 0, width: '44px', height: '24px', borderRadius: '12px', background: form.isPrivate ? '#6366f1' : '#d1cdc7', border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s' }}>
+            <span style={{ position: 'absolute', top: '3px', left: form.isPrivate ? '22px' : '3px', width: '18px', height: '18px', background: '#ffffff', borderRadius: '50%', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+          </button>
+        </div>
+        {form.isPrivate && (
+          <div style={{ marginTop: '0.75rem', background: '#eef2ff', borderRadius: '6px', padding: '0.625rem 0.875rem', fontSize: '0.8125rem', color: '#4338ca' }}>
+            Artikel ini hanya tersimpan untuk kamu pribadi. Tidak bisa dijual atau dibagikan.
+          </div>
+        )}
+      </div>
+
+      {/* Monetization — only shown when not private */}
+      {!form.isPrivate && <div style={card}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: form.isPremium ? '1rem' : '0' }}>
           <div>
             <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1a1a1a' }}>Konten Premium</div>
@@ -174,16 +197,16 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
             )}
           </div>
         )}
-      </div>
+      </div>}
 
-      {/* File attachments */}
-      <div style={card}>
+      {/* File attachments — only when not private */}
+      {!form.isPrivate && <div style={card}>
         <PostFileUpload
           files={form.files}
           onChange={(files) => set({ files })}
           isPremium={form.isPremium}
         />
-      </div>
+      </div>}
 
       {/* Error */}
       {error && (

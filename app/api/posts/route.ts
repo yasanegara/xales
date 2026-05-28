@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get('page') ?? '1')
   const limit = 20
 
-  const where = { published: true, ...(type ? { type } : {}) }
+  const where = { published: true, isPrivate: false, ...(type ? { type } : {}) }
   const orderBy =
     sort === 'trending'
       ? [{ viewCount: 'desc' as const }, { likeCount: 'desc' as const }]
@@ -34,22 +34,24 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const { title, description, type, content, category, tags, published, isPremium, price, discount, files } = await req.json()
+    const { title, description, type, content, category, tags, published, isPrivate, isPremium, price, discount, files } = await req.json()
 
     if (!title || !type || !content)
       return NextResponse.json({ error: 'Title, type, dan content wajib diisi' }, { status: 400 })
 
     const slug = await generateUniqueSlug(title)
+    const privateMode = isPrivate ?? false
 
     const post = await db.post.create({
       data: {
         slug, title, description, type, content, category,
         tags: tags ?? [],
         published: published ?? false,
+        isPrivate: privateMode,
         publishedAt: published ? new Date() : null,
-        isPremium: isPremium ?? false,
-        price: isPremium ? (price ?? null) : null,
-        discount: isPremium ? (discount ?? null) : null,
+        isPremium: privateMode ? false : (isPremium ?? false),
+        price: (!privateMode && isPremium) ? (price ?? null) : null,
+        discount: (!privateMode && isPremium) ? (discount ?? null) : null,
         authorId: session.user.id,
         ...(files?.length
           ? {

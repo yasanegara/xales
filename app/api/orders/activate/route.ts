@@ -47,5 +47,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
-  return NextResponse.json({ error: 'type harus article atau file' }, { status: 400 })
+  if (type === 'bundle') {
+    const purchase = await db.bundlePurchase.findUnique({
+      where: { orderId },
+      include: { bundle: { select: { authorId: true } } },
+    })
+    if (!purchase) return NextResponse.json({ error: 'Order tidak ditemukan' }, { status: 404 })
+    if (purchase.bundle.authorId !== session.user.id)
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (purchase.status === 'paid')
+      return NextResponse.json({ error: 'Sudah aktif' }, { status: 400 })
+
+    await db.bundlePurchase.update({ where: { orderId }, data: { status: 'paid' } })
+    return NextResponse.json({ ok: true })
+  }
+
+  return NextResponse.json({ error: 'type harus article, file, atau bundle' }, { status: 400 })
 }

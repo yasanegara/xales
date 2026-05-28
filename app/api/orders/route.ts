@@ -8,7 +8,7 @@ export async function GET(_req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const [articleOrders, fileOrders] = await Promise.all([
+  const [articleOrders, fileOrders, bundleOrders] = await Promise.all([
     db.purchase.findMany({
       where: { post: { authorId: session.user.id } },
       orderBy: { createdAt: 'desc' },
@@ -30,7 +30,15 @@ export async function GET(_req: NextRequest) {
         user: { select: { username: true, name: true, email: true } },
       },
     }),
+    db.bundlePurchase.findMany({
+      where: { bundle: { authorId: session.user.id } },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        bundle: { select: { title: true, slug: true } },
+        user: { select: { username: true, name: true, email: true } },
+      },
+    }),
   ])
 
-  return NextResponse.json({ articleOrders, fileOrders })
+  return NextResponse.json({ articleOrders, fileOrders, bundleOrders })
 }

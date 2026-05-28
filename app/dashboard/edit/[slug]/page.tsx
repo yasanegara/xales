@@ -25,10 +25,11 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
         content: data.content ?? '',
         category: data.category ?? '',
         tags: (data.tags ?? []).join(', '),
+        isPrivate: data.isPrivate ?? false,
         isPremium: data.isPremium ?? false,
         price: data.price ? String(data.price) : '',
         discount: data.discount ? String(data.discount) : '',
-        files: [],  // existing files fetched separately via API
+        files: [],
       })
     })
   }, [params])
@@ -48,9 +49,10 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
         category: form.category,
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
         published,
-        isPremium: form.isPremium,
-        price: form.isPremium && form.price ? parseInt(form.price) : null,
-        newFiles: form.files,
+        isPrivate: form.isPrivate,
+        isPremium: form.isPrivate ? false : form.isPremium,
+        price: (!form.isPrivate && form.isPremium && form.price) ? parseInt(form.price) : null,
+        newFiles: form.isPrivate ? [] : form.files,
       }),
     })
     const data = await res.json()

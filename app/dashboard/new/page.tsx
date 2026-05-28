@@ -10,7 +10,7 @@ export default function NewPostPage() {
   const { data: session } = useSession()
   const [form, setForm] = useState<PostFormData>({
     title: '', description: '', type: 'markdown', content: '',
-    category: '', tags: '', isPremium: false, price: '', discount: '', files: [],
+    category: '', tags: '', isPrivate: false, isPremium: false, price: '', discount: '', files: [],
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -31,9 +31,10 @@ export default function NewPostPage() {
         category: form.category,
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
         published,
-        isPremium: form.isPremium,
-        price: form.isPremium && form.price ? parseInt(form.price) : null,
-        files: form.files,
+        isPrivate: form.isPrivate,
+        isPremium: form.isPrivate ? false : form.isPremium,
+        price: (!form.isPrivate && form.isPremium && form.price) ? parseInt(form.price) : null,
+        files: form.isPrivate ? [] : form.files,
       }),
     })
     const data = await res.json()

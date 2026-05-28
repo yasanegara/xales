@@ -103,6 +103,7 @@ export default function Navbar() {
                       { href: `/@${session.user.username}`, label: 'Profile' },
                       { href: '/dashboard', label: 'Dashboard' },
                       { href: '/dashboard/orders', label: '📦 Pesanan' },
+                      { href: '/dashboard/bundles', label: '🎁 Bundle' },
                       { href: '/dashboard/library', label: '★ Library' },
                       { href: '/dashboard/discounts', label: '% Kode Diskon' },
                       { href: '/dashboard/affiliate', label: '↗ Affiliate' },

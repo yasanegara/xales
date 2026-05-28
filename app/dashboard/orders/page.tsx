@@ -27,6 +27,7 @@ function formatDate(s: string) {
 export default function OrdersPage() {
   const [articleOrders, setArticleOrders] = useState<Order[]>([])
   const [fileOrders, setFileOrders] = useState<Order[]>([])
+  const [bundleOrders, setBundleOrders] = useState<Order[]>([])
   const [tab, setTab] = useState<'pending' | 'paid'>('pending')
   const [activating, setActivating] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -36,12 +37,13 @@ export default function OrdersPage() {
     const data = await res.json()
     setArticleOrders(data.articleOrders ?? [])
     setFileOrders(data.fileOrders ?? [])
+    setBundleOrders(data.bundleOrders ?? [])
     setLoading(false)
   }
 
   useEffect(() => { fetchOrders() }, [])
 
-  const activate = async (orderId: string, type: 'article' | 'file') => {
+  const activate = async (orderId: string, type: 'article' | 'file' | 'bundle') => {
     setActivating(orderId)
     const res = await fetch('/api/orders/activate', {
       method: 'POST',
@@ -52,9 +54,10 @@ export default function OrdersPage() {
     if (res.ok) fetchOrders()
   }
 
-  const allOrders: (Order & { type: 'article' | 'file' })[] = [
+  const allOrders: (Order & { type: 'article' | 'file' | 'bundle' })[] = [
     ...articleOrders.map(o => ({ ...o, type: 'article' as const })),
     ...fileOrders.map(o => ({ ...o, type: 'file' as const })),
+    ...bundleOrders.map(o => ({ ...o, type: 'bundle' as const, post: (o as any).bundle })),
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   const filtered = allOrders.filter(o => o.status === tab)
@@ -103,7 +106,7 @@ export default function OrdersPage() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   {/* Item title */}
                   <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1a1a1a', marginBottom: '0.25rem' }}>
-                    {order.type === 'article' ? order.post?.title : `${order.file?.name}`}
+                    {order.type === 'article' ? order.post?.title : order.type === 'bundle' ? `Bundle: ${order.post?.title}` : `${order.file?.name}`}
                   </div>
                   {order.type === 'file' && (
                     <div style={{ fontSize: '0.75rem', color: '#9c9690', marginBottom: '0.25rem' }}>
@@ -141,7 +144,7 @@ export default function OrdersPage() {
                 {/* Action */}
                 {order.status === 'pending' ? (
                   <button
-                    onClick={() => activate(order.orderId, order.type)}
+                    onClick={() => activate(order.orderId, order.type as 'article' | 'file' | 'bundle')}
                     disabled={activating === order.orderId}
                     style={{
                       flexShrink: 0, background: activating === order.orderId ? '#6e6a65' : '#059669',

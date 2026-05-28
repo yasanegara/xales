@@ -67,12 +67,22 @@ export default async function PostPage({ params, searchParams }: Props) {
   if (!post || !post.published) notFound()
 
   const isAuthor = session?.user?.id === post.authorId
+
+  // Private posts only accessible by author
+  if (post.isPrivate && !isAuthor) notFound()
   let isPurchased = false
   if (post.isPremium && session && !isAuthor) {
-    const purchase = await db.purchase.findFirst({
-      where: { userId: session.user.id, postId: post.id, status: 'paid' },
-    })
-    isPurchased = !!purchase
+    // Check direct purchase OR bundle purchase containing this post
+    const [purchase, bundleAccess] = await Promise.all([
+      db.purchase.findFirst({ where: { userId: session.user.id, postId: post.id, status: 'paid' } }),
+      db.bundlePurchase.findFirst({
+        where: {
+          userId: session.user.id, status: 'paid',
+          bundle: { items: { some: { postId: post.id } } },
+        },
+      }),
+    ])
+    isPurchased = !!(purchase || bundleAccess)
   }
 
   const canRead = !post.isPremium || isAuthor || isPurchased
