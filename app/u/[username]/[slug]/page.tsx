@@ -60,7 +60,7 @@ export default async function PostPage({ params, searchParams }: Props) {
     where: { slug },
     include: {
       author: { select: { username: true, name: true, profilePic: true, bio: true, waNumber: true, waMessage: true } },
-      files: { select: { id: true, name: true, mimeType: true, size: true, isFree: true } },
+      files: { select: { id: true, name: true, mimeType: true, size: true, isFree: true, price: true, discount: true, url: true } },
     },
   })
 
@@ -241,6 +241,7 @@ export default async function PostPage({ params, searchParams }: Props) {
               refCode={refCode}
               files={post.files}
               isPurchased={false}
+              preview={post.content?.slice(0, 600) ?? ''}
             />
           )}
 

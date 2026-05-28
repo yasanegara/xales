@@ -26,6 +26,7 @@ interface Props {
   refCode?: string
   files?: PostFile[]
   isPurchased?: boolean
+  preview?: string
 }
 
 function formatBytes(b: number) {
@@ -33,7 +34,7 @@ function formatBytes(b: number) {
   return `${(b / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export default function Paywall({ slug, title, price, authorName, authorWaNumber, authorWaMessage, refCode, files = [], isPurchased: initialPurchased = false }: Props) {
+export default function Paywall({ slug, title, price, authorName, authorWaNumber, authorWaMessage, refCode, files = [], isPurchased: initialPurchased = false, preview = '' }: Props) {
   const router = useRouter()
   const [purchased, setPurchased] = useState(initialPurchased)
 
@@ -46,13 +47,34 @@ export default function Paywall({ slug, title, price, authorName, authorWaNumber
     )
   }
 
+  // Strip markdown syntax for plain text preview
+  const plainPreview = preview
+    .replace(/#{1,6}\s/g, '')
+    .replace(/[*_~`]/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/^>\s/gm, '')
+    .replace(/\n{2,}/g, '\n')
+    .trim()
+
   return (
     <div>
-      {/* Blur overlay */}
+      {/* Content preview with fade */}
+      {plainPreview && (
+        <div style={{ position: 'relative', marginBottom: '0', maxHeight: '8rem', overflow: 'hidden' }}>
+          <p style={{ fontSize: '1rem', color: '#4a4540', lineHeight: 1.8, margin: 0 }}>
+            {plainPreview}
+          </p>
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '5rem',
+            background: 'linear-gradient(to bottom, transparent, #f7f5f2)',
+          }} />
+        </div>
+      )}
+
+      {/* Lock box */}
       <div
         style={{
           position: 'relative', marginBottom: '2rem',
-          background: 'linear-gradient(to bottom, transparent 0%, #f7f5f2 70%)',
           borderRadius: '12px', overflow: 'hidden',
         }}
       >

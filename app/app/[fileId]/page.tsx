@@ -12,6 +12,8 @@ export default async function AppPage({ params }: { params: Promise<{ fileId: st
         select: {
           slug: true,
           title: true,
+          description: true,
+          content: true,
           published: true,
           author: { select: { name: true, username: true } },
         },
@@ -23,11 +25,15 @@ export default async function AppPage({ params }: { params: Promise<{ fileId: st
     notFound()
   }
 
+  // Use description, or first 300 chars of content as intro
+  const intro = file.post.description ?? file.post.content?.slice(0, 300).replace(/[#*_`>\-]/g, '').trim() ?? ''
+
   return (
     <StandaloneAppPage
       fileId={file.id}
       slug={file.post.slug}
       name={file.name}
+      intro={intro}
       price={file.price ?? null}
       discount={file.discount ?? null}
       url={file.url}

@@ -8,6 +8,7 @@ interface Props {
   fileId: string
   slug: string
   name: string
+  intro: string
   price: number | null
   discount: number | null
   url: string
@@ -17,7 +18,7 @@ function formatIDR(n: number) {
   return new Intl.NumberFormat('id-ID').format(n)
 }
 
-export default function StandaloneAppPage({ fileId, slug, name, price, discount, url }: Props) {
+export default function StandaloneAppPage({ fileId, slug, name, intro, price, discount, url }: Props) {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [buying, setBuying] = useState(false)
@@ -90,9 +91,25 @@ export default function StandaloneAppPage({ fileId, slug, name, price, discount,
             🔗
           </div>
 
-          <h1 style={{ fontSize: '1.375rem', fontWeight: 700, color: '#1a1a1a', marginBottom: '0.5rem', lineHeight: 1.3 }}>
+          <h1 style={{ fontSize: '1.375rem', fontWeight: 700, color: '#1a1a1a', marginBottom: '0.75rem', lineHeight: 1.3 }}>
             {name}
           </h1>
+
+          {/* Intro / description */}
+          {intro && (
+            <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+              <p style={{
+                fontSize: '0.9375rem', color: '#6e6a65', lineHeight: 1.7,
+                textAlign: 'left', maxHeight: '4.8em', overflow: 'hidden',
+              }}>
+                {intro}
+              </p>
+              <div style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0, height: '2.5em',
+                background: 'linear-gradient(to bottom, transparent, #ffffff)',
+              }} />
+            </div>
+          )}
 
           {/* Price */}
           {effectivePrice ? (
