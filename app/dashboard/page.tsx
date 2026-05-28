@@ -55,11 +55,14 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: '1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ marginBottom: '1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a' }}>Dashboard</h1>
           <p style={{ color: '#6e6a65', marginTop: '0.25rem' }}>
-            Halo, {session!.user.name ?? `@${session!.user.username}`}
+            Halo, {session!.user.name ?? `@${session!.user.username}`} ·{' '}
+            <Link href={`/@${session!.user.username}`} style={{ color: '#0070f3', textDecoration: 'none', fontSize: '0.875rem' }}>
+              Lihat profil publik →
+            </Link>
           </p>
         </div>
         <Link href="/dashboard/new" style={{ background: '#1a1a1a', color: '#f7f5f2', padding: '0.5rem 1.25rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>

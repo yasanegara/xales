@@ -19,6 +19,7 @@ export default async function HomePage({
 
   const where = {
     published: true,
+    isPrivate: false,
     ...(type && type !== 'all' ? { type } : {}),
   }
 
