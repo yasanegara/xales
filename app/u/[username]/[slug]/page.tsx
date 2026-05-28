@@ -9,6 +9,7 @@ import BookmarkButton from '@/components/BookmarkButton'
 import SaveButton from '@/components/SaveButton'
 import ShareModal from '@/components/ShareModal'
 import ReadingWrapper from '@/components/ReadingWrapper'
+import TampilanButton from '@/components/TampilanButton'
 import Paywall from '@/components/Paywall'
 import ViewTracker from './ViewTracker'
 import { db } from '@/lib/prisma'
@@ -168,7 +169,7 @@ export default async function PostPage({ params, searchParams }: Props) {
                 </div>
               </div>
             </Link>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <LikeButton slug={post.slug} initialCount={post.likeCount} />
               {isMarkdown && <BookmarkButton slug={post.slug} />}
               <SaveButton slug={post.slug} />
@@ -181,6 +182,7 @@ export default async function PostPage({ params, searchParams }: Props) {
                 coverImage={post.coverImage}
               />
               <span style={{ fontSize: '0.8125rem', color: '#9c9690' }}>👁 {post.viewCount.toLocaleString()}</span>
+              {isMarkdown && <TampilanButton />}
               <ViewTracker slug={post.slug} />
             </div>
           </div>
