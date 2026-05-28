@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 function safeFrom(raw: string | null): string {
@@ -19,7 +19,6 @@ function safeFrom(raw: string | null): string {
 
 export default function RegisterPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [from, setFrom] = useState('/dashboard')
   const [fromParam, setFromParam] = useState('')
 
