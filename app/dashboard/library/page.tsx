@@ -22,7 +22,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       },
     }),
     db.filePurchase.findMany({
-      where: { userId: session!.user.id, status: 'paid', file: { mimeType: 'url/link' } },
+      where: { userId: session!.user.id, status: 'paid' },
       orderBy: { createdAt: 'desc' },
       include: {
         file: {
@@ -33,6 +33,9 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       },
     }),
   ])
+
+  // Filter only app links (url/link mimeType or has url) — done client-side for reliability
+  const appLinks = appPurchases.filter(p => p.file.mimeType === 'url/link' || !!p.file.url)
 
   return (
     <div>
@@ -62,7 +65,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
             marginBottom: '-1px',
           }}
         >
-          App <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>({appPurchases.length})</span>
+          App <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>({appLinks.length})</span>
         </Link>
       </div>
 
@@ -115,7 +118,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
 
       {/* Apps tab */}
       {activeTab === 'apps' && (
-        appPurchases.length === 0 ? (
+        appLinks.length === 0 ? (
           <div style={{ background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '10px', padding: '4rem 2rem', textAlign: 'center', color: '#6e6a65' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🔗</div>
             <p style={{ fontWeight: 500, color: '#1a1a1a', marginBottom: '0.5rem' }}>Belum ada app yang dibeli</p>
@@ -123,7 +126,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
-            {appPurchases.map(({ file, createdAt }) => (
+            {appLinks.map(({ file, createdAt }) => (
               <a
                 key={file.id}
                 href={file.url!}
