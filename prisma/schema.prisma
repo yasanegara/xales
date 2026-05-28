@@ -8,22 +8,25 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  username     String   @unique
-  passwordHash String?
-  name         String?
-  bio          String?
-  profilePic   String?  @db.Text
-  status       String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(cuid())
+  email         String   @unique
+  username      String   @unique
+  passwordHash  String?
+  name          String?
+  bio           String?
+  profilePic    String?  @db.Text
+  status        String?
+  affiliateRate Int      @default(20) // % commission paid to affiliates
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  posts      Post[]
-  likes      Like[]
-  savedPosts SavedPost[]
-  sessions   Session[]
-  accounts   Account[]
+  posts         Post[]
+  likes         Like[]
+  savedPosts    SavedPost[]
+  purchases     Purchase[]
+  discounts     Discount[]
+  sessions      Session[]
+  accounts      Account[]
 }
 
 model Post {
@@ -40,6 +43,8 @@ model Post {
   viewCount   Int       @default(0)
   likeCount   Int       @default(0)
   coverImage  String?   @db.Text
+  isPremium   Boolean   @default(false)
+  price       Int?      // IDR, e.g. 25000 = Rp 25.000
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -49,6 +54,52 @@ model Post {
   likes      Like[]
   savedPosts SavedPost[]
   views      PostView[]
+  files      PostFile[]
+  purchases  Purchase[]
+  discounts  Discount[]
+}
+
+model PostFile {
+  id        String   @id @default(cuid())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  name      String
+  mimeType  String
+  size      Int      // bytes
+  data      String   @db.Text // base64
+  isFree    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Purchase {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+  amount    Int      // IDR actually paid (after discount)
+  status    String   @default("pending") // pending | paid | failed
+  orderId   String   @unique
+  refCode   String?  // affiliate username who referred
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Discount {
+  id         String    @id @default(cuid())
+  author     User      @relation(fields: [authorId], references: [id])
+  authorId   String
+  post       Post?     @relation(fields: [postId], references: [id])
+  postId     String?   // null = valid for all posts by this author
+  code       String    @unique
+  type       String    // "percent" | "fixed"
+  value      Int       // percent (1-100) or IDR amount
+  maxUses    Int?      // null = unlimited
+  usedCount  Int       @default(0)
+  expiresAt  DateTime?
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
 }
 
 model Like {

@@ -48,7 +48,7 @@ function wrapText(
 // Portrait 1080×1920 — Instagram Story / WA Status
 const W = 1080
 const H = 1920
-const PAD = 80
+const PAD = 90
 
 function generatePosterOnCanvas(
   canvas: HTMLCanvasElement,
@@ -59,95 +59,103 @@ function generatePosterOnCanvas(
   canvas.width = W
   canvas.height = H
   const ctx = canvas.getContext('2d')!
+  const F = '-apple-system, system-ui, sans-serif'
 
-  // Background gradient (top-to-bottom warm cream)
-  const grad = ctx.createLinearGradient(0, 0, 0, H)
-  grad.addColorStop(0, '#faf7f2')
-  grad.addColorStop(0.6, '#f0ede8')
-  grad.addColorStop(1, '#e8e2d8')
-  ctx.fillStyle = grad
+  // ── Full dark background ──────────────────────────────────────────
+  ctx.fillStyle = '#141210'
   ctx.fillRect(0, 0, W, H)
 
-  // Decorative dot grid — top right
-  ctx.fillStyle = 'rgba(26,26,26,0.07)'
-  for (let col = 0; col < 10; col++) {
-    for (let row = 0; row < 10; row++) {
-      ctx.beginPath()
-      ctx.arc(W - PAD - col * 28, PAD + row * 28, 3, 0, Math.PI * 2)
-      ctx.fill()
+  // Subtle noise / dot texture
+  ctx.fillStyle = 'rgba(255,255,255,0.018)'
+  for (let x = 0; x < W; x += 22) {
+    for (let y = 0; y < H; y += 22) {
+      ctx.fillRect(x, y, 1.5, 1.5)
     }
   }
 
-  // Decorative dot grid — bottom left
-  for (let col = 0; col < 6; col++) {
-    for (let row = 0; row < 6; row++) {
-      ctx.beginPath()
-      ctx.arc(PAD + col * 28, H - PAD - row * 28, 3, 0, Math.PI * 2)
-      ctx.fill()
-    }
-  }
-
-  // Top accent bar (horizontal)
-  ctx.fillStyle = '#1a1a1a'
-  ctx.fillRect(PAD, 120, 120, 6)
+  // ── Header zone (0–340px) ─────────────────────────────────────────
+  // Top cream accent line
+  ctx.fillStyle = '#f0ede8'
+  ctx.fillRect(0, 0, W, 7)
 
   // XALES wordmark
-  ctx.font = 'bold 52px -apple-system, system-ui, sans-serif'
-  ctx.fillStyle = '#1a1a1a'
-  ctx.fillText('XALES', PAD, 220)
+  ctx.font = `bold 48px ${F}`
+  ctx.fillStyle = '#f0ede8'
+  ctx.fillText('XALES', PAD, 120)
+
+  // Dot separator after wordmark
+  const wMeasure = ctx.measureText('XALES').width
+  ctx.beginPath()
+  ctx.arc(PAD + wMeasure + 28, 110, 5, 0, Math.PI * 2)
+  ctx.fillStyle = '#6e6a65'
+  ctx.fill()
 
   // Tagline
-  ctx.font = '32px -apple-system, system-ui, sans-serif'
-  ctx.fillStyle = '#9c9690'
-  ctx.fillText('creator platform', PAD, 272)
+  ctx.font = `32px ${F}`
+  ctx.fillStyle = '#6e6a65'
+  ctx.fillText('Creator Platform', PAD, 180)
 
-  // Horizontal rule
-  ctx.fillStyle = '#d4cdc4'
-  ctx.fillRect(PAD, 340, W - PAD * 2, 1.5)
+  // Thin horizontal rule
+  ctx.fillStyle = '#2a2724'
+  ctx.fillRect(PAD, 230, W - PAD * 2, 1)
 
-  // Title — large, bold, centered vertically in the middle zone
-  ctx.font = 'bold 88px -apple-system, system-ui, sans-serif'
-  ctx.fillStyle = '#1a1a1a'
-  const titleBottom = wrapText(ctx, title, PAD, 520, W - PAD * 2, 108, 5)
+  // ── Content zone (280–1580px) — safe area ─────────────────────────
+  // Adaptive font size based on title length
+  const tLen = title.length
+  const tSize = tLen > 90 ? 54 : tLen > 65 ? 64 : tLen > 40 ? 74 : 86
+  const tLineH = Math.round(tSize * 1.3)
+  // Max lines that fit in safe zone (1580 - 310) / lineHeight
+  const safeZone = 1580 - 310
+  const tMaxLines = Math.min(8, Math.floor(safeZone / tLineH))
+
+  ctx.font = `bold ${tSize}px ${F}`
+  ctx.fillStyle = '#ffffff'
+  const titleBottom = wrapText(ctx, title, PAD, 310, W - PAD * 2, tLineH, tMaxLines)
 
   // Description
   if (description) {
-    ctx.font = '44px -apple-system, system-ui, sans-serif'
-    ctx.fillStyle = '#6e6a65'
-    wrapText(ctx, description, PAD, titleBottom + 72, W - PAD * 2, 58, 3)
+    const dStart = Math.min(titleBottom + 60, 1420)
+    const dRemaining = 1540 - dStart
+    const dMaxLines = Math.max(1, Math.floor(dRemaining / 54))
+    if (dMaxLines >= 1) {
+      ctx.font = `38px ${F}`
+      ctx.fillStyle = '#8a8480'
+      wrapText(ctx, description, PAD, dStart, W - PAD * 2, 54, dMaxLines)
+    }
   }
 
-  // Bottom dark band
-  ctx.fillStyle = '#1a1a1a'
-  ctx.fillRect(0, H - 180, W, 180)
+  // ── Footer zone (1600–1920px) ─────────────────────────────────────
+  // Gradient fade to footer
+  const footerGrad = ctx.createLinearGradient(0, 1580, 0, 1920)
+  footerGrad.addColorStop(0, 'rgba(20,18,16,0)')
+  footerGrad.addColorStop(0.3, 'rgba(20,18,16,1)')
+  ctx.fillStyle = footerGrad
+  ctx.fillRect(0, 1580, W, 340)
 
-  // Rounded top corners for bottom band (fake)
-  ctx.fillStyle = '#1a1a1a'
-  ctx.beginPath()
-  ctx.moveTo(0, H - 196)
-  ctx.quadraticCurveTo(0, H - 180, 24, H - 180)
-  ctx.lineTo(W - 24, H - 180)
-  ctx.quadraticCurveTo(W, H - 180, W, H - 196)
-  ctx.lineTo(W, H - 180)
-  ctx.lineTo(0, H - 180)
-  ctx.fill()
+  // Separator line
+  ctx.fillStyle = '#2a2724'
+  ctx.fillRect(PAD, 1680, W - PAD * 2, 1)
 
   // Author name
-  ctx.font = '500 40px -apple-system, system-ui, sans-serif'
-  ctx.fillStyle = 'rgba(255,255,255,0.75)'
-  ctx.fillText(authorName, PAD, H - 108)
+  ctx.font = `500 36px ${F}`
+  ctx.fillStyle = 'rgba(240,237,232,0.6)'
+  ctx.fillText(authorName, PAD, 1770)
 
-  // xales.id — right aligned
-  ctx.font = 'bold 40px -apple-system, system-ui, sans-serif'
-  ctx.fillStyle = '#ffffff'
+  // xales.id — right-aligned
+  ctx.font = `bold 36px ${F}`
+  ctx.fillStyle = '#f0ede8'
   const domain = 'xales.id'
-  const domainW = ctx.measureText(domain).width
-  ctx.fillText(domain, W - PAD - domainW, H - 108)
+  const dW = ctx.measureText(domain).width
+  ctx.fillText(domain, W - PAD - dW, 1770)
 
-  // QR hint line
-  ctx.font = '30px -apple-system, system-ui, sans-serif'
-  ctx.fillStyle = 'rgba(255,255,255,0.4)'
-  ctx.fillText(`xales.id`, PAD, H - 56)
+  // URL hint line
+  ctx.font = `26px ${F}`
+  ctx.fillStyle = 'rgba(255,255,255,0.22)'
+  ctx.fillText(`xales.id/@${authorName.replace('@', '')}`, PAD, 1850)
+
+  // Bottom cream accent line
+  ctx.fillStyle = '#f0ede8'
+  ctx.fillRect(0, H - 6, W, 6)
 }
 
 export default function ShareModal({
@@ -168,9 +176,14 @@ export default function ShareModal({
   const fileRef = useRef<HTMLInputElement>(null)
 
   const isAuthor = session?.user?.username === authorUsername
-  const postUrl = typeof window !== 'undefined'
+  const myUsername = session?.user?.username
+  const baseUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/@${authorUsername}/${slug}`
     : `https://xales.id/@${authorUsername}/${slug}`
+  // Non-authors get affiliate ref appended automatically
+  const postUrl = myUsername && !isAuthor
+    ? `${baseUrl}?ref=${myUsername}`
+    : baseUrl
 
   const drawPoster = useCallback(() => {
     if (!canvasRef.current || coverImage) return

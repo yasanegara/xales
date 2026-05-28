@@ -100,6 +100,8 @@ export default function Navbar() {
                       { href: `/@${session.user.username}`, label: 'Profile' },
                       { href: '/dashboard', label: 'Dashboard' },
                       { href: '/dashboard/library', label: '★ Library' },
+                      { href: '/dashboard/discounts', label: '% Kode Diskon' },
+                      { href: '/dashboard/affiliate', label: '↗ Affiliate' },
                       { href: '/dashboard/settings', label: 'Settings' },
                     ].map((item) => (
                       <Link

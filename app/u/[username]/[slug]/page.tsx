@@ -9,12 +9,15 @@ import BookmarkButton from '@/components/BookmarkButton'
 import SaveButton from '@/components/SaveButton'
 import ShareModal from '@/components/ShareModal'
 import ReadingWrapper from '@/components/ReadingWrapper'
+import Paywall from '@/components/Paywall'
 import ViewTracker from './ViewTracker'
 import { db } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { extractHeadings } from '@/lib/headings'
 import { formatDate, readingTime } from '@/lib/utils'
 
-type Props = { params: Promise<{ username: string; slug: string }> }
+type Props = { params: Promise<{ username: string; slug: string }>; searchParams: Promise<{ ref?: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -23,30 +26,59 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     include: { author: { select: { name: true, username: true } } },
   })
   if (!post) return { title: 'Post not found' }
+
+  const authorName = post.author.name ?? `@${post.author.username}`
+  const description = post.description ?? undefined
+  const ogImageUrl = `/api/og/${slug}`
+
   return {
     title: post.title,
-    description: post.description ?? post.title,
+    description: description ?? post.title,
     openGraph: {
       title: post.title,
-      description: post.description ?? undefined,
+      description,
       type: 'article',
-      authors: [post.author.name ?? `@${post.author.username}`],
-      images: post.coverImage ? [{ url: post.coverImage, width: 1200, height: 630 }] : [],
+      url: `/@${post.author.username}/${slug}`,
+      authors: [authorName],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description,
+      images: [ogImageUrl],
     },
   }
 }
 
-export default async function PostPage({ params }: Props) {
+export default async function PostPage({ params, searchParams }: Props) {
   const { slug } = await params
+  const { ref: refCode } = await searchParams
+  const session = await getServerSession(authOptions)
 
   const post = await db.post.findUnique({
     where: { slug },
-    include: { author: { select: { username: true, name: true, profilePic: true, bio: true } } },
+    include: {
+      author: { select: { username: true, name: true, profilePic: true, bio: true } },
+      files: { select: { id: true, name: true, mimeType: true, size: true, isFree: true } },
+    },
   })
 
   if (!post || !post.published) notFound()
 
-  const headings = post.type === 'markdown' ? extractHeadings(post.content) : []
+  const isAuthor = session?.user?.id === post.authorId
+  let isPurchased = false
+  if (post.isPremium && session && !isAuthor) {
+    const purchase = await db.purchase.findFirst({
+      where: { userId: session.user.id, postId: post.id, status: 'paid' },
+    })
+    isPurchased = !!purchase
+  }
+
+  const canRead = !post.isPremium || isAuthor || isPurchased
+
+  // Extract ?ref= from the request — passed via searchParams
+  const headings = post.type === 'markdown' && canRead ? extractHeadings(post.content) : []
   const isMarkdown = post.type === 'markdown'
   const authorName = post.author.name ?? `@${post.author.username}`
 
@@ -164,9 +196,51 @@ export default async function PostPage({ params }: Props) {
 
         {/* Article body */}
         <div style={{ borderTop: '1px solid #e5e0d8', paddingTop: '2rem' }}>
-          <ReadingWrapper isMarkdown={isMarkdown}>
-            <PostViewer type={post.type} content={post.content} title={post.title} />
-          </ReadingWrapper>
+          {canRead ? (
+            <>
+              <ReadingWrapper isMarkdown={isMarkdown}>
+                <PostViewer type={post.type} content={post.content} title={post.title} />
+              </ReadingWrapper>
+
+              {/* File downloads for readers who have access */}
+              {post.files.length > 0 && (
+                <div style={{ marginTop: '2rem', padding: '1.25rem', background: '#f7f5f2', borderRadius: '10px', border: '1px solid #e5e0d8' }}>
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#6e6a65', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.875rem' }}>
+                    File Lampiran
+                  </div>
+                  {post.files.map((file) => (
+                    <a
+                      key={file.id}
+                      href={`/api/files/${file.id}`}
+                      download={file.name}
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '8px', padding: '0.75rem 1rem', textDecoration: 'none', marginBottom: '0.5rem' }}
+                    >
+                      <span>📎</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#1a1a1a' }}>{file.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#9c9690' }}>
+                          {file.isFree ? 'Gratis' : 'Berbayar'}
+                        </div>
+                      </div>
+                      <span style={{ fontSize: '0.8125rem', color: '#059669', fontWeight: 500 }}>↓ Unduh</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            /* Paywall */
+            <Paywall
+              slug={post.slug}
+              title={post.title}
+              price={post.price!}
+              authorName={authorName}
+              authorUsername={post.author.username}
+              refCode={refCode}
+              files={post.files}
+              isPurchased={false}
+            />
+          )}
 
           {/* Tags */}
           {post.tags.length > 0 && (

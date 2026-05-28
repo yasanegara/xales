@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import PostViewer from './PostViewer'
+import ImageUploadButton from './ImageUploadButton'
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
 
@@ -28,9 +29,14 @@ export default function PostEditor({ type, value, onChange }: PostEditorProps) {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <button style={tabStyle(tab === 'edit')} onClick={() => setTab('edit')}>Edit</button>
         <button style={tabStyle(tab === 'preview')} onClick={() => setTab('preview')}>Preview</button>
+        {type === 'markdown' && tab === 'edit' && (
+          <div style={{ marginLeft: 'auto' }}>
+            <ImageUploadButton onInsert={(md) => onChange(value + md)} />
+          </div>
+        )}
       </div>
 
       {tab === 'edit' ? (

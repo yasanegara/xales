@@ -9,11 +9,12 @@ interface Profile {
   bio: string
   status: string
   profilePic: string
+  affiliateRate: number
 }
 
 export default function SettingsPage() {
   const { data: session, update } = useSession()
-  const [form, setForm] = useState<Profile>({ name: '', bio: '', status: '', profilePic: '' })
+  const [form, setForm] = useState<Profile>({ name: '', bio: '', status: '', profilePic: '', affiliateRate: 20 })
   const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' })
   const [profileMsg, setProfileMsg] = useState('')
   const [passwordMsg, setPasswordMsg] = useState('')
@@ -29,6 +30,7 @@ export default function SettingsPage() {
           bio: d.bio ?? '',
           status: d.status ?? '',
           profilePic: d.profilePic ?? '',
+          affiliateRate: d.affiliateRate ?? 20,
         })
       )
   }, [session])
@@ -145,6 +147,30 @@ export default function SettingsPage() {
               style={inputStyle}
               placeholder="Contoh: Full-stack dev · Coffee addict ☕"
             />
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={labelStyle}>
+              Komisi Affiliate{' '}
+              <span style={{ color: '#9c9690', fontWeight: 400 }}>
+                — berapa % yang kamu bagi ke orang yang share artikelmu
+              </span>
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <input
+                type="range"
+                min={5} max={50} step={5}
+                value={form.affiliateRate}
+                onChange={(e) => setForm({ ...form, affiliateRate: parseInt(e.target.value) })}
+                style={{ flex: 1 }}
+              />
+              <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1a1a1a', minWidth: '48px', textAlign: 'right' }}>
+                {form.affiliateRate}%
+              </span>
+            </div>
+            <p style={{ fontSize: '0.75rem', color: '#9c9690', marginTop: '0.375rem' }}>
+              Sharer dapat {form.affiliateRate}%, kamu dapat {100 - form.affiliateRate}% dari setiap pembelian
+            </p>
           </div>
 
           <div style={{ marginBottom: '1.5rem' }}>
