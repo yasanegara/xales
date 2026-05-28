@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { formatDate, readingTime } from '@/lib/utils'
 
@@ -31,23 +33,29 @@ export default function PostCard({ post }: PostCardProps) {
     >
       <article
         style={{
-          background: '#111111',
-          border: '1px solid #222222',
+          background: '#ffffff',
+          border: '1px solid #e5e0d8',
           borderRadius: '10px',
           padding: '1.25rem',
-          transition: 'border-color 0.15s',
+          transition: 'border-color 0.15s, box-shadow 0.15s',
           cursor: 'pointer',
         }}
-        onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = '#333333')}
-        onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = '#222222')}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLElement
+          el.style.borderColor = '#cfc9c0'
+          el.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)'
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLElement
+          el.style.borderColor = '#e5e0d8'
+          el.style.boxShadow = 'none'
+        }}
       >
-        <div
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}
-        >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
           <span
             style={{
-              background: post.type === 'html' ? '#1a2a1a' : '#1a1a2a',
-              color: post.type === 'html' ? '#00c853' : '#0070f3',
+              background: post.type === 'html' ? '#ecfdf5' : '#eff6ff',
+              color: post.type === 'html' ? '#059669' : '#2563eb',
               fontSize: '0.7rem',
               fontWeight: 600,
               padding: '0.15rem 0.5rem',
@@ -59,7 +67,7 @@ export default function PostCard({ post }: PostCardProps) {
             {post.type === 'html' ? 'App' : 'Article'}
           </span>
           {post.category && (
-            <span style={{ fontSize: '0.75rem', color: '#888888' }}>{post.category}</span>
+            <span style={{ fontSize: '0.75rem', color: '#6e6a65' }}>{post.category}</span>
           )}
         </div>
 
@@ -67,7 +75,7 @@ export default function PostCard({ post }: PostCardProps) {
           style={{
             fontSize: '1.0625rem',
             fontWeight: 600,
-            color: '#ffffff',
+            color: '#1a1a1a',
             marginBottom: '0.5rem',
             lineHeight: 1.4,
           }}
@@ -79,7 +87,7 @@ export default function PostCard({ post }: PostCardProps) {
           <p
             style={{
               fontSize: '0.875rem',
-              color: '#888888',
+              color: '#6e6a65',
               marginBottom: '1rem',
               lineHeight: 1.6,
               display: '-webkit-box',
@@ -106,14 +114,14 @@ export default function PostCard({ post }: PostCardProps) {
                 width: '22px',
                 height: '22px',
                 borderRadius: '50%',
-                background: '#1a1a1a',
-                border: '1px solid #222222',
+                background: '#f0ede8',
+                border: '1px solid #e5e0d8',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '0.625rem',
                 fontWeight: 700,
-                color: '#888888',
+                color: '#6e6a65',
                 overflow: 'hidden',
                 flexShrink: 0,
               }}
@@ -129,22 +137,22 @@ export default function PostCard({ post }: PostCardProps) {
                 (post.author.name?.[0] ?? post.author.username[0]).toUpperCase()
               )}
             </div>
-            <span style={{ fontSize: '0.8rem', color: '#888888' }}>
+            <span style={{ fontSize: '0.8rem', color: '#6e6a65' }}>
               {post.author.name ?? `@${post.author.username}`}
             </span>
-            <span style={{ color: '#333333' }}>·</span>
-            <span style={{ fontSize: '0.75rem', color: '#555555' }}>{formatDate(displayDate)}</span>
+            <span style={{ color: '#d0c9b8' }}>·</span>
+            <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>{formatDate(displayDate)}</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-            <span style={{ fontSize: '0.75rem', color: '#555555' }}>
+            <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>
               👁 {post.viewCount.toLocaleString()}
             </span>
-            <span style={{ fontSize: '0.75rem', color: '#555555' }}>
+            <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>
               ♥ {post.likeCount.toLocaleString()}
             </span>
             {post.content && post.type === 'markdown' && (
-              <span style={{ fontSize: '0.75rem', color: '#555555' }}>
+              <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>
                 {readingTime(post.content)}
               </span>
             )}

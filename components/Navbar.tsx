@@ -11,8 +11,8 @@ export default function Navbar() {
   return (
     <nav
       style={{
-        background: '#111111',
-        borderBottom: '1px solid #222222',
+        background: '#ffffff',
+        borderBottom: '1px solid #e5e0d8',
         position: 'sticky',
         top: 0,
         zIndex: 50,
@@ -34,7 +34,7 @@ export default function Navbar() {
           style={{
             fontSize: '1.25rem',
             fontWeight: 700,
-            color: '#ffffff',
+            color: '#1a1a1a',
             textDecoration: 'none',
             letterSpacing: '-0.02em',
           }}
@@ -48,8 +48,8 @@ export default function Navbar() {
               <Link
                 href="/dashboard/new"
                 style={{
-                  background: '#0070f3',
-                  color: '#fff',
+                  background: '#1a1a1a',
+                  color: '#f7f5f2',
                   padding: '0.375rem 1rem',
                   borderRadius: '6px',
                   fontSize: '0.875rem',
@@ -64,8 +64,8 @@ export default function Navbar() {
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
                   style={{
-                    background: '#1a1a1a',
-                    border: '1px solid #222222',
+                    background: '#f0ede8',
+                    border: '1px solid #e5e0d8',
                     borderRadius: '50%',
                     width: '32px',
                     height: '32px',
@@ -73,7 +73,7 @@ export default function Navbar() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
-                    color: '#ededed',
+                    color: '#1a1a1a',
                     fontSize: '0.875rem',
                     fontWeight: 600,
                   }}
@@ -87,57 +87,37 @@ export default function Navbar() {
                       position: 'absolute',
                       right: 0,
                       top: '40px',
-                      background: '#111111',
-                      border: '1px solid #222222',
+                      background: '#ffffff',
+                      border: '1px solid #e5e0d8',
                       borderRadius: '8px',
                       padding: '0.5rem',
                       minWidth: '160px',
                       zIndex: 100,
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     }}
                   >
-                    <Link
-                      href={`/@${session.user.username}`}
-                      onClick={() => setMenuOpen(false)}
-                      style={{
-                        display: 'block',
-                        padding: '0.5rem 0.75rem',
-                        color: '#ededed',
-                        textDecoration: 'none',
-                        fontSize: '0.875rem',
-                        borderRadius: '4px',
-                      }}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setMenuOpen(false)}
-                      style={{
-                        display: 'block',
-                        padding: '0.5rem 0.75rem',
-                        color: '#ededed',
-                        textDecoration: 'none',
-                        fontSize: '0.875rem',
-                        borderRadius: '4px',
-                      }}
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
-                      href="/dashboard/settings"
-                      onClick={() => setMenuOpen(false)}
-                      style={{
-                        display: 'block',
-                        padding: '0.5rem 0.75rem',
-                        color: '#ededed',
-                        textDecoration: 'none',
-                        fontSize: '0.875rem',
-                        borderRadius: '4px',
-                      }}
-                    >
-                      Settings
-                    </Link>
-                    <hr style={{ border: 'none', borderTop: '1px solid #222222', margin: '0.25rem 0' }} />
+                    {[
+                      { href: `/@${session.user.username}`, label: 'Profile' },
+                      { href: '/dashboard', label: 'Dashboard' },
+                      { href: '/dashboard/settings', label: 'Settings' },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMenuOpen(false)}
+                        style={{
+                          display: 'block',
+                          padding: '0.5rem 0.75rem',
+                          color: '#1a1a1a',
+                          textDecoration: 'none',
+                          fontSize: '0.875rem',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                    <hr style={{ border: 'none', borderTop: '1px solid #e5e0d8', margin: '0.25rem 0' }} />
                     <button
                       onClick={() => { setMenuOpen(false); signOut({ callbackUrl: '/' }) }}
                       style={{
@@ -145,7 +125,7 @@ export default function Navbar() {
                         width: '100%',
                         textAlign: 'left',
                         padding: '0.5rem 0.75rem',
-                        color: '#ff4444',
+                        color: '#dc2626',
                         background: 'none',
                         border: 'none',
                         fontSize: '0.875rem',
@@ -163,15 +143,15 @@ export default function Navbar() {
             <>
               <Link
                 href="/login"
-                style={{ color: '#888888', fontSize: '0.875rem', textDecoration: 'none' }}
+                style={{ color: '#6e6a65', fontSize: '0.875rem', textDecoration: 'none' }}
               >
                 Login
               </Link>
               <Link
                 href="/register"
                 style={{
-                  background: '#0070f3',
-                  color: '#fff',
+                  background: '#1a1a1a',
+                  color: '#f7f5f2',
                   padding: '0.375rem 1rem',
                   borderRadius: '6px',
                   fontSize: '0.875rem',

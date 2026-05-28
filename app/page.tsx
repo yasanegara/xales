@@ -57,13 +57,13 @@ export default async function HomePage({
               fontSize: 'clamp(2rem, 5vw, 3rem)',
               fontWeight: 700,
               letterSpacing: '-0.03em',
-              color: '#ffffff',
+              color: '#1a1a1a',
               marginBottom: '0.75rem',
             }}
           >
             Publish. Share. Earn.
           </h1>
-          <p style={{ color: '#888888', fontSize: '1.0625rem', lineHeight: 1.6 }}>
+          <p style={{ color: '#6e6a65', fontSize: '1.0625rem', lineHeight: 1.6 }}>
             Platform untuk kreator: publish artikel &amp; web app, bangun audiens, monetisasi karya.
           </p>
         </div>
@@ -93,8 +93,8 @@ export default async function HomePage({
                     fontWeight: 500,
                     textDecoration: 'none',
                     background: active ? '#1a1a1a' : 'transparent',
-                    color: active ? '#ededed' : '#888888',
-                    border: active ? '1px solid #333333' : '1px solid transparent',
+                    color: active ? '#f7f5f2' : '#6e6a65',
+                    border: active ? '1px solid #1a1a1a' : '1px solid transparent',
                   }}
                 >
                   {t.label}
@@ -116,7 +116,7 @@ export default async function HomePage({
                     fontSize: '0.8125rem',
                     textDecoration: 'none',
                     background: active ? '#0070f3' : 'transparent',
-                    color: active ? '#fff' : '#888888',
+                    color: active ? '#fff' : '#6e6a65',
                     border: '1px solid transparent',
                   }}
                 >
@@ -129,7 +129,7 @@ export default async function HomePage({
 
         {/* Posts */}
         {posts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem 0', color: '#888888' }}>
+          <div style={{ textAlign: 'center', padding: '4rem 0', color: '#6e6a65' }}>
             <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>📝</p>
             <p>Belum ada post. Jadilah yang pertama!</p>
           </div>

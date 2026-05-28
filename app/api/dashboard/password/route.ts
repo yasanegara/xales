@@ -13,6 +13,10 @@ export async function PUT(req: NextRequest) {
   const user = await db.user.findUnique({ where: { id: session.user.id } })
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
+  if (!user.passwordHash) {
+    return NextResponse.json({ error: 'Akun Google tidak bisa ganti password di sini' }, { status: 400 })
+  }
+
   const valid = await bcrypt.compare(current, user.passwordHash)
   if (!valid) return NextResponse.json({ error: 'Password sekarang salah' }, { status: 400 })
 

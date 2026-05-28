@@ -1,7 +1,6 @@
 'use client'
 
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import MarkdownContent from './MarkdownContent'
 
 interface PostViewerProps {
   type: string
@@ -27,9 +26,5 @@ export default function PostViewer({ type, content, title }: PostViewerProps) {
     )
   }
 
-  return (
-    <div className="prose" style={{ maxWidth: '100%' }}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-    </div>
-  )
+  return <MarkdownContent content={content} />
 }

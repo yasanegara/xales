@@ -27,9 +27,7 @@ export default function PostsPage() {
     setLoading(false)
   }, [])
 
-  useEffect(() => {
-    fetchPosts()
-  }, [fetchPosts])
+  useEffect(() => { fetchPosts() }, [fetchPosts])
 
   const togglePublish = async (slug: string, published: boolean) => {
     await fetch(`/api/posts/${slug}`, {
@@ -49,62 +47,39 @@ export default function PostsPage() {
   return (
     <div>
       <div style={{ marginBottom: '1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff' }}>Posts</h1>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a' }}>Posts</h1>
         <Link
           href="/dashboard/new"
-          style={{
-            background: '#0070f3',
-            color: '#fff',
-            padding: '0.5rem 1.25rem',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-          }}
+          style={{ background: '#1a1a1a', color: '#f7f5f2', padding: '0.5rem 1.25rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}
         >
           + New Post
         </Link>
       </div>
 
-      <div
-        style={{
-          background: '#111111',
-          border: '1px solid #222222',
-          borderRadius: '10px',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Table header */}
+      <div style={{ background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '10px', overflow: 'hidden' }}>
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr auto auto auto auto auto',
             gap: '1rem',
             padding: '0.75rem 1.25rem',
-            borderBottom: '1px solid #222222',
+            borderBottom: '1px solid #e5e0d8',
             fontSize: '0.75rem',
-            color: '#555555',
+            color: '#9c9690',
             fontWeight: 600,
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
           }}
         >
-          <span>Judul</span>
-          <span>Type</span>
-          <span>Status</span>
-          <span>Views</span>
-          <span>Likes</span>
-          <span>Aksi</span>
+          <span>Judul</span><span>Type</span><span>Status</span><span>Views</span><span>Likes</span><span>Aksi</span>
         </div>
 
         {loading ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: '#888888' }}>Loading...</div>
+          <div style={{ padding: '3rem', textAlign: 'center', color: '#6e6a65' }}>Loading...</div>
         ) : posts.length === 0 ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: '#888888' }}>
+          <div style={{ padding: '3rem', textAlign: 'center', color: '#6e6a65' }}>
             Belum ada post.{' '}
-            <Link href="/dashboard/new" style={{ color: '#0070f3', textDecoration: 'none' }}>
-              Buat sekarang
-            </Link>
+            <Link href="/dashboard/new" style={{ color: '#0070f3', textDecoration: 'none' }}>Buat sekarang</Link>
           </div>
         ) : (
           posts.map((post, i) => (
@@ -115,83 +90,32 @@ export default function PostsPage() {
                 gridTemplateColumns: '1fr auto auto auto auto auto',
                 gap: '1rem',
                 padding: '1rem 1.25rem',
-                borderBottom: i < posts.length - 1 ? '1px solid #1a1a1a' : 'none',
+                borderBottom: i < posts.length - 1 ? '1px solid #f0ede8' : 'none',
                 alignItems: 'center',
               }}
             >
               <div>
-                <div style={{ color: '#ededed', fontSize: '0.9375rem', fontWeight: 500 }}>
-                  {post.title}
-                </div>
-                <div style={{ color: '#555555', fontSize: '0.75rem', marginTop: '0.2rem' }}>
-                  {formatDate(post.updatedAt)}
-                </div>
+                <div style={{ color: '#1a1a1a', fontSize: '0.9375rem', fontWeight: 500 }}>{post.title}</div>
+                <div style={{ color: '#9c9690', fontSize: '0.75rem', marginTop: '0.2rem' }}>{formatDate(post.updatedAt)}</div>
               </div>
 
-              <span
-                style={{
-                  background: post.type === 'html' ? '#1a2a1a' : '#1a1a2a',
-                  color: post.type === 'html' ? '#00c853' : '#0070f3',
-                  fontSize: '0.65rem',
-                  fontWeight: 600,
-                  padding: '0.15rem 0.5rem',
-                  borderRadius: '4px',
-                  textTransform: 'uppercase',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <span style={{ background: post.type === 'html' ? '#ecfdf5' : '#eff6ff', color: post.type === 'html' ? '#059669' : '#2563eb', fontSize: '0.65rem', fontWeight: 600, padding: '0.15rem 0.5rem', borderRadius: '4px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                 {post.type === 'html' ? 'App' : 'Article'}
               </span>
 
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  color: post.published ? '#00c853' : '#888888',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <span style={{ fontSize: '0.75rem', color: post.published ? '#059669' : '#6e6a65', whiteSpace: 'nowrap' }}>
                 {post.published ? '● Published' : '○ Draft'}
               </span>
 
-              <span style={{ fontSize: '0.8125rem', color: '#888888', whiteSpace: 'nowrap' }}>
-                {post.viewCount.toLocaleString()}
-              </span>
-
-              <span style={{ fontSize: '0.8125rem', color: '#888888', whiteSpace: 'nowrap' }}>
-                {post.likeCount.toLocaleString()}
-              </span>
+              <span style={{ fontSize: '0.8125rem', color: '#6e6a65', whiteSpace: 'nowrap' }}>{post.viewCount.toLocaleString()}</span>
+              <span style={{ fontSize: '0.8125rem', color: '#6e6a65', whiteSpace: 'nowrap' }}>{post.likeCount.toLocaleString()}</span>
 
               <div style={{ display: 'flex', gap: '0.5rem', whiteSpace: 'nowrap' }}>
-                <Link
-                  href={`/dashboard/edit/${post.slug}`}
-                  style={{ fontSize: '0.8125rem', color: '#0070f3', textDecoration: 'none' }}
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={() => togglePublish(post.slug, post.published)}
-                  style={{
-                    fontSize: '0.8125rem',
-                    color: post.published ? '#ff8800' : '#00c853',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0,
-                  }}
-                >
+                <Link href={`/dashboard/edit/${post.slug}`} style={{ fontSize: '0.8125rem', color: '#0070f3', textDecoration: 'none' }}>Edit</Link>
+                <button onClick={() => togglePublish(post.slug, post.published)} style={{ fontSize: '0.8125rem', color: post.published ? '#d97706' : '#059669', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                   {post.published ? 'Unpublish' : 'Publish'}
                 </button>
-                <button
-                  onClick={() => deletePost(post.slug)}
-                  style={{
-                    fontSize: '0.8125rem',
-                    color: '#ff4444',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0,
-                  }}
-                >
+                <button onClick={() => deletePost(post.slug)} style={{ fontSize: '0.8125rem', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                   Hapus
                 </button>
               </div>
