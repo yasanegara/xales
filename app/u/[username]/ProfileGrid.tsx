@@ -191,54 +191,85 @@ function PostCard({ post, idx, username }: { post: GridPost; idx: number; userna
 }
 
 export default function ProfileGrid({ posts, username }: Props) {
+  const [tab, setTab] = useState<'artikel' | 'app'>('artikel')
+
   const articles = posts.filter(p => p.type === 'markdown')
   const apps     = posts.filter(p => p.type === 'html')
+  const visible  = tab === 'artikel' ? articles : apps
 
-  const renderGrid = (items: GridPost[], offset = 0) => (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: '1rem',
-    }}>
-      {items.map((post, i) => (
-        <PostCard key={post.id} post={post} idx={offset + i} username={username} />
-      ))}
-    </div>
-  )
+  const tabs = [
+    { key: 'artikel' as const, label: 'Artikel', count: articles.length, accent: '#8b7355' },
+    { key: 'app'     as const, label: 'App',     count: apps.length,      accent: '#5b7fa6' },
+  ]
 
   if (posts.length === 0) return null
 
-  // If mixed content — show all in one grid
-  if (articles.length === 0 || apps.length === 0) {
-    return renderGrid(posts)
-  }
-
-  // Separate sections
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-      <section>
-        <div style={{
-          fontSize: '0.75rem', fontWeight: 700, color: '#6e6a65',
-          textTransform: 'uppercase', letterSpacing: '0.08em',
-          marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
-        }}>
-          <span style={{ display: 'inline-block', width: 12, height: 2, background: '#8b7355', borderRadius: 1 }} />
-          Artikel
-        </div>
-        {renderGrid(articles, 0)}
-      </section>
+    <div>
+      {/* Tab bar */}
+      <div style={{
+        display: 'flex',
+        borderBottom: '1px solid #e5e0d8',
+        marginBottom: '1.5rem',
+        gap: 0,
+      }}>
+        {tabs.map(t => {
+          const active = tab === t.key
+          return (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              style={{
+                flex: 1,
+                padding: '0.75rem 0',
+                background: 'none',
+                border: 'none',
+                borderBottom: active ? `2px solid ${t.accent}` : '2px solid transparent',
+                marginBottom: -1,
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: active ? 700 : 400,
+                color: active ? '#1a1a1a' : '#9c9690',
+                transition: 'color 0.15s, border-color 0.15s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.375rem',
+              }}
+            >
+              {t.label}
+              <span style={{
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                background: active ? t.accent : '#f0ede8',
+                color: active ? '#ffffff' : '#9c9690',
+                borderRadius: '10px',
+                padding: '0.1rem 0.45rem',
+                transition: 'background 0.15s, color 0.15s',
+              }}>
+                {t.count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
 
-      <section>
+      {/* Grid — 2 columns */}
+      {visible.length === 0 ? (
+        <p style={{ textAlign: 'center', color: '#9c9690', padding: '3rem 0', fontSize: '0.9375rem' }}>
+          Belum ada {tab === 'artikel' ? 'artikel' : 'app'}.
+        </p>
+      ) : (
         <div style={{
-          fontSize: '0.75rem', fontWeight: 700, color: '#6e6a65',
-          textTransform: 'uppercase', letterSpacing: '0.08em',
-          marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '1rem',
         }}>
-          <span style={{ display: 'inline-block', width: 12, height: 2, background: '#5b7fa6', borderRadius: 1 }} />
-          Apps
+          {visible.map((post, i) => (
+            <PostCard key={post.id} post={post} idx={i} username={username} />
+          ))}
         </div>
-        {renderGrid(apps, articles.length)}
-      </section>
+      )}
     </div>
   )
 }
