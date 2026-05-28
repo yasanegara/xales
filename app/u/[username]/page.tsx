@@ -59,10 +59,10 @@ export default async function ProfilePage({ params }: Props) {
         <div style={{ display: 'flex', gap: '3rem', alignItems: 'flex-start', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
           {/* Avatar */}
           <div style={{
-            width: '96px', height: '96px', borderRadius: '50%',
-            background: '#f0ede8', border: '2px solid #e5e0d8',
+            width: '100px', height: '132px', borderRadius: '16px',
+            background: '#f0ede8', border: '1px solid #e5e0d8',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '2.25rem', fontWeight: 700, color: '#6e6a65',
+            fontSize: '2.5rem', fontWeight: 700, color: '#6e6a65',
             flexShrink: 0, overflow: 'hidden',
           }}>
             {user.profilePic ? (
