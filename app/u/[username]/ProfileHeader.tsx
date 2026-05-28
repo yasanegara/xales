@@ -96,9 +96,13 @@ export default function ProfileHeader({
         justifyContent: 'flex-start',
       }}>
         {stats.map(s => (
-          <div key={s.label} style={{ fontSize: '0.9rem', color: '#1a1a1a', whiteSpace: 'nowrap' }}>
-            <strong>{s.value.toLocaleString()}</strong>{' '}
-            <span style={{ color: '#6e6a65', fontWeight: 400 }}>{s.label}</span>
+          <div key={s.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.2 }}>
+              {s.value.toLocaleString()}
+            </span>
+            <span style={{ fontSize: '0.75rem', color: '#6e6a65', marginTop: '0.1rem' }}>
+              {s.label}
+            </span>
           </div>
         ))}
       </div>
