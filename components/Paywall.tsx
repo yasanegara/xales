@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import BuyModal from './BuyModal'
 
 interface PostFile {
@@ -36,9 +35,7 @@ function formatBytes(b: number) {
 
 export default function Paywall({ slug, title, price, authorName, authorWaNumber, authorWaMessage, refCode, files = [], isPurchased: initialPurchased = false }: Props) {
   const router = useRouter()
-  const { data: session } = useSession()
   const [purchased, setPurchased] = useState(initialPurchased)
-  const [buyingFileId, setBuyingFileId] = useState<string | null>(null)
 
   if (purchased) {
     return (
@@ -163,31 +160,20 @@ export default function Paywall({ slug, title, price, authorName, authorWaNumber
                       )}
                     </div>
                     <button
-                      onClick={async () => {
+                      onClick={() => {
                         if (file.mimeType === 'url/link') {
-                          // For paid app links, buy first then redirect to app
-                          if (!session) { router.push('/login'); return }
-                          setBuyingFileId(file.id)
-                          const res = await fetch(`/api/posts/${slug}/files/${file.id}/purchase`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({}),
-                          })
-                          setBuyingFileId(null)
-                          if (res.ok && file.url) {
-                            window.location.href = file.url
-                          }
+                          // Go to standalone app page (no XALES header)
+                          router.push(`/app/${file.id}`)
                         } else {
                           window.location.href = `/api/posts/${slug}/files/${file.id}/purchase`
                         }
                       }}
-                      disabled={buyingFileId === file.id}
                       style={{
-                        fontSize: '0.75rem', fontWeight: 500, color: buyingFileId === file.id ? '#9c9690' : '#0070f3',
-                        background: 'none', border: 'none', cursor: buyingFileId === file.id ? 'not-allowed' : 'pointer', padding: 0, textDecoration: 'underline',
+                        fontSize: '0.75rem', fontWeight: 500, color: '#0070f3',
+                        background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline',
                       }}
                     >
-                      {buyingFileId === file.id ? 'Memproses...' : file.mimeType === 'url/link' ? 'Beli & Buka' : 'Beli'}
+                      {file.mimeType === 'url/link' ? 'Beli & Buka' : 'Beli'}
                     </button>
                   </div>
                 ) : (
