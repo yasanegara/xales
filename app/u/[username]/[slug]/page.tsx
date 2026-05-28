@@ -100,7 +100,7 @@ export default async function PostPage({ params, searchParams }: Props) {
 
         {/* Post header */}
         <div style={{ maxWidth: isMarkdown ? '760px' : '100%', marginBottom: '2rem' }}>
-          {/* Top bar: type + category | actions */}
+          {/* Top bar: type + category | view count */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span
@@ -121,23 +121,7 @@ export default async function PostPage({ params, searchParams }: Props) {
                 <span style={{ fontSize: '0.8125rem', color: '#6e6a65' }}>{post.category}</span>
               )}
             </div>
-
-            {/* Actions */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.8125rem', color: '#9c9690' }}>👁 {post.viewCount.toLocaleString()}</span>
-              <LikeButton slug={post.slug} initialCount={post.likeCount} />
-              {isMarkdown && <BookmarkButton slug={post.slug} />}
-              <SaveButton slug={post.slug} />
-              <ShareModal
-                slug={post.slug}
-                title={post.title}
-                description={post.description}
-                authorName={authorName}
-                authorUsername={post.author.username}
-                coverImage={post.coverImage}
-              />
-              <ViewTracker slug={post.slug} />
-            </div>
+            <span style={{ fontSize: '0.8125rem', color: '#9c9690' }}>👁 {post.viewCount.toLocaleString()}</span>
           </div>
 
           <h1
@@ -159,8 +143,8 @@ export default async function PostPage({ params, searchParams }: Props) {
             </p>
           )}
 
-          {/* Author */}
-          <div style={{ paddingTop: '1rem', borderTop: '1px solid #e5e0d8' }}>
+          {/* Author + actions */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid #e5e0d8' }}>
             <Link
               href={`/@${post.author.username}`}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}
@@ -187,6 +171,20 @@ export default async function PostPage({ params, searchParams }: Props) {
                 </div>
               </div>
             </Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <LikeButton slug={post.slug} initialCount={post.likeCount} />
+              {isMarkdown && <BookmarkButton slug={post.slug} />}
+              <SaveButton slug={post.slug} />
+              <ShareModal
+                slug={post.slug}
+                title={post.title}
+                description={post.description}
+                authorName={authorName}
+                authorUsername={post.author.username}
+                coverImage={post.coverImage}
+              />
+              <ViewTracker slug={post.slug} />
+            </div>
           </div>
         </div>
 
