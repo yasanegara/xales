@@ -56,10 +56,10 @@ export default async function ProfilePage({ params }: Props) {
       <main style={{ maxWidth: '935px', margin: '0 auto', padding: '2rem 1.5rem' }}>
 
         {/* Profile header */}
-        <div style={{ display: 'flex', gap: '3rem', alignItems: 'flex-start', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '3rem', alignItems: 'stretch', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
           {/* Avatar */}
           <div style={{
-            width: '100px', height: '132px', borderRadius: '16px',
+            width: '110px', minHeight: '140px', borderRadius: '16px',
             background: '#f0ede8', border: '1px solid #e5e0d8',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '2.5rem', fontWeight: 700, color: '#6e6a65',
@@ -67,7 +67,7 @@ export default async function ProfilePage({ params }: Props) {
           }}>
             {user.profilePic ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.profilePic} alt={user.name ?? username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={user.profilePic} alt={user.name ?? username} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', alignSelf: 'stretch' }} />
             ) : (
               (user.name?.[0] ?? username[0]).toUpperCase()
             )}
