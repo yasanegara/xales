@@ -36,6 +36,7 @@ model User {
   discounts     Discount[]
   followers     Follow[]  @relation("following")
   following     Follow[]  @relation("follower")
+  images        Image[]
   sessions      Session[]
   accounts      Account[]
 }
@@ -111,6 +112,16 @@ model Discount {
   expiresAt  DateTime?
   active     Boolean   @default(true)
   createdAt  DateTime  @default(now())
+}
+
+model Image {
+  id         String   @id @default(cuid())
+  data       String   @db.Text
+  mimeType   String
+  size       Int
+  createdAt  DateTime @default(now())
+  uploader   User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  uploaderId String
 }
 
 model Follow {

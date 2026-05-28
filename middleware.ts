@@ -28,4 +28,5 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: ['/admin/:path*', '/dashboard/:path*'],
+  // /api/images/[id] is intentionally NOT matched — public access needed for rendering
 }
