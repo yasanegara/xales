@@ -148,7 +148,7 @@ export default async function PostPage({ params, searchParams }: Props) {
               style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}
             >
               <div style={{
-                width: '30px', height: '38px', borderRadius: '7px',
+                width: '34px', height: '34px', borderRadius: '7px',
                 background: '#f0ede8', border: '1px solid #e5e0d8',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '0.8125rem', fontWeight: 700, color: '#6e6a65',
@@ -156,7 +156,7 @@ export default async function PostPage({ params, searchParams }: Props) {
               }}>
                 {post.author.profilePic ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={post.author.profilePic} alt={authorName} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                  <img src={post.author.profilePic} alt={authorName} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
                 ) : (
                   (post.author.name?.[0] ?? post.author.username[0]).toUpperCase()
                 )}

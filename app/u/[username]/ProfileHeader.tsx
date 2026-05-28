@@ -41,14 +41,13 @@ export default function ProfileHeader({
   const avatar = (
     <div style={{
       width: mobile ? '88px' : '110px',
+      height: mobile ? '88px' : '110px',
       flexShrink: 0,
-      alignSelf: 'stretch',
-      borderRadius: '14px',
+      borderRadius: '12px',
       background: '#f0ede8',
       border: '1px solid #e5e0d8',
       overflow: 'hidden',
       position: 'relative',
-      minHeight: '120px',
     }}>
       {profilePic ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -57,7 +56,8 @@ export default function ProfileHeader({
           alt={name ?? username}
           style={{
             width: '100%', height: '100%',
-            objectFit: 'contain', display: 'block',
+            objectFit: 'cover', objectPosition: 'top center',
+            display: 'block',
           }}
         />
       ) : (

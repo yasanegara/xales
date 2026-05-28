@@ -69,9 +69,9 @@ export default function Navbar() {
                   style={{
                     background: '#f0ede8',
                     border: '1px solid #e5e0d8',
-                    borderRadius: '8px',
-                    width: '28px',
-                    height: '36px',
+                    borderRadius: '7px',
+                    width: '32px',
+                    height: '32px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -92,7 +92,7 @@ export default function Navbar() {
                       alt={session.user.name ?? session.user.username}
                       style={{
                         width: '100%', height: '100%',
-                        objectFit: 'contain', display: 'block',
+                        objectFit: 'cover', objectPosition: 'top center', display: 'block',
                       }}
                     />
                   ) : (

@@ -48,7 +48,14 @@ function PostCard({ post, idx, username }: { post: GridPost; idx: number; userna
   return (
     <Link
       href={`/@${username}/${post.slug}`}
-      style={{ textDecoration: 'none', display: 'block', aspectRatio: '1 / 1', position: 'relative', borderRadius: '10px', overflow: 'hidden' }}
+      style={{
+        textDecoration: 'none', display: 'block',
+        aspectRatio: '1 / 1', position: 'relative',
+        borderRadius: '10px', overflow: 'hidden',
+        boxShadow: hovered ? '6px 6px 0 #1a1a1a' : '4px 4px 0 #1a1a1a',
+        transition: 'box-shadow 0.15s, transform 0.15s',
+        transform: hovered ? 'translate(-1px, -1px)' : 'translate(0, 0)',
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
