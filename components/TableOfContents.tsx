@@ -55,7 +55,8 @@ export default function TableOfContents({ headings }: { headings: Heading[] }) {
         style={{
           position: 'fixed',
           left: '1rem',
-          top: '72px',
+          top: '50%',
+          transform: 'translateY(-50%)',
           zIndex: 50,
           width: '38px',
           height: '38px',
