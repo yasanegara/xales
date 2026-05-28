@@ -12,7 +12,7 @@ export default async function BundlePage({ params }: { params: Promise<{ slug: s
   const bundle = await db.bundle.findUnique({
     where: { slug, published: true },
     include: {
-      author: { select: { username: true, name: true, bankName: true, bankAccount: true, bankHolder: true, qrisImage: true, waNumber: true } },
+      author: { select: { username: true, name: true } },
       items: {
         include: {
           post: { select: { id: true, title: true, slug: true, type: true, description: true } },
