@@ -137,6 +137,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         )}
 
         <FeedGrid
+          key={`${tab}-${type}`}
           initialPosts={posts as Parameters<typeof FeedGrid>[0]['initialPosts']}
           initialHasMore={hasMore}
           initialCursor={nextCursor}
