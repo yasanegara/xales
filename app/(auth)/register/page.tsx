@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -20,8 +20,16 @@ function safeFrom(raw: string | null): string {
 export default function RegisterPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const from = safeFrom(searchParams.get('from'))
-  const fromParam = searchParams.get('from') ?? ''
+  const [from, setFrom] = useState('/dashboard')
+  const [fromParam, setFromParam] = useState('')
+
+  // Read from URL on mount for reliability
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const fromQuery = params.get('from')
+    setFrom(safeFrom(fromQuery))
+    setFromParam(fromQuery ?? '')
+  }, [])
 
   const [form, setForm] = useState({ name: '', username: '', email: '', password: '' })
   const [error, setError] = useState('')
