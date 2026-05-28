@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
+import TopLoader from '@/components/TopLoader'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono' })
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" className={`${inter.className} ${jetbrainsMono.variable}`}>
       <body>
+        <TopLoader />
         <Providers>{children}</Providers>
       </body>
     </html>

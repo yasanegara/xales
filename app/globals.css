@@ -36,6 +36,18 @@ body {
   min-height: 100vh;
 }
 
+/* Instant click feedback — makes every tap/click feel responsive */
+a, button {
+  -webkit-tap-highlight-color: transparent;
+}
+button:active:not(:disabled) {
+  opacity: 0.75;
+  transform: scale(0.97);
+}
+a:active {
+  opacity: 0.7;
+}
+
 /* Skeleton loading */
 @keyframes skel-pulse {
   0%, 100% { opacity: 1; }
