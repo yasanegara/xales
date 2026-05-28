@@ -3,19 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 
-const SPINE_COLORS = [
-  '#8B3A2A', '#2A4A7F', '#2A6B3A', '#6B4A1A', '#4A2A6B',
-  '#7A3A5A', '#1A5A6B', '#6B5A1A', '#3A6B5A', '#5A2A3A',
-]
-const HEIGHTS = [188, 204, 168, 212, 176, 196, 162, 208, 182, 192]
-const WIDTHS  = [58, 52, 66, 54, 62, 50, 68, 56, 60, 64]
-const BOOKS_PER_SHELF = 10
-
-function chunk<T>(arr: T[], n: number): T[][] {
-  const out: T[][] = []
-  for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n))
-  return out
-}
+function formatIDR(n: number) { return new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(n) }
 
 interface GridPost {
   id: string
@@ -23,8 +11,10 @@ interface GridPost {
   title: string
   description?: string | null
   type: string
+  category?: string | null
   coverImage?: string | null
   isPremium: boolean
+  price?: number | null
   viewCount: number
   likeCount: number
 }
@@ -34,196 +24,221 @@ interface Props {
   username: string
 }
 
-function Book({ post, idx, username, onHover, onLeave }: {
-  post: GridPost
-  idx: number
-  username: string
-  onHover: () => void
-  onLeave: () => void
-}) {
+// Article card colors — warm paper tones
+const ARTICLE_ACCENTS = ['#c4956a', '#8b7355', '#a07850', '#b08968', '#9a7a60']
+// App card colors — cooler tones
+const APP_ACCENTS     = ['#5b7fa6', '#6b8fa0', '#4a7a8a', '#5a8096', '#4e7090']
+
+function PostCard({ post, idx, username }: { post: GridPost; idx: number; username: string }) {
   const [hovered, setHovered] = useState(false)
-  const color  = SPINE_COLORS[idx % SPINE_COLORS.length]
-  const height = HEIGHTS[idx % HEIGHTS.length]
-  const width  = WIDTHS[idx % WIDTHS.length]
+
+  const isApp = post.type === 'html'
+  const accent = isApp
+    ? APP_ACCENTS[idx % APP_ACCENTS.length]
+    : ARTICLE_ACCENTS[idx % ARTICLE_ACCENTS.length]
+
+  // Large decorative letter from title
+  const bigLetter = post.title.trimStart()[0]?.toUpperCase() ?? '✦'
 
   return (
     <Link
       href={`/@${username}/${post.slug}`}
-      style={{ textDecoration: 'none', display: 'block', flexShrink: 0 }}
-      onMouseEnter={() => { setHovered(true); onHover() }}
-      onMouseLeave={() => { setHovered(false); onLeave() }}
-      title={post.title}
+      style={{ textDecoration: 'none', display: 'block' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      <div style={{
-        width,
-        height,
-        borderRadius: '3px 4px 4px 3px',
-        background: post.coverImage
-          ? `url(${post.coverImage}) center/cover no-repeat`
-          : color,
+      <article style={{
+        borderRadius: '12px',
+        border: `1px solid ${hovered ? accent : '#e5e0d8'}`,
+        overflow: 'hidden',
+        background: '#ffffff',
+        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
         boxShadow: hovered
-          ? 'inset 4px 0 6px rgba(0,0,0,0.32), inset -1px 0 0 rgba(0,0,0,0.18), 5px 8px 20px rgba(0,0,0,0.38)'
-          : 'inset 4px 0 6px rgba(0,0,0,0.22), inset -1px 0 0 rgba(0,0,0,0.12), 2px 3px 8px rgba(0,0,0,0.22)',
-        transform: hovered ? 'translateY(-14px)' : 'translateY(0)',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          ? `0 12px 32px rgba(0,0,0,0.10), 0 0 0 1px ${accent}33`
+          : '0 1px 3px rgba(0,0,0,0.05)',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '8px 0',
-        position: 'relative',
-        overflow: 'hidden',
         cursor: 'pointer',
       }}>
 
-        {/* Page-edge strip (right side) */}
-        <div style={{
-          position: 'absolute', right: 0, top: 0, bottom: 0, width: 5,
-          background: 'linear-gradient(to right, rgba(235,228,210,0.0), rgba(235,228,210,0.55))',
-          borderRadius: '0 4px 4px 0',
-          pointerEvents: 'none',
-        }} />
+        {/* Accent top bar */}
+        <div style={{ height: 3, background: accent, flexShrink: 0 }} />
 
-        {/* Spine highlight line */}
-        <div style={{
-          position: 'absolute', left: 4, top: 0, bottom: 0, width: 1,
-          background: 'rgba(255,255,255,0.18)',
-          pointerEvents: 'none',
-        }} />
-
-        {!post.coverImage && (
-          <>
-            {/* Top band */}
-            <div style={{ width: '70%', height: 4, background: 'rgba(255,255,255,0.18)', borderRadius: 2, flexShrink: 0 }} />
-
-            {/* Rotated title */}
-            <div style={{
-              writingMode: 'vertical-lr',
-              transform: 'rotate(180deg)',
-              fontSize: 10,
-              fontWeight: 600,
-              color: 'rgba(255,255,255,0.92)',
-              lineHeight: 1.3,
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              padding: '4px 2px',
-              textShadow: '0 1px 3px rgba(0,0,0,0.55)',
-              overflow: 'hidden',
-              maxHeight: height - 44,
-            }}>
-              {post.title.length > 48 ? post.title.slice(0, 48) + '…' : post.title}
-            </div>
-
-            {/* Icon */}
-            <div style={{ fontSize: 11, flexShrink: 0, opacity: 0.85 }}>
-              {post.isPremium ? '★' : post.type === 'html' ? '🔗' : '📝'}
-            </div>
-
-            {/* Bottom band */}
-            <div style={{ width: '70%', height: 4, background: 'rgba(255,255,255,0.12)', borderRadius: 2, flexShrink: 0, marginTop: 4 }} />
-          </>
+        {/* Cover image */}
+        {post.coverImage && (
+          <div style={{ height: 130, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          </div>
         )}
-      </div>
+
+        {/* Body */}
+        <div style={{
+          flex: 1,
+          padding: '1rem',
+          background: post.coverImage ? '#ffffff' : '#faf8f5',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.625rem',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          {/* Decorative letter — only when no cover image */}
+          {!post.coverImage && (
+            <div style={{
+              position: 'absolute',
+              right: '0.625rem',
+              top: '0.25rem',
+              fontSize: '5rem',
+              fontWeight: 900,
+              color: accent,
+              opacity: 0.07,
+              lineHeight: 1,
+              pointerEvents: 'none',
+              userSelect: 'none',
+              fontFamily: 'Georgia, serif',
+            }}>
+              {bigLetter}
+            </div>
+          )}
+
+          {/* Type + category */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
+            <span style={{
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              letterSpacing: '0.07em',
+              textTransform: 'uppercase',
+              color: '#ffffff',
+              background: accent,
+              padding: '0.15rem 0.45rem',
+              borderRadius: '3px',
+            }}>
+              {isApp ? 'App' : 'Artikel'}
+            </span>
+            {post.category && (
+              <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>{post.category}</span>
+            )}
+            {post.isPremium && (
+              <span style={{
+                fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.05em',
+                textTransform: 'uppercase', color: '#b45309',
+                background: '#fef3c7', padding: '0.15rem 0.45rem', borderRadius: '3px',
+              }}>
+                {post.price ? `Rp ${formatIDR(post.price)}` : 'Premium'}
+              </span>
+            )}
+          </div>
+
+          {/* Title */}
+          <h3 style={{
+            fontSize: '0.9375rem',
+            fontWeight: 700,
+            lineHeight: 1.45,
+            color: '#1a1a1a',
+            margin: 0,
+            display: '-webkit-box',
+            WebkitLineClamp: post.coverImage ? 3 : 4,
+            WebkitBoxOrient: 'vertical' as const,
+            overflow: 'hidden',
+            fontFamily: 'Georgia, serif',
+            position: 'relative',
+          }}>
+            {post.title}
+          </h3>
+
+          {/* Description — only without cover */}
+          {!post.coverImage && post.description && (
+            <p style={{
+              fontSize: '0.8125rem',
+              color: '#6e6a65',
+              lineHeight: 1.55,
+              margin: 0,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical' as const,
+              overflow: 'hidden',
+              position: 'relative',
+            }}>
+              {post.description}
+            </p>
+          )}
+
+          {/* Footer stats */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.625rem',
+            marginTop: 'auto',
+            paddingTop: '0.5rem',
+            borderTop: '1px solid #f0ede8',
+            fontSize: '0.75rem',
+            color: '#9c9690',
+          }}>
+            <span>👁 {post.viewCount.toLocaleString()}</span>
+            <span style={{ color: '#d0c9b8' }}>·</span>
+            <span>♥ {post.likeCount.toLocaleString()}</span>
+          </div>
+        </div>
+      </article>
     </Link>
   )
 }
 
 export default function ProfileGrid({ posts, username }: Props) {
-  const [hovered, setHovered] = useState<GridPost | null>(null)
-  const shelves = chunk(posts, BOOKS_PER_SHELF)
+  const articles = posts.filter(p => p.type === 'markdown')
+  const apps     = posts.filter(p => p.type === 'html')
 
-  return (
+  const renderGrid = (items: GridPost[], offset = 0) => (
     <div style={{
-      background: '#ede8de',
-      borderRadius: '12px',
-      padding: '1rem 1.5rem 0',
-      border: '1px solid #d5c9b0',
-      boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.06)',
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: '1rem',
     }}>
-
-      {/* Status bar */}
-      <div style={{
-        height: 36,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.625rem',
-        marginBottom: '0.875rem',
-        minWidth: 0,
-      }}>
-        {hovered ? (
-          <>
-            <span style={{
-              fontSize: '0.65rem', fontWeight: 700, flexShrink: 0,
-              background: hovered.type === 'html' ? '#ecfdf5' : '#eff6ff',
-              color: hovered.type === 'html' ? '#059669' : '#2563eb',
-              padding: '0.15rem 0.45rem', borderRadius: '4px',
-              textTransform: 'uppercase', letterSpacing: '0.05em',
-            }}>
-              {hovered.type === 'html' ? 'App' : 'Artikel'}
-            </span>
-            <span style={{
-              fontSize: '0.875rem', fontWeight: 600, color: '#1a1a1a',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
-            }}>
-              {hovered.title}
-            </span>
-            <span style={{ fontSize: '0.8125rem', color: '#6e6a65', flexShrink: 0, whiteSpace: 'nowrap' }}>
-              👁 {hovered.viewCount.toLocaleString()} · ♥ {hovered.likeCount.toLocaleString()}
-            </span>
-          </>
-        ) : (
-          <span style={{ fontSize: '0.8125rem', color: '#9c9690' }}>
-            📚 {posts.length} buku · arahkan kursor ke buku
-          </span>
-        )}
-      </div>
-
-      {/* Shelves */}
-      {shelves.map((shelf, si) => (
-        <div key={si}>
-          {/* Row of books, bottom-aligned */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            gap: 5,
-            minHeight: 220,
-            paddingTop: 16,
-          }}>
-            {shelf.map((post, i) => (
-              <Book
-                key={post.id}
-                post={post}
-                idx={si * BOOKS_PER_SHELF + i}
-                username={username}
-                onHover={() => setHovered(post)}
-                onLeave={() => setHovered(null)}
-              />
-            ))}
-          </div>
-
-          {/* Wooden shelf board */}
-          <div style={{
-            height: 15,
-            background: 'linear-gradient(to bottom, #c8944a 0%, #9e6a22 50%, #7c5218 100%)',
-            borderRadius: 3,
-            position: 'relative',
-            boxShadow: '0 6px 16px rgba(0,0,0,0.32), 0 2px 4px rgba(0,0,0,0.18)',
-            marginBottom: si < shelves.length - 1 ? '2.5rem' : '1.5rem',
-          }}>
-            {/* Wood highlight */}
-            <div style={{
-              position: 'absolute', top: 2, left: 10, right: 10, height: 2,
-              background: 'rgba(255,255,255,0.22)', borderRadius: 1,
-            }} />
-            {/* Wood grain shadow */}
-            <div style={{
-              position: 'absolute', top: 7, left: 40, right: 60, height: 1,
-              background: 'rgba(0,0,0,0.12)', borderRadius: 1,
-            }} />
-          </div>
-        </div>
+      {items.map((post, i) => (
+        <PostCard key={post.id} post={post} idx={offset + i} username={username} />
       ))}
+    </div>
+  )
+
+  if (posts.length === 0) return null
+
+  // If mixed content — show all in one grid
+  if (articles.length === 0 || apps.length === 0) {
+    return renderGrid(posts)
+  }
+
+  // Separate sections
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+      <section>
+        <div style={{
+          fontSize: '0.75rem', fontWeight: 700, color: '#6e6a65',
+          textTransform: 'uppercase', letterSpacing: '0.08em',
+          marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+        }}>
+          <span style={{ display: 'inline-block', width: 12, height: 2, background: '#8b7355', borderRadius: 1 }} />
+          Artikel
+        </div>
+        {renderGrid(articles, 0)}
+      </section>
+
+      <section>
+        <div style={{
+          fontSize: '0.75rem', fontWeight: 700, color: '#6e6a65',
+          textTransform: 'uppercase', letterSpacing: '0.08em',
+          marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+        }}>
+          <span style={{ display: 'inline-block', width: 12, height: 2, background: '#5b7fa6', borderRadius: 1 }} />
+          Apps
+        </div>
+        {renderGrid(apps, articles.length)}
+      </section>
     </div>
   )
 }
