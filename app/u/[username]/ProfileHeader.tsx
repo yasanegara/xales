@@ -38,110 +38,78 @@ export default function ProfileHeader({
     { label: 'mengikuti', value: following },
   ]
 
-  const avatar = (
-    <div style={{
-      width: mobile ? '88px' : '110px',
-      height: mobile ? '88px' : '110px',
-      flexShrink: 0,
-      borderRadius: '12px',
-      background: '#f0ede8',
-      border: '1px solid #e5e0d8',
-      overflow: 'hidden',
-      position: 'relative',
-    }}>
-      {profilePic ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={profilePic}
-          alt={name ?? username}
-          style={{
-            width: '100%', height: '100%',
-            objectFit: 'cover', objectPosition: 'top center',
-            display: 'block',
-          }}
-        />
-      ) : (
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '2.25rem', fontWeight: 700, color: '#6e6a65',
-        }}>
-          {(name?.[0] ?? username[0]).toUpperCase()}
-        </div>
-      )}
-    </div>
-  )
-
-  const info = (
-    <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-      {/* Username + follow */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '0.875rem',
-        flexWrap: 'wrap', marginBottom: '0.875rem',
-        justifyContent: 'flex-start',
-      }}>
-        <h1 style={{ fontSize: '1.1875rem', fontWeight: 500, color: '#1a1a1a', margin: 0 }}>
-          {username}
-        </h1>
-        <FollowButton username={username} />
-      </div>
-
-      {/* Stats */}
-      <div style={{
-        display: 'flex', gap: '1.75rem', marginBottom: '0.875rem',
-        justifyContent: 'flex-start',
-      }}>
-        {stats.map(s => (
-          <div key={s.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.2 }}>
-              {s.value.toLocaleString()}
-            </span>
-            <span style={{ fontSize: '0.75rem', color: '#6e6a65', marginTop: '0.1rem' }}>
-              {s.label}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Display name */}
-      {name && (
-        <div style={{ fontWeight: 600, fontSize: '0.9375rem', color: '#1a1a1a', marginBottom: '0.2rem' }}>
-          {name}
-        </div>
-      )}
-
-      {/* Status */}
-      {status && (
-        <div style={{ fontSize: '0.875rem', color: '#6e6a65', marginBottom: '0.25rem' }}>{status}</div>
-      )}
-
-      {/* Bio */}
-      {bio && (
-        <div style={{
-          fontSize: '0.9rem', color: '#3d3a36', lineHeight: 1.6,
-          whiteSpace: 'pre-line', marginBottom: '0.375rem',
-        }}>
-          {bio}
-        </div>
-      )}
-
-      {/* Views + join date */}
-      <div style={{ fontSize: '0.8rem', color: '#9c9690' }}>
-        👁 {totalViews.toLocaleString()} · ♥ {totalLikes.toLocaleString()} · Bergabung {formatDate(createdAt)}
-      </div>
-    </div>
-  )
+  const sz = mobile ? '88px' : '110px'
 
   return (
     <div style={{
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'stretch',
-      gap: mobile ? '1.25rem' : '2.5rem',
-      marginBottom: '2rem',
+      display: 'flex', flexDirection: 'row', alignItems: 'flex-start',
+      gap: mobile ? '1.25rem' : '2rem', marginBottom: '2rem',
     }}>
-      {avatar}
-      {info}
+
+      {/* Left col: avatar + nama lengkap */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flexShrink: 0, width: sz }}>
+        <div style={{
+          width: sz, height: sz, borderRadius: '12px',
+          background: '#f0ede8', border: '1px solid #e5e0d8',
+          overflow: 'hidden', position: 'relative',
+        }}>
+          {profilePic ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profilePic} alt={name ?? username}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }}
+            />
+          ) : (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.25rem', fontWeight: 700, color: '#6e6a65' }}>
+              {(name?.[0] ?? username[0]).toUpperCase()}
+            </div>
+          )}
+        </div>
+        {name && (
+          <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1a1a1a', marginTop: '0.5rem', lineHeight: 1.3, wordBreak: 'break-word' }}>
+            {name}
+          </div>
+        )}
+      </div>
+
+      {/* Right col: username, stats, status, bio */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Username + follow */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', flexWrap: 'wrap', marginBottom: '0.875rem' }}>
+          <h1 style={{ fontSize: '1.1875rem', fontWeight: 500, color: '#1a1a1a', margin: 0 }}>
+            {username}
+          </h1>
+          <FollowButton username={username} />
+        </div>
+
+        {/* Stats */}
+        <div style={{ display: 'flex', gap: '1.75rem', marginBottom: '0.875rem' }}>
+          {stats.map(s => (
+            <div key={s.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.2 }}>
+                {s.value.toLocaleString()}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: '#6e6a65', marginTop: '0.1rem' }}>{s.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Status */}
+        {status && (
+          <div style={{ fontSize: '0.875rem', color: '#6e6a65', marginBottom: '0.25rem' }}>{status}</div>
+        )}
+
+        {/* Bio */}
+        {bio && (
+          <div style={{ fontSize: '0.9rem', color: '#3d3a36', lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: '0.375rem' }}>
+            {bio}
+          </div>
+        )}
+
+        {/* Views + join */}
+        <div style={{ fontSize: '0.8rem', color: '#9c9690' }}>
+          👁 {totalViews.toLocaleString()} · ♥ {totalLikes.toLocaleString()} · Bergabung {formatDate(createdAt)}
+        </div>
+      </div>
     </div>
   )
 }
