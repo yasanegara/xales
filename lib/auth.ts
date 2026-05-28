@@ -68,11 +68,13 @@ export const authOptions: NextAuthOptions = {
       return true
     },
 
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id
         token.username = (user as unknown as { username: string }).username
         token.role = (user as unknown as { role: string }).role ?? 'user'
+        const dbUser = await db.user.findUnique({ where: { id: user.id }, select: { profilePic: true } })
+        token.profilePic = dbUser?.profilePic ?? null
       }
       return token
     },
@@ -82,6 +84,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         session.user.username = token.username as string
         session.user.role = (token.role as string) ?? 'user'
+        session.user.profilePic = (token.profilePic as string | null | undefined) ?? null
       }
       return session
     },

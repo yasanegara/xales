@@ -69,9 +69,9 @@ export default function Navbar() {
                   style={{
                     background: '#f0ede8',
                     border: '1px solid #e5e0d8',
-                    borderRadius: '50%',
-                    width: '32px',
-                    height: '32px',
+                    borderRadius: '8px',
+                    width: '28px',
+                    height: '36px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -79,9 +79,29 @@ export default function Navbar() {
                     color: '#1a1a1a',
                     fontSize: '0.875rem',
                     fontWeight: 600,
+                    overflow: 'hidden',
+                    padding: 0,
+                    position: 'relative',
+                    flexShrink: 0,
                   }}
                 >
-                  {session.user.name?.[0]?.toUpperCase() ?? session.user.username?.[0]?.toUpperCase()}
+                  {session.user.profilePic ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={session.user.profilePic}
+                      alt={session.user.name ?? session.user.username}
+                      style={{
+                        position: 'absolute',
+                        top: '50%', left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        minWidth: '100%', minHeight: '100%',
+                        width: 'auto', height: 'auto',
+                        maxWidth: 'none',
+                      }}
+                    />
+                  ) : (
+                    session.user.name?.[0]?.toUpperCase() ?? session.user.username?.[0]?.toUpperCase()
+                  )}
                 </button>
 
                 {menuOpen && (
