@@ -3,10 +3,13 @@
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
   const { data: session } = useSession()
   const [menuOpen, setMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const from = encodeURIComponent(pathname)
 
   return (
     <nav
@@ -146,13 +149,13 @@ export default function Navbar() {
           ) : (
             <>
               <Link
-                href="/login"
+                href={`/login?from=${from}`}
                 style={{ color: '#6e6a65', fontSize: '0.875rem', textDecoration: 'none' }}
               >
                 Login
               </Link>
               <Link
-                href="/register"
+                href={`/register?from=${from}`}
                 style={{
                   background: '#1a1a1a',
                   color: '#f7f5f2',

@@ -2,11 +2,27 @@
 
 import { useState, FormEvent } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+
+function safeFrom(raw: string | null): string {
+  if (!raw) return '/dashboard'
+  try {
+    const decoded = decodeURIComponent(raw)
+    if (!decoded.startsWith('/')) return '/dashboard'
+    if (decoded.startsWith('/login') || decoded.startsWith('/register')) return '/dashboard'
+    return decoded
+  } catch {
+    return '/dashboard'
+  }
+}
 
 export default function RegisterPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const from = safeFrom(searchParams.get('from'))
+  const fromParam = searchParams.get('from') ?? ''
+
   const [form, setForm] = useState({ name: '', username: '', email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -14,7 +30,7 @@ export default function RegisterPage() {
 
   const handleGoogle = async () => {
     setGoogleLoading(true)
-    await signIn('google', { callbackUrl: '/dashboard' })
+    await signIn('google', { callbackUrl: from })
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -38,7 +54,7 @@ export default function RegisterPage() {
     if (!res.ok) { setError(data.error); setLoading(false); return }
     const result = await signIn('credentials', { email: form.email, password: form.password, redirect: false })
     setLoading(false)
-    router.push(result?.ok ? '/dashboard' : '/login')
+    router.push(result?.ok ? from : '/login')
   }
 
   const inputStyle = {
@@ -53,22 +69,18 @@ export default function RegisterPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: '#f7f5f2',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1.5rem',
-      }}
-    >
+    <div style={{ minHeight: '100vh', background: '#f7f5f2', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
       <div style={{ width: '100%', maxWidth: '400px' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <Link href="/" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a', textDecoration: 'none', letterSpacing: '-0.02em' }}>
             XALES
           </Link>
           <p style={{ color: '#6e6a65', marginTop: '0.5rem', fontSize: '0.9375rem' }}>Buat akunmu</p>
+          {from !== '/dashboard' && (
+            <p style={{ color: '#9c9690', fontSize: '0.8125rem', marginTop: '0.375rem' }}>
+              Daftar untuk melanjutkan
+            </p>
+          )}
         </div>
 
         <div style={{ background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '12px', padding: '2rem', boxShadow: '0 2px 16px rgba(0,0,0,0.05)' }}>
@@ -76,21 +88,10 @@ export default function RegisterPage() {
             onClick={handleGoogle}
             disabled={googleLoading}
             style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.75rem',
-              background: '#f7f5f2',
-              color: '#1a1a1a',
-              border: '1px solid #e5e0d8',
-              borderRadius: '8px',
-              padding: '0.75rem',
-              fontSize: '0.9375rem',
-              fontWeight: 500,
-              cursor: googleLoading ? 'not-allowed' : 'pointer',
-              opacity: googleLoading ? 0.7 : 1,
-              marginBottom: '1.25rem',
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+              background: '#f7f5f2', color: '#1a1a1a', border: '1px solid #e5e0d8', borderRadius: '8px',
+              padding: '0.75rem', fontSize: '0.9375rem', fontWeight: 500,
+              cursor: googleLoading ? 'not-allowed' : 'pointer', opacity: googleLoading ? 0.7 : 1, marginBottom: '1.25rem',
             }}
           >
             <GoogleIcon />
@@ -131,23 +132,8 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                background: '#1a1a1a',
-                color: '#f7f5f2',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '0.75rem',
-                fontSize: '0.9375rem',
-                fontWeight: 500,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.7 : 1,
-                marginTop: '0.5rem',
-              }}
-            >
+            <button type="submit" disabled={loading}
+              style={{ width: '100%', background: '#1a1a1a', color: '#f7f5f2', border: 'none', borderRadius: '8px', padding: '0.75rem', fontSize: '0.9375rem', fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, marginTop: '0.5rem' }}>
               {loading ? 'Mendaftar...' : 'Daftar dengan Email'}
             </button>
           </form>
@@ -155,7 +141,9 @@ export default function RegisterPage() {
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', color: '#6e6a65', fontSize: '0.875rem' }}>
           Sudah punya akun?{' '}
-          <Link href="/login" style={{ color: '#0070f3', textDecoration: 'none', fontWeight: 500 }}>Masuk</Link>
+          <Link href={`/login${fromParam ? `?from=${fromParam}` : ''}`} style={{ color: '#0070f3', textDecoration: 'none', fontWeight: 500 }}>
+            Masuk
+          </Link>
         </p>
       </div>
     </div>

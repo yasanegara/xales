@@ -2,11 +2,28 @@
 
 import { useState, FormEvent } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+
+function safeFrom(raw: string | null): string {
+  if (!raw) return '/dashboard'
+  try {
+    const decoded = decodeURIComponent(raw)
+    // Only allow relative paths, block login/register loops
+    if (!decoded.startsWith('/')) return '/dashboard'
+    if (decoded.startsWith('/login') || decoded.startsWith('/register')) return '/dashboard'
+    return decoded
+  } catch {
+    return '/dashboard'
+  }
+}
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const from = safeFrom(searchParams.get('from'))
+  const fromParam = searchParams.get('from') ?? ''
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -15,7 +32,7 @@ export default function LoginPage() {
 
   const handleGoogle = async () => {
     setGoogleLoading(true)
-    await signIn('google', { callbackUrl: '/dashboard' })
+    await signIn('google', { callbackUrl: from })
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -27,7 +44,7 @@ export default function LoginPage() {
     if (result?.error) {
       setError('Email atau password salah')
     } else {
-      router.push('/dashboard')
+      router.push(from)
       router.refresh()
     }
   }
@@ -44,57 +61,29 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: '#f7f5f2',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1.5rem',
-      }}
-    >
+    <div style={{ minHeight: '100vh', background: '#f7f5f2', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
       <div style={{ width: '100%', maxWidth: '400px' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <Link
-            href="/"
-            style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a', textDecoration: 'none', letterSpacing: '-0.02em' }}
-          >
+          <Link href="/" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a', textDecoration: 'none', letterSpacing: '-0.02em' }}>
             XALES
           </Link>
-          <p style={{ color: '#6e6a65', marginTop: '0.5rem', fontSize: '0.9375rem' }}>
-            Masuk ke akunmu
-          </p>
+          <p style={{ color: '#6e6a65', marginTop: '0.5rem', fontSize: '0.9375rem' }}>Masuk ke akunmu</p>
+          {from !== '/dashboard' && (
+            <p style={{ color: '#9c9690', fontSize: '0.8125rem', marginTop: '0.375rem' }}>
+              Masuk untuk melanjutkan
+            </p>
+          )}
         </div>
 
-        <div
-          style={{
-            background: '#ffffff',
-            border: '1px solid #e5e0d8',
-            borderRadius: '12px',
-            padding: '2rem',
-            boxShadow: '0 2px 16px rgba(0,0,0,0.05)',
-          }}
-        >
+        <div style={{ background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '12px', padding: '2rem', boxShadow: '0 2px 16px rgba(0,0,0,0.05)' }}>
           <button
             onClick={handleGoogle}
             disabled={googleLoading}
             style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.75rem',
-              background: '#f7f5f2',
-              color: '#1a1a1a',
-              border: '1px solid #e5e0d8',
-              borderRadius: '8px',
-              padding: '0.75rem',
-              fontSize: '0.9375rem',
-              fontWeight: 500,
-              cursor: googleLoading ? 'not-allowed' : 'pointer',
-              opacity: googleLoading ? 0.7 : 1,
-              marginBottom: '1.25rem',
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+              background: '#f7f5f2', color: '#1a1a1a', border: '1px solid #e5e0d8', borderRadius: '8px',
+              padding: '0.75rem', fontSize: '0.9375rem', fontWeight: 500,
+              cursor: googleLoading ? 'not-allowed' : 'pointer', opacity: googleLoading ? 0.7 : 1, marginBottom: '1.25rem',
             }}
           >
             <GoogleIcon />
@@ -109,16 +98,11 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', color: '#6e6a65', marginBottom: '0.5rem' }}>
-                Email
-              </label>
+              <label style={{ display: 'block', fontSize: '0.875rem', color: '#6e6a65', marginBottom: '0.5rem' }}>Email</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={inputStyle} placeholder="kamu@contoh.com" />
             </div>
-
             <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', color: '#6e6a65', marginBottom: '0.5rem' }}>
-                Password
-              </label>
+              <label style={{ display: 'block', fontSize: '0.875rem', color: '#6e6a65', marginBottom: '0.5rem' }}>Password</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={inputStyle} placeholder="••••••••" />
             </div>
 
@@ -128,22 +112,8 @@ export default function LoginPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                background: '#1a1a1a',
-                color: '#f7f5f2',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '0.75rem',
-                fontSize: '0.9375rem',
-                fontWeight: 500,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.7 : 1,
-              }}
-            >
+            <button type="submit" disabled={loading}
+              style={{ width: '100%', background: '#1a1a1a', color: '#f7f5f2', border: 'none', borderRadius: '8px', padding: '0.75rem', fontSize: '0.9375rem', fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}>
               {loading ? 'Masuk...' : 'Masuk dengan Email'}
             </button>
           </form>
@@ -151,7 +121,7 @@ export default function LoginPage() {
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', color: '#6e6a65', fontSize: '0.875rem' }}>
           Belum punya akun?{' '}
-          <Link href="/register" style={{ color: '#0070f3', textDecoration: 'none', fontWeight: 500 }}>
+          <Link href={`/register${fromParam ? `?from=${fromParam}` : ''}`} style={{ color: '#0070f3', textDecoration: 'none', fontWeight: 500 }}>
             Daftar
           </Link>
         </p>
