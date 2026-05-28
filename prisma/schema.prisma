@@ -19,10 +19,11 @@ model User {
   banned        Boolean  @default(false)
   status        String?
   affiliateRate Int      @default(20)
-  // Rekening (withdrawal)
+  // Payment method untuk menerima pembayaran
   bankName      String?
   bankAccount   String?
   bankHolder    String?
+  qrisImage     String?  @db.Text  // base64 QRIS image
   // WhatsApp Responder
   waNumber      String?
   waMessage     String?  // auto-reply template after purchase
@@ -91,30 +92,34 @@ model PostFile {
 }
 
 model Purchase {
-  id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  post      Post     @relation(fields: [postId], references: [id])
-  postId    String
-  amount    Int
-  status    String   @default("pending")
-  orderId   String   @unique
-  refCode   String?
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  post       Post     @relation(fields: [postId], references: [id])
+  postId     String
+  amount     Int
+  status     String   @default("pending")
+  orderId    String   @unique
+  refCode    String?
+  payerName  String?
+  payerWa    String?
+  createdAt  DateTime @default(now())
 
   @@unique([userId, postId])
 }
 
 model FilePurchase {
-  id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  file      PostFile @relation(fields: [fileId], references: [id])
-  fileId    String
-  amount    Int
-  status    String   @default("pending")
-  orderId   String   @unique
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  file       PostFile @relation(fields: [fileId], references: [id])
+  fileId     String
+  amount     Int
+  status     String   @default("pending")
+  orderId    String   @unique
+  payerName  String?
+  payerWa    String?
+  createdAt  DateTime @default(now())
 
   @@unique([userId, fileId])
 }

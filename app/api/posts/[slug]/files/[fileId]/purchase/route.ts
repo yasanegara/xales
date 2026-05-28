@@ -12,7 +12,14 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const file = await db.postFile.findUnique({
     where: { id: fileId },
-    include: { post: { select: { slug: true, authorId: true } } },
+    include: {
+      post: {
+        select: {
+          slug: true, authorId: true,
+          author: { select: { bankName: true, bankAccount: true, bankHolder: true, qrisImage: true, waNumber: true } },
+        },
+      },
+    },
   })
 
   if (!file || file.post.slug !== slug)
@@ -25,10 +32,21 @@ export async function POST(req: NextRequest, { params }: Params) {
   const existing = await db.filePurchase.findUnique({
     where: { userId_fileId: { userId: session.user.id, fileId } },
   })
-  if (existing) return NextResponse.json({ ok: true, message: 'Already purchased' })
+  if (existing?.status === 'paid') return NextResponse.json({ ok: true, alreadyOwned: true })
+  if (existing?.status === 'pending') return NextResponse.json({
+    pending: true,
+    orderId: existing.orderId,
+    paymentInfo: {
+      bankName: file.post.author.bankName,
+      bankAccount: file.post.author.bankAccount,
+      bankHolder: file.post.author.bankHolder,
+      qrisImage: file.post.author.qrisImage,
+      waNumber: file.post.author.waNumber,
+    },
+  })
 
   try {
-    const { discountCode } = await req.json()
+    const { discountCode, payerName, payerWa } = await req.json()
     let finalPrice = file.price
 
     // Apply file discount
@@ -46,7 +64,6 @@ export async function POST(req: NextRequest, { params }: Params) {
       }
     }
 
-    // Demo mode: instant payment
     const orderId = `fp_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
 
     const purchase = await db.filePurchase.create({
@@ -54,8 +71,10 @@ export async function POST(req: NextRequest, { params }: Params) {
         userId: session.user.id,
         fileId,
         amount: finalPrice,
-        status: 'paid',
+        status: 'pending',
         orderId,
+        payerName: payerName ?? null,
+        payerWa: payerWa ?? null,
       },
     })
 
@@ -70,7 +89,18 @@ export async function POST(req: NextRequest, { params }: Params) {
       }
     }
 
-    return NextResponse.json(purchase, { status: 201 })
+    return NextResponse.json({
+      pending: true,
+      orderId: purchase.orderId,
+      amount: finalPrice,
+      paymentInfo: {
+        bankName: file.post.author.bankName,
+        bankAccount: file.post.author.bankAccount,
+        bankHolder: file.post.author.bankHolder,
+        qrisImage: file.post.author.qrisImage,
+        waNumber: file.post.author.waNumber,
+      },
+    }, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }

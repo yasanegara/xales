@@ -8,7 +8,7 @@ export async function PUT(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
-  const { name, bio, status, profilePic, affiliateRate, bankName, bankAccount, bankHolder, waNumber, waMessage } = body
+  const { name, bio, status, profilePic, affiliateRate, bankName, bankAccount, bankHolder, qrisImage, waNumber, waMessage } = body
 
   const updated = await db.user.update({
     where: { id: session.user.id },
@@ -21,6 +21,7 @@ export async function PUT(req: NextRequest) {
       ...(bankName !== undefined ? { bankName: bankName || null } : {}),
       ...(bankAccount !== undefined ? { bankAccount: bankAccount || null } : {}),
       ...(bankHolder !== undefined ? { bankHolder: bankHolder || null } : {}),
+      ...(qrisImage !== undefined ? { qrisImage: qrisImage || null } : {}),
       ...(waNumber !== undefined ? { waNumber: waNumber || null } : {}),
       ...(waMessage !== undefined ? { waMessage: waMessage || null } : {}),
     },

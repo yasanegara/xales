@@ -13,13 +13,15 @@ interface Profile {
   bankName: string
   bankAccount: string
   bankHolder: string
+  qrisImage: string
   waNumber: string
   waMessage: string
 }
 
 export default function SettingsPage() {
   const { data: session, update } = useSession()
-  const [form, setForm] = useState<Profile>({ name: '', bio: '', status: '', profilePic: '', affiliateRate: 20, bankName: '', bankAccount: '', bankHolder: '', waNumber: '', waMessage: '' })
+  const [form, setForm] = useState<Profile>({ name: '', bio: '', status: '', profilePic: '', affiliateRate: 20, bankName: '', bankAccount: '', bankHolder: '', qrisImage: '', waNumber: '', waMessage: '' })
+  const [qrisMsg, setQrisMsg] = useState('')
   const [bankMsg, setBankMsg] = useState('')
   const [waMsg, setWaMsg] = useState('')
   const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' })
@@ -41,6 +43,7 @@ export default function SettingsPage() {
           bankName: d.bankName ?? '',
           bankAccount: d.bankAccount ?? '',
           bankHolder: d.bankHolder ?? '',
+          qrisImage: d.qrisImage ?? '',
           waNumber: d.waNumber ?? '',
           waMessage: d.waMessage ?? '',
         })
@@ -75,6 +78,28 @@ export default function SettingsPage() {
     })
     setLoading(false)
     setBankMsg(res.ok ? 'Rekening disimpan! ✓' : 'Gagal menyimpan.')
+  }
+
+  const saveQris = async (e: FormEvent) => {
+    e.preventDefault()
+    setLoading(true); setQrisMsg('')
+    const res = await fetch('/api/dashboard/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ qrisImage: form.qrisImage }),
+    })
+    setLoading(false)
+    setQrisMsg(res.ok ? 'QRIS disimpan! ✓' : 'Gagal menyimpan.')
+  }
+
+  const handleQrisUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      setForm(f => ({ ...f, qrisImage: ev.target?.result as string }))
+    }
+    reader.readAsDataURL(file)
   }
 
   const saveWA = async (e: FormEvent) => {
@@ -303,13 +328,13 @@ export default function SettingsPage() {
         </form>
       </div>
 
-      {/* Rekening card */}
+      {/* Metode Pembayaran — Transfer Bank */}
       <div style={cardStyle}>
         <h2 style={{ fontSize: '1.0625rem', fontWeight: 600, color: '#1a1a1a', marginBottom: '0.375rem' }}>
-          Rekening Pencairan
+          Metode Pembayaran — Transfer Bank
         </h2>
         <p style={{ fontSize: '0.8125rem', color: '#6e6a65', marginBottom: '1.25rem' }}>
-          Untuk pencairan revenue dan komisi affiliate
+          Info rekening yang ditampilkan ke pembeli saat checkout
         </p>
         <form onSubmit={saveBank}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
@@ -333,6 +358,41 @@ export default function SettingsPage() {
           <button type="submit" disabled={loading}
             style={{ background: '#ffffff', border: '1px solid #e5e0d8', color: '#1a1a1a', borderRadius: '8px', padding: '0.625rem 1.5rem', fontSize: '0.9375rem', fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer' }}>
             Simpan Rekening
+          </button>
+        </form>
+      </div>
+
+      {/* Metode Pembayaran — QRIS */}
+      <div style={cardStyle}>
+        <h2 style={{ fontSize: '1.0625rem', fontWeight: 600, color: '#1a1a1a', marginBottom: '0.375rem' }}>
+          Metode Pembayaran — QRIS
+        </h2>
+        <p style={{ fontSize: '0.8125rem', color: '#6e6a65', marginBottom: '1.25rem' }}>
+          Upload gambar QRIS kamu — akan ditampilkan ke pembeli saat checkout
+        </p>
+        <form onSubmit={saveQris}>
+          <div style={{ marginBottom: '1.25rem' }}>
+            {form.qrisImage ? (
+              <div style={{ marginBottom: '1rem' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={form.qrisImage} alt="QRIS" style={{ width: '200px', height: '200px', objectFit: 'contain', border: '1px solid #e5e0d8', borderRadius: '8px', background: '#fafaf8' }} />
+                <button type="button" onClick={() => setForm(f => ({ ...f, qrisImage: '' }))}
+                  style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.8125rem', color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                  Hapus QRIS
+                </button>
+              </div>
+            ) : (
+              <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '200px', height: '200px', border: '2px dashed #e5e0d8', borderRadius: '8px', cursor: 'pointer', background: '#fafaf8', gap: '0.5rem' }}>
+                <span style={{ fontSize: '2rem' }}>🖼</span>
+                <span style={{ fontSize: '0.8125rem', color: '#6e6a65' }}>Upload QRIS</span>
+                <input type="file" accept="image/*" onChange={handleQrisUpload} style={{ display: 'none' }} />
+              </label>
+            )}
+          </div>
+          {qrisMsg && <p style={{ color: qrisMsg.includes('✓') ? '#059669' : '#dc2626', fontSize: '0.875rem', marginBottom: '1rem' }}>{qrisMsg}</p>}
+          <button type="submit" disabled={loading || !form.qrisImage}
+            style={{ background: '#ffffff', border: '1px solid #e5e0d8', color: '#1a1a1a', borderRadius: '8px', padding: '0.625rem 1.5rem', fontSize: '0.9375rem', fontWeight: 500, cursor: (loading || !form.qrisImage) ? 'not-allowed' : 'pointer', opacity: !form.qrisImage ? 0.5 : 1 }}>
+            Simpan QRIS
           </button>
         </form>
       </div>
