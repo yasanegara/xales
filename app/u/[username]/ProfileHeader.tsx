@@ -40,16 +40,15 @@ export default function ProfileHeader({
 
   const avatar = (
     <div style={{
-      width:  mobile ? '100px' : '110px',
-      height: mobile ? '128px' : undefined,
+      width: mobile ? '88px' : '110px',
       flexShrink: 0,
-      alignSelf: mobile ? 'center' : 'stretch',
+      alignSelf: 'stretch',
       borderRadius: '14px',
       background: '#f0ede8',
       border: '1px solid #e5e0d8',
       overflow: 'hidden',
       position: 'relative',
-      minHeight: mobile ? '128px' : '140px',
+      minHeight: '120px',
     }}>
       {profilePic ? (
         // eslint-disable-next-line @next/next/no-img-element
