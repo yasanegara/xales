@@ -2,6 +2,25 @@
 
 import { useRef, useState } from 'react'
 import ImageUploadButton from './ImageUploadButton'
+import TurndownService from 'turndown'
+
+const td = new TurndownService({
+  headingStyle: 'atx',
+  bulletListMarker: '-',
+  codeBlockStyle: 'fenced',
+})
+// Keep images as markdown
+td.keep(['figure'])
+// Convert <b> and <strong> to **
+td.addRule('bold', {
+  filter: ['b', 'strong'],
+  replacement: (content) => `**${content}**`,
+})
+// Strip span/div wrappers cleanly
+td.addRule('stripStyle', {
+  filter: (node) => node.nodeName === 'SPAN' && !(node as Element).getAttribute('style')?.includes('font-weight: bold'),
+  replacement: (content) => content,
+})
 
 interface Props {
   value: string
@@ -223,6 +242,22 @@ export default function MarkdownEditor({ value, onChange }: Props) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
+        onPaste={(e) => {
+          const html = e.clipboardData.getData('text/html')
+          if (!html) return // plain text paste — default behaviour
+          const md = td.turndown(html).trim()
+          if (!md) return
+          e.preventDefault()
+          const ta = taRef.current
+          const start = ta?.selectionStart ?? value.length
+          const end = ta?.selectionEnd ?? value.length
+          const next = value.slice(0, start) + md + value.slice(end)
+          onChange(next)
+          // Move cursor to end of pasted content
+          requestAnimationFrame(() => {
+            if (ta) { ta.selectionStart = ta.selectionEnd = start + md.length }
+          })
+        }}
         placeholder={'Mulai menulis...\n\nGunakan toolbar di atas atau ketik langsung syntax Markdown.\nContoh: **tebal**, *miring*, # Judul'}
         spellCheck={false}
         style={{
