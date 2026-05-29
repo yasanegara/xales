@@ -11,6 +11,9 @@ import ShareModal from '@/components/ShareModal'
 import ReadingWrapper from '@/components/ReadingWrapper'
 import TampilanButton from '@/components/TampilanButton'
 import Paywall from '@/components/Paywall'
+import RatingWidget from '@/components/RatingWidget'
+import GiftPanel from '@/components/GiftPanel'
+import CommentSection from '@/components/CommentSection'
 import ViewTracker from './ViewTracker'
 import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
@@ -67,7 +70,8 @@ export default async function PostPage({ params, searchParams }: Props) {
 
   if (!post || !post.published) notFound()
 
-  const isAuthor = session?.user?.id === post.authorId
+  const isAuthor  = session?.user?.id === post.authorId
+  const isMarkdown = post.type === 'markdown'
 
   // Private posts only accessible by author
   if (post.isPrivate && !isAuthor) notFound()
@@ -89,9 +93,19 @@ export default async function PostPage({ params, searchParams }: Props) {
   const canRead = !post.isPremium || isAuthor || isPurchased
 
   // Extract ?ref= from the request — passed via searchParams
-  const headings = post.type === 'markdown' && canRead ? extractHeadings(post.content) : []
-  const isMarkdown = post.type === 'markdown'
+  const headings  = isMarkdown && canRead ? extractHeadings(post.content) : []
   const authorName = post.author.name ?? `@${post.author.username}`
+
+  // Gifts sent on this post (for GiftPanel initial data)
+  const sentGifts = isMarkdown ? await db.sentGift.findMany({
+    where: { postId: post.id },
+    orderBy: { createdAt: 'desc' },
+    take: 50,
+    include: {
+      sender: { select: { username: true, name: true, profilePic: true } },
+      giftItem: true,
+    },
+  }) : []
 
   return (
     <>
@@ -250,17 +264,34 @@ export default async function PostPage({ params, searchParams }: Props) {
           {post.tags.length > 0 && (
             <div style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  style={{
-                    background: '#f0ede8', border: '1px solid #e5e0d8', color: '#6e6a65',
-                    fontSize: '0.8125rem', padding: '0.25rem 0.75rem', borderRadius: '20px',
-                  }}
-                >
+                <span key={tag} style={{ background: '#f0ede8', border: '1px solid #e5e0d8', color: '#6e6a65', fontSize: '0.8125rem', padding: '0.25rem 0.75rem', borderRadius: '20px' }}>
                   #{tag}
                 </span>
               ))}
             </div>
+          )}
+
+          {/* Rating + Gift row — only for articles */}
+          {isMarkdown && (
+            <div style={{ marginTop: '2rem', paddingTop: '1.25rem', borderTop: '1px solid #f0ede8', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+              <RatingWidget postId={post.id} isAuthor={isAuthor} />
+              <GiftPanel
+                postId={post.id}
+                isAuthor={isAuthor}
+                isLoggedIn={!!session}
+                initialGifts={sentGifts.map(g => ({ ...g, createdAt: g.createdAt.toISOString() }))}
+              />
+            </div>
+          )}
+
+          {/* Comment section — only for articles */}
+          {isMarkdown && (
+            <CommentSection
+              postId={post.id}
+              postAuthorId={post.authorId}
+              currentUserId={session?.user?.username}
+              isLoggedIn={!!session}
+            />
           )}
         </div>
       </div>

@@ -45,6 +45,10 @@ model User {
   sessions        Session[]
   accounts        Account[]
   withdrawals     Withdrawal[]
+  comments        Comment[]
+  ratings         Rating[]
+  sentGifts       SentGift[]   @relation("giftSender")
+  receivedGifts   SentGift[]   @relation("giftReceiver")
 }
 
 model Post {
@@ -80,6 +84,9 @@ model Post {
   purchases   Purchase[]
   discounts   Discount[]
   bundleItems BundleItem[]
+  comments    Comment[]
+  ratings     Rating[]
+  sentGifts   SentGift[]   @relation("postSentGifts")
 }
 
 model PostFile {
@@ -285,6 +292,57 @@ model Withdrawal {
   adminNote   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  value     Int      // 1-5
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  @@unique([userId, postId])
+}
+
+model GiftItem {
+  id       String  @id @default(cuid())
+  emoji    String
+  name     String
+  price    Int     // IDR
+  isActive Boolean @default(true)
+  order    Int     @default(0)
+
+  sentGifts SentGift[]
+}
+
+model SentGift {
+  id        String   @id @default(cuid())
+  amount    Int      // IDR paid
+  message   String?
+  createdAt DateTime @default(now())
+
+  sender     User     @relation("giftSender",   fields: [senderId],    references: [id], onDelete: Cascade)
+  senderId   String
+  receiver   User     @relation("giftReceiver", fields: [receiverId],  references: [id], onDelete: Cascade)
+  receiverId String
+  post       Post     @relation("postSentGifts", fields: [postId],     references: [id], onDelete: Cascade)
+  postId     String
+  giftItem   GiftItem @relation(fields: [giftItemId], references: [id])
+  giftItemId String
 }
 
 model VerificationToken {

@@ -129,6 +129,7 @@ export default function Navbar() {
                       ...(session.user.role === 'admin' ? [
                         { href: '/admin', label: '⚙ Admin Panel' },
                         { href: '/admin/withdrawals', label: '💸 Pencairan Dana' },
+                        { href: '/admin/gifts', label: '🎁 Katalog Hadiah' },
                       ] : []),
                     ].map((item) => (
                       <Link
