@@ -241,6 +241,8 @@ export default async function PostPage({ params, searchParams }: Props) {
               files={post.files}
               isPurchased={false}
               preview={post.content?.slice(0, 600) ?? ''}
+              postType={post.type}
+              coverImage={post.coverImage}
             />
           )}
 

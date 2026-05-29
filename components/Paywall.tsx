@@ -27,6 +27,8 @@ interface Props {
   files?: PostFile[]
   isPurchased?: boolean
   preview?: string
+  postType?: string
+  coverImage?: string | null
 }
 
 function formatBytes(b: number) {
@@ -34,7 +36,58 @@ function formatBytes(b: number) {
   return `${(b / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export default function Paywall({ slug, title, price, authorName, authorWaNumber, authorWaMessage, refCode, files = [], isPurchased: initialPurchased = false, preview = '' }: Props) {
+function AppScreenshotPreview({ coverImage, title }: { coverImage?: string | null; title: string }) {
+  const fallbackGrad = 'linear-gradient(135deg, #1e3a5f 0%, #0f2340 50%, #1a1040 100%)'
+
+  return (
+    <div style={{ marginBottom: '1.5rem', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e0d8', boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
+      {/* Fake browser bar */}
+      <div style={{ background: '#f0ede8', borderBottom: '1px solid #e5e0d8', padding: '0.5rem 0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '5px' }}>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#fc5c65' }} />
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ffd32a' }} />
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#05c46b' }} />
+        </div>
+        <div style={{ flex: 1, background: '#ffffff', borderRadius: '4px', padding: '0.2rem 0.625rem', fontSize: '0.7rem', color: '#9c9690', border: '1px solid #e5e0d8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          tweak.id/app/{title.toLowerCase().replace(/\s+/g, '-').slice(0, 30)}
+        </div>
+      </div>
+
+      {/* Blurred screenshot area */}
+      <div style={{ position: 'relative', height: '260px', overflow: 'hidden' }}>
+        {/* Background: cover image or gradient */}
+        {coverImage ? (
+          <img
+            src={coverImage}
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(10px)', transform: 'scale(1.08)' }}
+          />
+        ) : (
+          <div style={{ width: '100%', height: '100%', background: fallbackGrad, filter: 'blur(4px)', transform: 'scale(1.05)' }} />
+        )}
+
+        {/* Overlay */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 100%)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.625rem',
+        }}>
+          <div style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)', borderRadius: '50%', width: '52px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.375rem', border: '1px solid rgba(255,255,255,0.2)' }}>
+            🔒
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.875rem', fontWeight: 600, margin: 0 }}>
+            Preview terkunci
+          </p>
+          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.75rem', margin: 0 }}>
+            Beli untuk membuka akses penuh
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function Paywall({ slug, title, price, authorName, authorWaNumber, authorWaMessage, refCode, files = [], isPurchased: initialPurchased = false, preview = '', postType, coverImage }: Props) {
   const router = useRouter()
   const [purchased, setPurchased] = useState(initialPurchased)
 
@@ -47,6 +100,8 @@ export default function Paywall({ slug, title, price, authorName, authorWaNumber
     )
   }
 
+  const isApp = postType === 'html'
+
   // Strip markdown syntax for plain text preview
   const plainPreview = preview
     .replace(/#{1,6}\s/g, '')
@@ -58,40 +113,38 @@ export default function Paywall({ slug, title, price, authorName, authorWaNumber
 
   return (
     <div>
-      {/* Content preview with fade */}
-      {plainPreview && (
-        <div style={{ position: 'relative', marginBottom: '0', maxHeight: '8rem', overflow: 'hidden' }}>
-          <p style={{ fontSize: '1rem', color: '#4a4540', lineHeight: 1.8, margin: 0 }}>
-            {plainPreview}
-          </p>
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: '5rem',
-            background: 'linear-gradient(to bottom, transparent, #f7f5f2)',
-          }} />
-        </div>
+      {/* Preview */}
+      {isApp ? (
+        <AppScreenshotPreview coverImage={coverImage} title={title} />
+      ) : (
+        plainPreview && (
+          <div style={{ position: 'relative', marginBottom: '0', maxHeight: '8rem', overflow: 'hidden' }}>
+            <p style={{ fontSize: '1rem', color: '#4a4540', lineHeight: 1.8, margin: 0 }}>
+              {plainPreview}
+            </p>
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: '5rem',
+              background: 'linear-gradient(to bottom, transparent, #f7f5f2)',
+            }} />
+          </div>
+        )
       )}
 
       {/* Lock box */}
-      <div
-        style={{
-          position: 'relative', marginBottom: '2rem',
-          borderRadius: '12px', overflow: 'hidden',
-        }}
-      >
-        {/* Locked content indicator */}
-        <div
-          style={{
-            background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '12px',
-            padding: '2.5rem 2rem', textAlign: 'center',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-          }}
-        >
-          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔒</div>
+      <div style={{ position: 'relative', marginBottom: '2rem', borderRadius: '12px', overflow: 'hidden' }}>
+        <div style={{
+          background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '12px',
+          padding: '2.5rem 2rem', textAlign: 'center',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+        }}>
+          {!isApp && <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔒</div>}
           <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1a1a1a', marginBottom: '0.5rem' }}>
-            Konten Premium
+            {isApp ? 'Buka Akses App' : 'Konten Premium'}
           </h3>
           <p style={{ color: '#6e6a65', fontSize: '0.9375rem', marginBottom: '0.5rem', lineHeight: 1.6 }}>
-            Artikel ini memerlukan pembelian untuk dibaca seluruhnya.
+            {isApp
+              ? 'Beli sekali, gunakan selamanya.'
+              : 'Artikel ini memerlukan pembelian untuk dibaca seluruhnya.'}
           </p>
           <p style={{ color: '#9c9690', fontSize: '0.875rem', marginBottom: '2rem' }}>
             oleh <strong style={{ color: '#1a1a1a' }}>{authorName}</strong>
@@ -184,7 +237,6 @@ export default function Paywall({ slug, title, price, authorName, authorWaNumber
                     <button
                       onClick={() => {
                         if (file.mimeType === 'url/link') {
-                          // Go to standalone app page (no tweak header)
                           router.push(`/app/${file.id}`)
                         } else {
                           window.location.href = `/api/posts/${slug}/files/${file.id}/purchase`

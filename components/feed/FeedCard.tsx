@@ -215,10 +215,10 @@ export function ArticleCard({ post }: { post: FeedPost }) {
         transition: 'border-color 0.2s, box-shadow 0.2s',
         display: 'flex', flexDirection: 'column', gap: '0.625rem', height: '100%',
       }}>
-        {/* Cover image or placeholder strip */}
+        {/* Cover image — square */}
         {post.coverImage ? (
-          <div style={{ height: 120, borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
-            <img src={post.coverImage} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div style={{ aspectRatio: '1/1', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
+            <img src={post.coverImage} alt={post.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         ) : (
           <div style={{ height: 4, borderRadius: '4px', background: 'linear-gradient(to right, #3b5bdb, #7048e8)', flexShrink: 0 }} />
@@ -263,9 +263,9 @@ export function AppCard({ post }: { post: FeedPost }) {
         boxShadow: hovered ? '0 4px 20px rgba(0,0,0,0.08)' : '0 1px 3px rgba(0,0,0,0.04)',
         transition: 'border-color 0.2s, box-shadow 0.2s', height: '100%', display: 'flex', flexDirection: 'column',
       }}>
-        <div style={{ height: 150, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+        <div style={{ aspectRatio: '1/1', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           {post.coverImage
-            ? <img src={post.coverImage} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.04)' : 'scale(1)', transition: 'transform 0.4s ease' }} />
+            ? <img src={post.coverImage} alt={post.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.04)' : 'scale(1)', transition: 'transform 0.4s ease' }} />
             : <div style={{ width: '100%', height: '100%', background: fallbackGrad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>🔗</div>
           }
           <div style={{ position: 'absolute', top: '0.625rem', left: '0.625rem', display: 'flex', gap: '0.35rem' }}>
