@@ -51,12 +51,12 @@ export default function Navbar() {
             <>
               <span style={{
                 fontFamily: 'var(--font-hand, cursive)',
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: '1.35rem',
                 color: '#1a1a1a',
                 display: 'inline-block',
                 transform: 'rotate(-12deg) translateY(3px)',
-                marginRight: '-0.15rem',
+                marginRight: '-0.35rem',
                 pointerEvents: 'none',
                 userSelect: 'none',
               }}>
