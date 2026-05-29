@@ -81,7 +81,7 @@ export default function RegisterPage() {
     <div style={{ minHeight: '100vh', background: '#f7f5f2', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
       <div style={{ width: '100%', maxWidth: '400px' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <Link href="/" style={{ fontSize: '1.625rem', fontWeight: 800, color: '#1a1a1a', textDecoration: 'none', letterSpacing: '-0.03em', fontFamily: 'var(--font-brand, Georgia, serif)' }}>
+          <Link href="/" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a', textDecoration: 'none', letterSpacing: '-0.01em', fontFamily: 'var(--font-brand, system-ui, sans-serif)' }}>
             tweak
           </Link>
           <p style={{ color: '#6e6a65', marginTop: '0.5rem', fontSize: '0.9375rem' }}>Buat akunmu</p>

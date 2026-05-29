@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
-import { Inter, JetBrains_Mono, Syne } from 'next/font/google'
+import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
 import TopLoader from '@/components/TopLoader'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono' })
-const syne = Syne({ subsets: ['latin'], weight: ['700', '800'], variable: '--font-brand' })
+const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-brand' })
 
 export const metadata: Metadata = {
   title: { default: 'tweak — Creator Publishing Platform', template: '%s | tweak' },
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${inter.className} ${jetbrainsMono.variable} ${syne.variable}`}>
+    <html lang="id" className={`${inter.className} ${jetbrainsMono.variable} ${plusJakartaSans.variable}`}>
       <body>
         <TopLoader />
         <Providers>{children}</Providers>
