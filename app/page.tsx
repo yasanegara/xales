@@ -5,6 +5,7 @@ import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import FeedGrid from '@/components/feed/FeedGrid'
+import CreatorAvatars from '@/components/CreatorAvatars'
 import Link from 'next/link'
 
 interface SearchParams { tab?: string; type?: string; tag?: string }
@@ -195,42 +196,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       {/* Creator showcase — always visible */}
       <div style={{ borderBottom: '1px solid #e5e0d8', background: '#fafaf8' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }} className="home-showcase">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <div>
-              <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1a1a1a' }}>
-                {totalUsers.toLocaleString('id-ID')} kreator bergabung
-              </span>
-              <span style={{ fontSize: '0.875rem', color: '#9c9690' }}> · {totalPosts.toLocaleString('id-ID')} konten dipublish</span>
-            </div>
-            {!session && (
-              <Link href="/register" style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#1a1a1a', textDecoration: 'none', borderBottom: '1.5px solid #1a1a1a', paddingBottom: '1px' }}>
-                Bergabung sekarang →
-              </Link>
-            )}
-          </div>
-          {/* Creator avatars */}
-          <div className="creator-strip">
-            {recentCreators.map(creator => (
-              <Link key={creator.username} href={`/@${creator.username}`}
-                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.625rem 0.375rem 0.375rem', background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '20px', transition: 'border-color 0.15s' }}>
-                <div style={{ width: 26, height: 26, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#f0ede8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6875rem', fontWeight: 700, color: '#6e6a65' }}>
-                  {creator.profilePic
-                    // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={creator.profilePic} alt={creator.name ?? creator.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : (creator.name?.[0] ?? creator.username[0]).toUpperCase()
-                  }
-                </div>
-                <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#1a1a1a', whiteSpace: 'nowrap' }}>
-                  {creator.name ?? `@${creator.username}`}
-                </span>
-                {creator._count.posts > 0 && (
-                  <span style={{ fontSize: '0.7rem', color: '#9c9690' }}>
-                    {creator._count.posts}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </div>
+          <CreatorAvatars
+            creators={recentCreators}
+            totalUsers={totalUsers}
+            session={!!session}
+          />
         </div>
       </div>
 

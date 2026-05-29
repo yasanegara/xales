@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { DiscoverCard, type FeedPost } from './FeedCard'
-import SuggestedUsers from '@/components/SuggestedUsers'
 
 interface Props {
   initialPosts: FeedPost[]
@@ -47,15 +46,8 @@ export default function FeedGrid({ initialPosts, initialHasMore, initialCursor, 
   return (
     <div>
       <div className="feed-grid">
-        {posts.map((post, i) => (
-          <div key={post.id}>
-            {i > 0 && i % 16 === 0 && (
-              <div style={{ gridColumn: '1 / -1', margin: '0.5rem 0' }}>
-                <SuggestedUsers compact />
-              </div>
-            )}
-            <DiscoverCard post={post} />
-          </div>
+        {posts.map((post) => (
+          <DiscoverCard key={post.id} post={post} />
         ))}
       </div>
 
