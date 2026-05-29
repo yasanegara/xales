@@ -16,6 +16,7 @@ import GiftPanel from '@/components/GiftPanel'
 import CommentSection from '@/components/CommentSection'
 import ViewTracker from './ViewTracker'
 import AppShareButton from '@/components/AppShareButton'
+import { headers } from 'next/headers'
 import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -34,7 +35,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const authorName = post.author.name ?? `@${post.author.username}`
   const description = post.description ?? undefined
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? 'https://xales.id'
+
+  // Derive base URL from actual request headers — reliable regardless of env vars
+  const headersList = await headers()
+  const host  = headersList.get('host') ?? 'xales.id'
+  const proto = headersList.get('x-forwarded-proto') ?? 'https'
+  const baseUrl = `${proto}://${host}`
 
   // Use cover image directly if it's a public URL; generated OG card otherwise
   const isUrl = post.coverImage?.startsWith('http')

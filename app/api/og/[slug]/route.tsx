@@ -3,8 +3,11 @@ import { db } from '@/lib/prisma'
 
 export const runtime = 'nodejs'
 
-export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const host  = new URL(req.url).host
+  const proto = req.headers.get('x-forwarded-proto') ?? 'https'
+  const baseUrl = `${proto}://${host}`
 
   const post = await db.post.findUnique({
     where: { slug, published: true },
@@ -60,7 +63,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1a1a1a', padding: '18px 48px 18px 60px' }}>
             <span style={{ fontSize: '18px', color: 'rgba(255,255,255,0.65)' }}>oleh {authorName}</span>
-            <span style={{ fontSize: '18px', fontWeight: 700, color: '#ffffff' }}>tweak.id</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`${baseUrl}/tweak-icon.png`} alt="" width={24} height={24} style={{ borderRadius: '5px' }} />
+              <span style={{ fontSize: '18px', fontWeight: 700, color: '#ffffff' }}>xales.id</span>
+            </div>
           </div>
         </div>
 
@@ -91,7 +98,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1a1a1a', padding: '20px 80px' }}>
           <span style={{ fontSize: '22px', color: 'rgba(255,255,255,0.65)' }}>oleh {authorName}</span>
-          <span style={{ fontSize: '22px', fontWeight: 700, color: '#ffffff' }}>tweak.id</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`${baseUrl}/tweak-icon.png`} alt="" width={28} height={28} style={{ borderRadius: '6px' }} />
+            <span style={{ fontSize: '22px', fontWeight: 700, color: '#ffffff' }}>xales.id</span>
+          </div>
         </div>
       </div>
     ),
