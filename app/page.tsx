@@ -94,7 +94,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         background: 'rgba(247,245,242,0.95)', backdropFilter: 'blur(8px)',
         borderBottom: '1px solid #e5e0d8',
       }}>
-        <div style={{ maxWidth: '860px', margin: '0 auto', padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', height: '44px' }}>
+        <div style={{ padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', height: '44px' }}>
           <div style={{ display: 'flex', gap: '0.25rem' }}>
             {tabs.map(t => {
               if (t.needsAuth && !session) return null
@@ -121,7 +121,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       </div>
 
-      <main style={{ maxWidth: '860px', margin: '0 auto', padding: '1.25rem 1rem 3rem' }}>
+      <main style={{ padding: '1.25rem 1.5rem 3rem' }}>
         {!session && (
           <div style={{ textAlign: 'center', padding: '2.25rem 0 2rem', borderBottom: '1px solid #e5e0d8', marginBottom: '1.5rem' }}>
             <h1 style={{ fontSize: 'clamp(1.875rem, 5vw, 2.75rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#1a1a1a', marginBottom: '0.75rem', fontFamily: 'Georgia, serif' }}>
