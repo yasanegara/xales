@@ -96,6 +96,28 @@ export default async function PostPage({ params, searchParams }: Props) {
   const headings  = isMarkdown && canRead ? extractHeadings(post.content) : []
   const authorName = post.author.name ?? `@${post.author.username}`
 
+  // Related posts — same tags or same category, exclude current
+  const relatedPosts = isMarkdown ? await db.post.findMany({
+    where: {
+      published: true,
+      isPrivate: false,
+      id: { not: post.id },
+      OR: [
+        ...(post.tags.length > 0 ? [{ tags: { hasSome: post.tags } }] : []),
+        ...(post.category ? [{ category: post.category }] : []),
+        { authorId: post.authorId },
+      ],
+    },
+    orderBy: { viewCount: 'desc' },
+    take: 4,
+    select: {
+      id: true, slug: true, title: true, type: true,
+      coverImage: true, isPremium: true, viewCount: true,
+      publishedAt: true, createdAt: true,
+      author: { select: { username: true, name: true } },
+    },
+  }) : []
+
   // Gifts sent on this post (for GiftPanel initial data)
   const sentGifts = isMarkdown ? await db.sentGift.findMany({
     where: { postId: post.id },
@@ -292,6 +314,48 @@ export default async function PostPage({ params, searchParams }: Props) {
               currentUserId={session?.user?.username}
               isLoggedIn={!!session}
             />
+          )}
+
+          {/* Related posts */}
+          {relatedPosts.length > 0 && (
+            <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid #e5e0d8', maxWidth: '760px' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9c9690', marginBottom: '1.25rem' }}>
+                Artikel Terkait
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                {relatedPosts.map((rp) => {
+                  const rpAuthor = rp.author.name ?? `@${rp.author.username}`
+                  return (
+                    <Link
+                      key={rp.id}
+                      href={`/@${rp.author.username}/${rp.slug}`}
+                      style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '0.625rem', padding: '0.875rem', background: '#f7f5f2', borderRadius: '10px', border: '1px solid #e5e0d8', transition: 'border-color 0.15s' }}
+                    >
+                      {rp.coverImage && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={rp.coverImage}
+                          alt={rp.title}
+                          loading="lazy"
+                          style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: '6px' }}
+                        />
+                      )}
+                      <div>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {rp.title}
+                        </div>
+                        <div style={{ marginTop: '0.375rem', fontSize: '0.75rem', color: '#9c9690', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <span>{rpAuthor}</span>
+                          <span>·</span>
+                          <span>👁 {rp.viewCount.toLocaleString()}</span>
+                          {rp.isPremium && <span style={{ color: '#b45309', fontWeight: 600 }}>★</span>}
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
           )}
         </div>
       </div>
