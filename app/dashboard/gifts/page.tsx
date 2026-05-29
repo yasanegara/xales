@@ -22,7 +22,7 @@ interface BalanceData {
 
 interface GiftItem { id: string; emoji: string; name: string; price: number }
 interface SentGift {
-  id: string; amount: number; message?: string | null; createdAt: string
+  id: string; amount: number; message?: string | null; createdAt: string; status: string
   sender: { username: string; name?: string | null; profilePic?: string | null }
   giftItem: GiftItem
   post: { title: string; slug: string }
@@ -188,8 +188,26 @@ export default function DashboardGiftsPage() {
                         </p>
                       )}
                     </div>
-                    <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#f59e0b', flexShrink: 0 }}>
-                      +{fmt(g.amount)}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem', flexShrink: 0 }}>
+                      <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#f59e0b' }}>+{fmt(g.amount)}</div>
+                      {g.status === 'pending_payment' && (
+                        <div style={{ display: 'flex', gap: '0.375rem' }}>
+                          <button onClick={async () => {
+                            await fetch('/api/gifts/send', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ giftId: g.id, action: 'confirm' }) })
+                            load()
+                          }} style={{ fontSize: '0.65rem', fontWeight: 700, background: '#059669', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.15rem 0.5rem', cursor: 'pointer' }}>
+                            ✓ Konfirmasi
+                          </button>
+                          <button onClick={async () => {
+                            await fetch('/api/gifts/send', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ giftId: g.id, action: 'reject' }) })
+                            load()
+                          }} style={{ fontSize: '0.65rem', fontWeight: 700, background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '4px', padding: '0.15rem 0.5rem', cursor: 'pointer' }}>
+                            ✕ Tolak
+                          </button>
+                        </div>
+                      )}
+                      {g.status === 'paid' && <span style={{ fontSize: '0.65rem', color: '#059669', fontWeight: 600 }}>✓ Terkonfirmasi</span>}
+                      {g.status === 'rejected' && <span style={{ fontSize: '0.65rem', color: '#dc2626' }}>Ditolak</span>}
                     </div>
                   </div>
                 ))}

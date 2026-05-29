@@ -53,6 +53,7 @@ model User {
   sentGifts       SentGift[]      @relation("giftSender")
   receivedGifts   SentGift[]      @relation("giftReceiver")
   giftRedemptions GiftRedemption[]
+  giftTopUps      GiftTopUp[]
 }
 
 model Post {
@@ -338,6 +339,7 @@ model SentGift {
   id        String   @id @default(cuid())
   amount    Int      // IDR paid
   message   String?
+  status    String   @default("pending_payment") // pending_payment | paid | rejected
   createdAt DateTime @default(now())
 
   sender     User     @relation("giftSender",   fields: [senderId],    references: [id], onDelete: Cascade)
@@ -348,6 +350,17 @@ model SentGift {
   postId     String
   giftItem   GiftItem @relation(fields: [giftItemId], references: [id])
   giftItemId String
+}
+
+model GiftTopUp {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  amount    Int      // IDR kredit yang dibeli
+  status    String   @default("pending") // pending | confirmed | rejected
+  orderId   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model GiftRedemption {

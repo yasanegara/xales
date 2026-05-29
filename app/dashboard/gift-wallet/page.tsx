@@ -18,6 +18,11 @@ interface SentGift {
 }
 interface HistoryData { sent: SentGift[]; received: SentGift[] }
 interface BalanceData { giftBalance: number; totalSent: number }
+interface TopUpPaymentInfo {
+  bankName?: string | null; bankAccount?: string | null
+  bankHolder?: string | null; qrisImage?: string | null
+}
+interface TopUpData { packages: number[]; paymentInfo: TopUpPaymentInfo | null }
 
 export default function GiftWalletPage() {
   const [balance, setBalance]     = useState<BalanceData | null>(null)
@@ -31,15 +36,21 @@ export default function GiftWalletPage() {
   const [transferMsg, setTransferMsg] = useState('')
   const [transferring, setTransferring] = useState(false)
   const [transferResult, setTransferResult] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
+  // Top-up
+  const [topupData, setTopupData]     = useState<TopUpData | null>(null)
+  const [topupPkg, setTopupPkg]       = useState<number | null>(null)
+  const [topupStep, setTopupStep]     = useState<'pick' | 'payment' | 'done'>('pick')
+  const [topping, setTopping]         = useState(false)
 
   const load = async () => {
     setLoading(true)
-    const [b, h, c] = await Promise.all([
+    const [b, h, c, t] = await Promise.all([
       fetch('/api/gifts/balance').then(r => r.json()),
       fetch('/api/gifts/history').then(r => r.json()),
       fetch('/api/gifts').then(r => r.json()),
+      fetch('/api/gifts/topup').then(r => r.json()),
     ])
-    setBalance(b); setHistory(h); setCatalog(c)
+    setBalance(b); setHistory(h); setCatalog(c); setTopupData(t)
     setLoading(false)
   }
 
@@ -59,6 +70,17 @@ export default function GiftWalletPage() {
     setToUser(''); setSelectedGift(null); setTransferMsg('')
     load()
     setTimeout(() => setTransferResult(null), 4000)
+  }
+
+  const startTopup = async () => {
+    if (!topupPkg) return
+    setTopping(true)
+    await fetch('/api/gifts/topup', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: topupPkg }),
+    })
+    setTopping(false)
+    setTopupStep('payment')
   }
 
   if (loading) return <div style={{ padding: '2rem', color: '#9c9690' }}>Memuat...</div>
@@ -249,16 +271,66 @@ export default function GiftWalletPage() {
             </button>
           </div>
 
-          {/* Info kredit */}
-          <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '12px', padding: '1.25rem' }}>
-            <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#7c3aed', marginBottom: '0.625rem' }}>💡 Gift Kredit</div>
-            <p style={{ fontSize: '0.75rem', color: '#6e6a65', lineHeight: 1.6 }}>
-              Gift kredit adalah saldo yang bisa kamu gunakan untuk mengirim gift ke kreator.
-              Isi saldo melalui halaman <strong>Settings → Isi Gift Kredit</strong>.
-            </p>
-            <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#7c3aed', fontWeight: 600 }}>
-              Saldo kamu: {fmt(balance.giftBalance)}
+          {/* Top-up gift kredit */}
+          <div style={{ background: '#fff', border: '1px solid #e5e0d8', borderRadius: '12px', padding: '1.375rem' }}>
+            <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1a1a1a', marginBottom: '0.25rem' }}>
+              💳 Isi Gift Kredit
             </div>
+            <p style={{ fontSize: '0.75rem', color: '#6e6a65', lineHeight: 1.5, marginBottom: '1rem' }}>
+              Beli kredit untuk transfer gift langsung ke kreator favoritmu.
+            </p>
+
+            {topupStep === 'pick' && topupData && (
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  {topupData.packages.map(pkg => (
+                    <button key={pkg} onClick={() => setTopupPkg(topupPkg === pkg ? null : pkg)}
+                      style={{ padding: '0.75rem', borderRadius: '8px', border: `2px solid ${topupPkg === pkg ? '#7c3aed' : '#e5e0d8'}`, background: topupPkg === pkg ? '#f5f3ff' : '#fff', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 700, color: topupPkg === pkg ? '#7c3aed' : '#1a1a1a', transition: 'all 0.15s' }}>
+                      {fmt(pkg)}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={startTopup} disabled={!topupPkg || topping}
+                  style={{ width: '100%', padding: '0.6875rem', borderRadius: '8px', border: 'none', background: topupPkg ? '#7c3aed' : '#e5e0d8', color: topupPkg ? '#fff' : '#9c9690', fontSize: '0.875rem', fontWeight: 700, cursor: topupPkg ? 'pointer' : 'not-allowed' }}>
+                  {topping ? 'Memproses...' : topupPkg ? `Beli ${fmt(topupPkg)} Kredit` : 'Pilih Paket'}
+                </button>
+              </>
+            )}
+
+            {topupStep === 'payment' && topupData?.paymentInfo && topupPkg && (
+              <>
+                <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '0.875rem', marginBottom: '0.875rem', fontSize: '0.8125rem', color: '#92400e' }}>
+                  Transfer <strong>{fmt(topupPkg)}</strong> ke rekening platform di bawah.
+                </div>
+                {topupData.paymentInfo.bankAccount && (
+                  <div style={{ border: '1px solid #e5e0d8', borderRadius: '8px', padding: '0.875rem', marginBottom: '0.75rem' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9c9690', textTransform: 'uppercase', marginBottom: '0.375rem' }}>Transfer Bank</div>
+                    <div style={{ fontWeight: 700, color: '#1a1a1a' }}>{topupData.paymentInfo.bankName}</div>
+                    <div style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', margin: '0.2rem 0' }}>{topupData.paymentInfo.bankAccount}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#6e6a65' }}>a.n. {topupData.paymentInfo.bankHolder}</div>
+                  </div>
+                )}
+                <button onClick={() => setTopupStep('done')}
+                  style={{ width: '100%', padding: '0.6875rem', borderRadius: '8px', border: 'none', background: '#059669', color: '#fff', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', marginBottom: '0.375rem' }}>
+                  ✓ Sudah Transfer
+                </button>
+                <button onClick={() => setTopupStep('pick')} style={{ width: '100%', background: 'none', border: 'none', color: '#9c9690', fontSize: '0.8rem', cursor: 'pointer', padding: '0.25rem' }}>
+                  ← Kembali
+                </button>
+              </>
+            )}
+
+            {topupStep === 'done' && (
+              <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⏳</div>
+                <div style={{ fontWeight: 700, color: '#1a1a1a', fontSize: '0.9rem' }}>Menunggu konfirmasi admin</div>
+                <p style={{ fontSize: '0.75rem', color: '#9c9690', marginTop: '0.25rem', lineHeight: 1.5 }}>Kredit akan masuk dalam 1–24 jam setelah admin konfirmasi.</p>
+                <button onClick={() => { setTopupStep('pick'); setTopupPkg(null) }}
+                  style={{ marginTop: '0.75rem', background: 'none', border: '1px solid #e5e0d8', borderRadius: '6px', padding: '0.375rem 0.875rem', fontSize: '0.8rem', cursor: 'pointer', color: '#6e6a65' }}>
+                  Isi Lagi
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
