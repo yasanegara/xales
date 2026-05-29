@@ -34,8 +34,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     ? [{ viewCount: 'desc' as const }, { likeCount: 'desc' as const }]
     : { publishedAt: 'desc' as const }
 
-  // Fetch posts + available tags in parallel
-  const [rawPosts, tagRows] = await Promise.all([
+  // Fetch posts, tags, and recent creators in parallel
+  const [rawPosts, tagRows, recentCreators, totalUsers, totalPosts] = await Promise.all([
     db.post.findMany({
       where, orderBy,
       take: TAKE + 1,
@@ -50,6 +50,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       where: { published: true, isPrivate: false, ...(type !== 'all' ? { type } : {}) },
       select: { tags: true },
     }),
+    db.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 18,
+      select: { username: true, name: true, profilePic: true, _count: { select: { posts: { where: { published: true } } } } },
+    }),
+    db.user.count(),
+    db.post.count({ where: { published: true, isPrivate: false } }),
   ])
 
   // Collect + count tags, sort by frequency
@@ -185,6 +192,48 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       )}
 
+      {/* Creator showcase — always visible */}
+      <div style={{ borderBottom: '1px solid #e5e0d8', background: '#fafaf8' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div>
+              <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1a1a1a' }}>
+                {totalUsers.toLocaleString('id-ID')} kreator bergabung
+              </span>
+              <span style={{ fontSize: '0.875rem', color: '#9c9690' }}> · {totalPosts.toLocaleString('id-ID')} konten dipublish</span>
+            </div>
+            {!session && (
+              <Link href="/register" style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#1a1a1a', textDecoration: 'none', borderBottom: '1.5px solid #1a1a1a', paddingBottom: '1px' }}>
+                Bergabung sekarang →
+              </Link>
+            )}
+          </div>
+          {/* Creator avatars */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+            {recentCreators.map(creator => (
+              <Link key={creator.username} href={`/@${creator.username}`}
+                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.625rem 0.375rem 0.375rem', background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '20px', transition: 'border-color 0.15s' }}>
+                <div style={{ width: 26, height: 26, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#f0ede8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6875rem', fontWeight: 700, color: '#6e6a65' }}>
+                  {creator.profilePic
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={creator.profilePic} alt={creator.name ?? creator.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : (creator.name?.[0] ?? creator.username[0]).toUpperCase()
+                  }
+                </div>
+                <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#1a1a1a', whiteSpace: 'nowrap' }}>
+                  {creator.name ?? `@${creator.username}`}
+                </span>
+                {creator._count.posts > 0 && (
+                  <span style={{ fontSize: '0.7rem', color: '#9c9690' }}>
+                    {creator._count.posts}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '1.75rem 1.5rem 4rem' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
           <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
@@ -206,6 +255,30 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           postType={type}
           tag={tag}
         />
+
+        {/* CTA join banner — bottom of feed, non-logged in only */}
+        {!session && (
+          <div style={{
+            marginTop: '4rem', padding: '3rem 2rem',
+            background: '#1a1a1a', borderRadius: '16px',
+            textAlign: 'center',
+          }}>
+            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em', marginBottom: '0.75rem', lineHeight: 1.2 }}>
+              Siap jadi kreator?
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', lineHeight: 1.65, marginBottom: '2rem', maxWidth: '400px', margin: '0 auto 2rem' }}>
+              Bergabung dengan {totalUsers.toLocaleString('id-ID')} kreator yang sudah publish di Tweak. Gratis selamanya.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href="/register" style={{ background: '#ffffff', color: '#1a1a1a', padding: '0.75rem 2rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 700 }}>
+                Daftar gratis
+              </Link>
+              <Link href="/login" style={{ background: 'transparent', color: 'rgba(255,255,255,0.75)', padding: '0.75rem 2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', textDecoration: 'none', fontSize: '0.9375rem' }}>
+                Sudah punya akun
+              </Link>
+            </div>
+          </div>
+        )}
       </main>
     </>
   )

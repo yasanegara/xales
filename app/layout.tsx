@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Plus_Jakarta_Sans, Caveat } from 'next/font/goog
 import './globals.css'
 import { Providers } from './providers'
 import TopLoader from '@/components/TopLoader'
+import Footer from '@/components/Footer'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono' })
@@ -20,7 +21,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="id" className={`${inter.className} ${jetbrainsMono.variable} ${plusJakartaSans.variable} ${caveat.variable}`}>
       <body>
         <TopLoader />
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <Footer />
+        </Providers>
       </body>
     </html>
   )
