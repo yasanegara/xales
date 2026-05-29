@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FeaturedCard, MediumCard, ArticleCard, AppCard, type FeedPost } from './FeedCard'
+import { FeaturedCard, MediumCard, ListCard, type FeedPost } from './FeedCard'
 import SuggestedUsers from '@/components/SuggestedUsers'
 
 interface Props {
@@ -65,27 +65,19 @@ export default function FeedGrid({ initialPosts, initialHasMore, initialCursor, 
         </div>
       )}
 
-      {/* 2-column grid */}
+      {/* X-style list */}
       {rest.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          {rest.map((post, i) => {
-            const card = post.type === 'html'
-              ? <AppCard key={post.id} post={post} />
-              : <ArticleCard key={post.id} post={post} />
-
-            // Insert suggested users after every 6th post
-            if (i > 0 && i % 6 === 0) {
-              return (
-                <>
-                  <div key={`suggest-${i}`} style={{ gridColumn: '1 / -1' }}>
-                    <SuggestedUsers compact />
-                  </div>
-                  {card}
-                </>
-              )
-            }
-            return card
-          })}
+        <div style={{ marginBottom: '1.5rem' }}>
+          {rest.map((post, i) => (
+            <div key={post.id}>
+              {i > 0 && i % 6 === 0 && (
+                <div style={{ margin: '0.75rem 0' }}>
+                  <SuggestedUsers compact />
+                </div>
+              )}
+              <ListCard post={post} />
+            </div>
+          ))}
         </div>
       )}
 

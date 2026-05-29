@@ -83,7 +83,7 @@ export function FeaturedCard({ post }: { post: FeedPost }) {
       onMouseLeave={() => setHovered(false)}
     >
       {post.coverImage
-        ? <img src={post.coverImage} alt={post.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.04)' : 'scale(1)', transition: 'transform 0.5s ease' }} />
+        ? <img src={post.coverImage} alt={post.title} loading="eager" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.04)' : 'scale(1)', transition: 'transform 0.5s ease' }} />
         : <div style={{ position: 'absolute', inset: 0, background: fallbackGrad }} />
       }
       {/* Vignette */}
@@ -124,7 +124,7 @@ export function MediumCard({ post }: { post: FeedPost }) {
       onMouseLeave={() => setHovered(false)}
     >
       {post.coverImage
-        ? <img src={post.coverImage} alt={post.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.05)' : 'scale(1)', transition: 'transform 0.4s ease' }} />
+        ? <img src={post.coverImage} alt={post.title} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.05)' : 'scale(1)', transition: 'transform 0.4s ease' }} />
         : <div style={{ position: 'absolute', inset: 0, background: fallbackGrad }} />
       }
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.15) 70%, transparent 100%)' }} />
@@ -141,6 +141,62 @@ export function MediumCard({ post }: { post: FeedPost }) {
           {post.author.name ?? `@${post.author.username}`} · 👁 {post.viewCount.toLocaleString()}
         </div>
       </div>
+    </Link>
+  )
+}
+
+// ─── List card (X/Twitter-style row) ─────────────────────────────────────
+export function ListCard({ post }: { post: FeedPost }) {
+  const [hovered, setHovered] = useState(false)
+  const isApp = post.type === 'html'
+
+  return (
+    <Link href={`/@${post.author.username}/${post.slug}`}
+      style={{ textDecoration: 'none', display: 'block' }}
+      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+    >
+      <article style={{
+        display: 'flex', gap: '0.875rem', alignItems: 'flex-start',
+        padding: '0.875rem 0.5rem',
+        borderBottom: '1px solid #f0ede8',
+        background: hovered ? '#fafaf8' : 'transparent',
+        borderRadius: '6px',
+        transition: 'background 0.15s',
+      }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', marginBottom: '0.3rem' }}>
+            <Badge bg={isApp ? '#ecfdf5' : '#eff6ff'} color={isApp ? '#059669' : '#1d4ed8'}>
+              {isApp ? 'App' : 'Artikel'}
+            </Badge>
+            {post.isPremium && <PremiumBadge />}
+            {post.category && <span style={{ fontSize: '0.7rem', color: '#9c9690' }}>{post.category}</span>}
+          </div>
+          <h3 style={{
+            fontSize: '0.9375rem', fontWeight: 700, color: '#1a1a1a',
+            lineHeight: 1.4, marginBottom: '0.25rem',
+            fontFamily: 'Georgia, serif',
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden',
+          }}>
+            {post.title}
+          </h3>
+          {post.description && (
+            <p style={{
+              fontSize: '0.8125rem', color: '#6e6a65', lineHeight: 1.5,
+              margin: '0 0 0.375rem',
+              display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden',
+            }}>
+              {post.description}
+            </p>
+          )}
+          <Meta post={post} />
+        </div>
+        {post.coverImage && (
+          <div style={{ width: 80, height: 80, borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
+            <img src={post.coverImage} alt="" loading="lazy" decoding="async"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+        )}
+      </article>
     </Link>
   )
 }
