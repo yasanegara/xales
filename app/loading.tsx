@@ -39,54 +39,29 @@ const CLUSTER = [
   { l: 'calc(50% + 162px)', t: 'calc(50% + 22px)', sz: 58 },
 ]
 
-// Float keyframe paths — each avatar picks one
-const FLOAT_KF = ['sk-fl-a', 'sk-fl-b', 'sk-fl-c', 'sk-fl-d']
-const DURATIONS = ['4.1s','5.0s','3.7s','4.8s','5.3s','3.5s','4.4s','5.1s','3.9s','4.6s','5.2s']
-const DELAYS    = ['0s','-1.3s','-2.1s','-0.7s','-1.9s','-2.8s','-0.4s','-1.7s','-3.2s','-0.9s','-2.4s']
-
 function ClusterSkeleton() {
   return (
     <>
       <style>{`
-        @keyframes sk-fl-a {
-          0%,100% { transform:translate(0,0);    }
-          30%     { transform:translate( 5px,-9px);  }
-          65%     { transform:translate(-3px,-6px);  }
-        }
-        @keyframes sk-fl-b {
-          0%,100% { transform:translate(0,0);    }
-          40%     { transform:translate(-6px,-8px);  }
-          70%     { transform:translate( 4px,-11px); }
-        }
-        @keyframes sk-fl-c {
-          0%,100% { transform:translate(0,0);    }
-          25%     { transform:translate( 7px,-5px);  }
-          60%     { transform:translate( 2px,-12px); }
-        }
-        @keyframes sk-fl-d {
-          0%,100% { transform:translate(0,0);    }
-          45%     { transform:translate(-5px,-10px); }
-          75%     { transform:translate( 6px,-4px);  }
+        @keyframes sk-popup {
+          0%   { opacity:0; transform:translate(-50%,-50%) scale(0.15); }
+          55%  { opacity:1; transform:translate(-50%,-50%) scale(1.18); }
+          75%  { transform:translate(-50%,-50%) scale(0.92); }
+          100% { opacity:1; transform:translate(-50%,-50%) scale(1); }
         }
       `}</style>
       <div style={{ position: 'relative', height: '260px', overflow: 'hidden' }}>
         {CLUSTER.map((c, i) => (
-          // Outer div handles float movement; inner .skel handles pulse opacity
-          <div key={i} style={{
+          <div key={i} className="skel" style={{
             position: 'absolute',
             left: c.l,
             top:  c.t,
-            transform: 'translate(-50%, -50%)',
-            animation: `${FLOAT_KF[i % 4]} ${DURATIONS[i]} ease-in-out infinite`,
-            animationDelay: DELAYS[i],
-          }}>
-            <div className="skel" style={{
-              width:  c.sz,
-              height: c.sz,
-              borderRadius: '10px',
-              border: '2.5px solid rgba(255,255,255,0.9)',
-            }} />
-          </div>
+            width:  c.sz,
+            height: c.sz,
+            borderRadius: '10px',
+            border: '2.5px solid rgba(255,255,255,0.9)',
+            animation: `sk-popup 0.42s cubic-bezier(0.34,1.56,0.64,1) ${(i * 0.09).toFixed(2)}s both`,
+          }} />
         ))}
       </div>
     </>
