@@ -45,7 +45,6 @@ export default function BuyModal({ slug, title, price, authorName, authorWaNumbe
   const [error, setError] = useState('')
 
   const handleOpen = () => {
-    if (!session) { router.push(`/login?from=${encodeURIComponent(window.location.pathname)}`); return }
     setStep('form')
     setOpen(true)
   }
@@ -128,7 +127,29 @@ export default function BuyModal({ slug, title, price, authorName, authorWaNumbe
               </div>
             </div>
 
-            {step === 'form' ? (
+            {/* Login gate for non-logged users */}
+            {!session ? (
+              <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🔐</div>
+                <p style={{ fontSize: '0.9375rem', color: '#4a4540', lineHeight: 1.65, marginBottom: '1.5rem' }}>
+                  Masuk dulu untuk melanjutkan pembelian.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                  <a
+                    href={`/login?from=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}`}
+                    style={{ display: 'block', background: '#1a1a1a', color: '#fff', padding: '0.75rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9375rem' }}
+                  >
+                    Masuk
+                  </a>
+                  <a
+                    href={`/register?from=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '')}`}
+                    style={{ display: 'block', background: '#f7f5f2', color: '#1a1a1a', padding: '0.75rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 500, fontSize: '0.9375rem', border: '1px solid #e5e0d8' }}
+                  >
+                    Daftar gratis
+                  </a>
+                </div>
+              </div>
+            ) : step === 'form' ? (
               <>
                 {/* Payer info */}
                 <div style={{ marginBottom: '1rem' }}>
