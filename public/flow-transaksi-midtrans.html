@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dokumen Flow Transaksi — Tweak (xales.id)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; }
+
+  /* Print styles */
+  @media print {
+    body { background: #fff; }
+    .no-print { display: none !important; }
+    .page-break { page-break-before: always; }
+    .step-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #ddd !important; }
+  }
+
+  .doc-container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* Cover page */
+  .cover { background: #1a1a1a; color: #f7f5f2; border-radius: 16px; padding: 3rem; margin-bottom: 3rem; }
+  .cover-brand { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.25rem; }
+  .cover-domain { font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+  .cover-title { font-size: 1.625rem; font-weight: 700; margin-bottom: 0.75rem; }
+  .cover-subtitle { color: rgba(255,255,255,0.65); font-size: 0.9375rem; line-height: 1.6; margin-bottom: 2rem; }
+  .cover-meta { display: flex; gap: 2rem; flex-wrap: wrap; font-size: 0.8125rem; color: rgba(255,255,255,0.5); }
+  .cover-meta strong { color: rgba(255,255,255,0.85); display: block; }
+
+  /* Step cards */
+  .step-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); margin-bottom: 2.5rem; overflow: hidden; }
+  .step-header { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; background: #f7f5f2; border-bottom: 1px solid #e5e0d8; }
+  .step-num { width: 36px; height: 36px; border-radius: 50%; background: #1a1a1a; color: #f7f5f2; font-weight: 800; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-title { font-size: 1.0625rem; font-weight: 700; color: #1a1a1a; }
+  .step-desc { font-size: 0.8125rem; color: #6e6a65; }
+  .step-body { padding: 1.5rem; }
+
+  /* Browser mockup */
+  .browser { border: 1px solid #e5e0d8; border-radius: 10px; overflow: hidden; margin-bottom: 1rem; }
+  .browser-bar { background: #f0ede8; border-bottom: 1px solid #e5e0d8; padding: 0.5rem 0.875rem; display: flex; align-items: center; gap: 0.625rem; }
+  .browser-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #fc5c65; }
+  .dot-y { background: #ffd32a; }
+  .dot-g { background: #05c46b; }
+  .browser-url { flex: 1; background: #fff; border: 1px solid #e5e0d8; border-radius: 5px; padding: 0.25rem 0.75rem; font-size: 0.75rem; color: #6e6a65; font-family: monospace; }
+  .browser-content { padding: 0; }
+
+  /* Mock UI pieces */
+  .mock-navbar { background: #fff; border-bottom: 1px solid #e5e0d8; padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+  .mock-brand { font-weight: 800; font-size: 1.125rem; color: #1a1a1a; letter-spacing: -0.02em; }
+  .mock-nav-links { display: flex; gap: 1.25rem; }
+  .mock-nav-link { font-size: 0.8125rem; color: #6e6a65; text-decoration: none; }
+  .mock-btn-sm { background: #1a1a1a; color: #fff; font-size: 0.75rem; font-weight: 600; padding: 0.375rem 0.875rem; border-radius: 6px; border: none; cursor: pointer; }
+  .mock-btn-outline { background: #fff; color: #1a1a1a; font-size: 0.75rem; font-weight: 600; padding: 0.375rem 0.875rem; border-radius: 6px; border: 1px solid #e5e0d8; cursor: pointer; }
+
+  /* Catalog grid */
+  .catalog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; padding: 1.5rem; background: #faf7f2; }
+  .product-card { background: #fff; border: 1px solid #e5e0d8; border-radius: 10px; overflow: hidden; }
+  .product-cover { height: 90px; background: #f0ede8; position: relative; overflow: hidden; }
+  .product-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .product-cover-grad-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .product-cover-grad-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .product-cover-grad-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .product-cover-grad-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+  .type-badge { position: absolute; top: 6px; left: 6px; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase; }
+  .badge-article { background: #2563eb; color: #fff; }
+  .badge-app { background: #059669; color: #fff; }
+  .badge-premium { position: absolute; top: 6px; right: 6px; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 3px; background: #b45309; color: #fef3c7; }
+  .product-body { padding: 0.625rem 0.75rem 0.875rem; }
+  .product-title { font-size: 0.75rem; font-weight: 700; color: #1a1a1a; line-height: 1.35; margin-bottom: 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .product-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f0ede8; padding-top: 0.5rem; margin-top: 0.375rem; }
+  .product-author { font-size: 0.65rem; color: #9c9690; }
+  .product-price { font-size: 0.75rem; font-weight: 800; color: #1a1a1a; }
+  .price-sub { font-size: 0.55rem; color: #9c9690; }
+
+  /* Product detail page */
+  .mock-product-page { padding: 1.5rem; background: #fff; }
+  .mock-type-badge { display: inline-block; background: #eff6ff; color: #2563eb; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+  .mock-post-title { font-size: 1.25rem; font-weight: 800; color: #1a1a1a; line-height: 1.3; margin-bottom: 0.5rem; }
+  .mock-post-desc { font-size: 0.8125rem; color: #6e6a65; line-height: 1.55; margin-bottom: 1rem; }
+  .mock-author-row { display: flex; align-items: center; gap: 0.625rem; padding-top: 0.875rem; border-top: 1px solid #e5e0d8; margin-bottom: 1.25rem; }
+  .avatar { width: 28px; height: 28px; border-radius: 6px; background: #f0ede8; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #6e6a65; flex-shrink: 0; }
+  .mock-content-preview { background: #f7f5f2; border-radius: 8px; padding: 1rem; font-size: 0.8125rem; color: #6e6a65; line-height: 1.6; position: relative; overflow: hidden; }
+  .mock-content-preview::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: linear-gradient(transparent, #f7f5f2); }
+
+  /* Paywall */
+  .mock-paywall { background: linear-gradient(150deg, #faf7f2 0%, #ede8e0 100%); border: 1px solid #e5e0d8; border-radius: 12px; padding: 1.5rem; margin-top: 1rem; text-align: center; }
+  .paywall-lock { font-size: 2rem; margin-bottom: 0.75rem; }
+  .paywall-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.375rem; }
+  .paywall-desc { font-size: 0.8125rem; color: #6e6a65; margin-bottom: 1.25rem; }
+  .paywall-price { font-size: 1.625rem; font-weight: 800; color: #1a1a1a; margin-bottom: 0.25rem; }
+  .paywall-idr { font-size: 0.75rem; color: #9c9690; margin-bottom: 1.25rem; }
+  .paywall-btn { display: inline-block; background: #1a1a1a; color: #fff; font-weight: 700; font-size: 0.9375rem; padding: 0.75rem 2.5rem; border-radius: 8px; cursor: pointer; border: none; }
+
+  /* Buy modal */
+  .modal-overlay { background: rgba(0,0,0,0.5); padding: 1.5rem; display: flex; align-items: center; justify-content: center; }
+  .modal-box { background: #fff; border-radius: 14px; padding: 1.5rem; width: 100%; max-width: 400px; }
+  .modal-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .modal-product { font-size: 0.8125rem; color: #6e6a65; margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid #f0ede8; }
+  .modal-price-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+  .modal-price-label { font-size: 0.8125rem; color: #6e6a65; }
+  .modal-price-val { font-size: 1.25rem; font-weight: 800; color: #1a1a1a; }
+  .modal-price-idr { font-size: 0.65rem; color: #9c9690; text-align: right; }
+  .form-group { margin-bottom: 0.875rem; }
+  .form-label { display: block; font-size: 0.75rem; font-weight: 600; color: #3d3a36; margin-bottom: 0.25rem; }
+  .form-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #e5e0d8; border-radius: 6px; font-size: 0.875rem; color: #1a1a1a; background: #fff; }
+  .form-input:focus { outline: none; border-color: #1a1a1a; }
+  .modal-submit { width: 100%; background: #1a1a1a; color: #fff; border: none; padding: 0.75rem; border-radius: 8px; font-size: 0.9375rem; font-weight: 700; cursor: pointer; margin-top: 0.5rem; }
+
+  /* Midtrans page */
+  .midtrans-header { background: #003d7a; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+  .midtrans-logo { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em; }
+  .midtrans-secure { font-size: 0.75rem; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 0.375rem; }
+  .midtrans-body { padding: 1.5rem; background: #f5f7fa; }
+  .midtrans-order-card { background: #fff; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #e0e7ef; }
+  .midtrans-order-label { font-size: 0.75rem; color: #6b7280; margin-bottom: 0.25rem; }
+  .midtrans-order-title { font-size: 0.9375rem; font-weight: 700; color: #1a1a1a; margin-bottom: 0.5rem; }
+  .midtrans-order-row { display: flex; justify-content: space-between; font-size: 0.8125rem; color: #374151; padding: 0.375rem 0; border-top: 1px solid #f0f0f0; }
+  .midtrans-total-row { display: flex; justify-content: space-between; font-size: 1rem; font-weight: 800; color: #1a1a1a; padding-top: 0.5rem; border-top: 2px solid #e0e7ef; margin-top: 0.25rem; }
+  .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; margin-bottom: 1rem; }
+  .payment-method { background: #fff; border: 2px solid #e0e7ef; border-radius: 8px; padding: 0.75rem; display: flex; align-items: center; gap: 0.625rem; cursor: pointer; font-size: 0.8125rem; color: #374151; font-weight: 500; }
+  .payment-method.selected { border-color: #003d7a; background: #eff6ff; }
+  .method-icon { font-size: 1.25rem; }
+  .midtrans-pay-btn { width: 100%; background: #003d7a; color: #fff; border: none; padding: 0.875rem; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.5rem; }
+  .midtrans-footer { text-align: center; font-size: 0.75rem; color: #9ca3af; padding: 1rem; display: flex; align-items: center; justify-content: center; gap: 1rem; }
+
+  /* Success page */
+  .success-page { padding: 2rem 1.5rem; text-align: center; background: #fff; }
+  .success-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+  .success-title { font-size: 1.375rem; font-weight: 800; color: #1a1a1a; margin-bottom: 0.5rem; }
+  .success-subtitle { font-size: 0.875rem; color: #6e6a65; margin-bottom: 1.5rem; line-height: 1.6; }
+  .success-details { background: #f7f5f2; border-radius: 10px; padding: 1rem 1.25rem; text-align: left; margin-bottom: 1.5rem; }
+  .success-row { display: flex; justify-content: space-between; font-size: 0.8125rem; padding: 0.35rem 0; color: #3d3a36; }
+  .success-row:not(:last-child) { border-bottom: 1px solid #ede8e0; }
+  .success-row strong { color: #1a1a1a; }
+  .success-access-btn { display: inline-block; background: #1a1a1a; color: #fff; font-weight: 700; font-size: 0.9375rem; padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; }
+
+  /* Annotations */
+  .annotation { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0 8px 8px 0; font-size: 0.8125rem; color: #92400e; margin-top: 1rem; }
+  .annotation strong { display: block; margin-bottom: 0.25rem; }
+
+  /* Print button */
+  .print-bar { position: sticky; top: 0; background: #1a1a1a; color: #fff; padding: 0.875rem 1.5rem; display: flex; align-items: center; justify-content: space-between; z-index: 100; margin-bottom: 2rem; border-radius: 10px; }
+  .print-bar-title { font-size: 0.9375rem; font-weight: 700; }
+  .print-btn { background: #fff; color: #1a1a1a; border: none; padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 700; font-size: 0.875rem; cursor: pointer; }
+
+  /* TOC */
+  .toc { background: #fff; border: 1px solid #e5e0d8; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem; }
+  .toc-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #9c9690; margin-bottom: 1rem; }
+  .toc-item { display: flex; align-items: center; gap: 0.875rem; padding: 0.625rem 0; border-bottom: 1px solid #f0ede8; font-size: 0.875rem; color: #3d3a36; }
+  .toc-item:last-child { border-bottom: none; }
+  .toc-num { width: 24px; height: 24px; border-radius: 50%; background: #1a1a1a; color: #fff; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="doc-container">
+
+  <!-- Print bar -->
+  <div class="print-bar no-print">
+    <span class="print-bar-title">📄 Dokumen Flow Transaksi — Tweak</span>
+    <button class="print-btn" onclick="window.print()">🖨 Print / Save PDF</button>
+  </div>
+
+  <!-- Cover -->
+  <div class="cover">
+    <div class="cover-brand">Tweak</div>
+    <div class="cover-domain">xales.id</div>
+    <div class="cover-title">Dokumen Flow Transaksi Pembelian Konten Digital</div>
+    <div class="cover-subtitle">
+      Dokumen ini menjelaskan alur lengkap transaksi pembelian produk digital (artikel premium dan web app) di platform Tweak — mulai dari pemilihan produk, proses pemesanan, hingga pembayaran melalui Midtrans dan konfirmasi akses.
+    </div>
+    <div class="cover-meta">
+      <div><strong>Nama Platform</strong>Tweak</div>
+      <div><strong>Domain</strong>xales.id</div>
+      <div><strong>Jenis Produk</strong>Konten Digital (Artikel & Web App)</div>
+      <div><strong>Mata Uang</strong>IDR (Rupiah Indonesia)</div>
+      <div><strong>Payment Gateway</strong>Midtrans</div>
+      <div><strong>Tanggal Dokumen</strong>Mei 2026</div>
+    </div>
+  </div>
+
+  <!-- Table of Contents -->
+  <div class="toc">
+    <div class="toc-title">Daftar Isi</div>
+    <div class="toc-item"><span class="toc-num">1</span>Halaman Katalog Produk — Daftar produk dengan harga IDR</div>
+    <div class="toc-item"><span class="toc-num">2</span>Halaman Detail Produk — Informasi produk dan paywall</div>
+    <div class="toc-item"><span class="toc-num">3</span>Modal Pembelian — Form pemesanan dengan total harga IDR</div>
+    <div class="toc-item"><span class="toc-num">4</span>Halaman Pembayaran Midtrans — Pilihan metode bayar</div>
+    <div class="toc-item"><span class="toc-num">5</span>Konfirmasi Pembayaran Berhasil — Akses produk diberikan</div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Halaman Katalog Produk</div>
+        <div class="step-desc">Pengguna membuka katalog produk dan melihat daftar produk premium dengan harga dalam IDR</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+          </div>
+          <div class="browser-url">https://xales.id/produk</div>
+        </div>
+        <div class="browser-content">
+          <!-- Navbar -->
+          <div class="mock-navbar">
+            <div class="mock-brand">Tweak</div>
+            <div style="display:flex;gap:0.75rem;align-items:center;">
+              <button class="mock-btn-outline">Masuk</button>
+              <button class="mock-btn-sm">Daftar Gratis</button>
+            </div>
+          </div>
+
+          <!-- Page header -->
+          <div style="padding:1.5rem 1.5rem 0;">
+            <h2 style="font-size:1.375rem;font-weight:800;color:#1a1a1a;margin-bottom:0.375rem;">Katalog Produk</h2>
+            <p style="font-size:0.8125rem;color:#6e6a65;margin-bottom:1.25rem;">Artikel dan web app dari kreator Tweak. Semua harga dalam IDR.</p>
+            <!-- Platform info strip -->
+            <div style="background:#f0ede8;border-radius:8px;padding:0.75rem 1rem;display:flex;gap:2rem;flex-wrap:wrap;font-size:0.75rem;margin-bottom:1.25rem;">
+              <span><strong style="color:#1a1a1a;">Jenis Produk:</strong> <span style="color:#6e6a65;">Konten Digital</span></span>
+              <span><strong style="color:#1a1a1a;">Mata Uang:</strong> <span style="color:#059669;font-weight:700;">IDR (Rupiah)</span></span>
+              <span><strong style="color:#1a1a1a;">Pembayaran:</strong> <span style="color:#003d7a;font-weight:700;">Midtrans</span></span>
+            </div>
+          </div>
+
+          <!-- Product grid -->
+          <div class="catalog-grid">
+            <div class="product-card">
+              <div class="product-cover product-cover-grad-1">
+                <span class="type-badge badge-article">Artikel</span>
+                <span class="badge-premium">★ Premium</span>
+              </div>
+              <div class="product-body">
+                <div class="product-title">Panduan Lengkap Monetisasi Konten Digital</div>
+                <div class="product-footer">
+                  <div class="product-author">@tweak.id</div>
+                  <div style="text-align:right">
+                    <div class="product-price">Rp 49.000</div>
+                    <div class="price-sub">IDR</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="product-card">
+              <div class="product-cover product-cover-grad-2">
+                <span class="type-badge badge-article">Artikel</span>
+                <span class="badge-premium">★ Premium</span>
+              </div>
+              <div class="product-body">
+                <div class="product-title">30 Template Email Marketing untuk Kreator</div>
+                <div class="product-footer">
+                  <div class="product-author">@tweak.id</div>
+                  <div style="text-align:right">
+                    <div class="product-price">Rp 29.000</div>
+                    <div class="price-sub">IDR</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="product-card">
+              <div class="product-cover product-cover-grad-3">
+                <span class="type-badge badge-app">App</span>
+                <span class="badge-premium">★ Premium</span>
+              </div>
+              <div class="product-body">
+                <div class="product-title">Kalkulator Harga Konten Digital</div>
+                <div class="product-footer">
+                  <div class="product-author">@tweak.id</div>
+                  <div style="text-align:right">
+                    <div class="product-price">Rp 19.000</div>
+                    <div class="price-sub">IDR</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="product-card">
+              <div class="product-cover product-cover-grad-4">
+                <span class="type-badge badge-article">Artikel</span>
+                <span class="badge-premium">★ Premium</span>
+              </div>
+              <div class="product-body">
+                <div class="product-title">Rahasia Pertumbuhan Audiens 0 → 10.000 Pembaca</div>
+                <div class="product-footer">
+                  <div class="product-author">@tweak.id</div>
+                  <div style="text-align:right">
+                    <div class="product-price">Rp 59.000</div>
+                    <div class="price-sub">IDR</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Keterangan Step 1</strong>
+        Halaman <code>xales.id/produk</code> menampilkan semua produk premium dengan harga tercantum jelas dalam IDR (Rupiah Indonesia). Setiap produk menampilkan nama, jenis (Artikel/App), badge Premium, nama kreator, dan harga.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-card page-break">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Halaman Detail Produk & Paywall</div>
+        <div class="step-desc">Pengguna mengklik produk dan melihat halaman detail dengan harga dan tombol beli</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+          </div>
+          <div class="browser-url">https://xales.id/@tweak.id/panduan-monetisasi-konten-digital</div>
+        </div>
+        <div class="browser-content">
+          <div class="mock-navbar">
+            <div class="mock-brand">Tweak</div>
+            <div style="display:flex;gap:0.75rem;align-items:center;">
+              <button class="mock-btn-outline">Masuk</button>
+              <button class="mock-btn-sm">Daftar Gratis</button>
+            </div>
+          </div>
+          <div class="mock-product-page">
+            <div class="mock-type-badge">Artikel</div>
+            <div class="mock-post-title">Panduan Lengkap Monetisasi Konten Digital untuk Kreator Indonesia</div>
+            <div class="mock-post-desc">Strategi terbukti menghasilkan pendapatan dari artikel, e-book, template, dan web app — lengkap dengan contoh nyata kreator Indonesia.</div>
+            <div class="mock-author-row">
+              <div class="avatar">T</div>
+              <div>
+                <div style="font-size:0.8125rem;font-weight:600;color:#1a1a1a;">Tweak Team</div>
+                <div style="font-size:0.7rem;color:#9c9690;">23 Mei 2026 · 12 menit baca</div>
+              </div>
+            </div>
+            <!-- Preview content -->
+            <div class="mock-content-preview">
+              <strong>Pendahuluan</strong><br><br>
+              Monetisasi konten digital adalah proses mengubah pengetahuan, keahlian, dan kreativitas kamu menjadi sumber pendapatan yang berkelanjutan...<br><br>
+              Banyak kreator yang sudah punya konten bagus, tapi tidak tahu bagaimana cara menghasilkan dari konten tersebut secara konsisten...
+            </div>
+            <!-- Paywall -->
+            <div class="mock-paywall">
+              <div class="paywall-lock">🔒</div>
+              <div class="paywall-title">Konten ini adalah artikel premium</div>
+              <div class="paywall-desc">Beli sekali, akses selamanya. Tidak ada langganan.</div>
+              <div class="paywall-price">Rp 49.000</div>
+              <div class="paywall-idr">IDR · Rupiah Indonesia</div>
+              <button class="paywall-btn">Beli Artikel Ini</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Keterangan Step 2</strong>
+        Halaman produk menampilkan preview konten, lalu paywall dengan harga yang jelas (Rp 49.000 / IDR). Pengguna harus login/daftar terlebih dahulu, kemudian klik "Beli Artikel Ini" untuk melanjutkan pembelian.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Modal Pembelian (Order Form)</div>
+        <div class="step-desc">Pengguna mengisi data dan mengkonfirmasi pesanan dengan total harga IDR</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+          </div>
+          <div class="browser-url">https://xales.id/@tweak.id/panduan-monetisasi-konten-digital</div>
+        </div>
+        <div class="browser-content">
+          <!-- Overlay + modal -->
+          <div class="modal-overlay">
+            <div class="modal-box">
+              <div class="modal-title">Konfirmasi Pembelian</div>
+              <div class="modal-product">
+                Panduan Lengkap Monetisasi Konten Digital untuk Kreator Indonesia
+              </div>
+              <div class="modal-price-row">
+                <div>
+                  <div class="modal-price-label">Total Pembayaran</div>
+                  <div class="modal-price-idr">IDR · Rupiah Indonesia</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="modal-price-val">Rp 49.000</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nama Lengkap *</label>
+                <input class="form-input" type="text" value="Budi Santoso" readonly>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email *</label>
+                <input class="form-input" type="email" value="budi@gmail.com" readonly>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Kode Diskon (opsional)</label>
+                <input class="form-input" type="text" placeholder="Masukkan kode diskon">
+              </div>
+              <button class="modal-submit">Lanjut ke Pembayaran — Rp 49.000</button>
+              <div style="text-align:center;font-size:0.7rem;color:#9c9690;margin-top:0.75rem;">
+                🔒 Pembayaran diproses secara aman oleh Midtrans
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Keterangan Step 3</strong>
+        Modal pembelian menampilkan nama produk, total harga (Rp 49.000 IDR), dan form data pembeli (nama & email). Setelah pengguna mengklik "Lanjut ke Pembayaran", sistem membuat order dan mengarahkan ke halaman Midtrans.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-card page-break">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Halaman Pembayaran Midtrans</div>
+        <div class="step-desc">Pengguna memilih metode pembayaran di halaman checkout Midtrans yang aman</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+          </div>
+          <div class="browser-url">https://app.midtrans.com/snap/v4/redirection/...</div>
+        </div>
+        <div class="browser-content">
+          <!-- Midtrans header -->
+          <div class="midtrans-header">
+            <div class="midtrans-logo">🔵 Midtrans</div>
+            <div class="midtrans-secure">🔒 Pembayaran Aman</div>
+          </div>
+
+          <div class="midtrans-body">
+            <!-- Order summary -->
+            <div class="midtrans-order-card">
+              <div class="midtrans-order-label">Ringkasan Pesanan</div>
+              <div class="midtrans-order-title">Tweak — xales.id</div>
+              <div style="font-size:0.8125rem;color:#6b7280;margin-bottom:0.75rem;">Panduan Lengkap Monetisasi Konten Digital</div>
+              <div class="midtrans-order-row">
+                <span>Harga Produk</span>
+                <span>Rp 49.000</span>
+              </div>
+              <div class="midtrans-order-row">
+                <span>Biaya Layanan</span>
+                <span>Rp 0</span>
+              </div>
+              <div class="midtrans-total-row">
+                <span>Total</span>
+                <span>Rp 49.000</span>
+              </div>
+            </div>
+
+            <!-- Payment methods -->
+            <div style="font-size:0.8125rem;font-weight:600;color:#374151;margin-bottom:0.75rem;">Pilih Metode Pembayaran</div>
+            <div class="payment-methods">
+              <div class="payment-method selected">
+                <span class="method-icon">🏦</span>
+                <span>Transfer Bank</span>
+              </div>
+              <div class="payment-method">
+                <span class="method-icon">📱</span>
+                <span>QRIS</span>
+              </div>
+              <div class="payment-method">
+                <span class="method-icon">💳</span>
+                <span>Kartu Kredit</span>
+              </div>
+              <div class="payment-method">
+                <span class="method-icon">🟣</span>
+                <span>GoPay / OVO</span>
+              </div>
+            </div>
+
+            <!-- Bank transfer detail -->
+            <div class="midtrans-order-card">
+              <div class="midtrans-order-label">Transfer ke (BCA Virtual Account)</div>
+              <div style="font-size:1.25rem;font-weight:800;letter-spacing:0.1em;color:#003d7a;margin:0.5rem 0;">8277 0012 3456 7890</div>
+              <div style="font-size:0.75rem;color:#6b7280;">Bayar sebelum: 23 Mei 2026, 15:30 WIB</div>
+            </div>
+
+            <button class="midtrans-pay-btn">Saya Sudah Transfer</button>
+          </div>
+
+          <div class="midtrans-footer">
+            <span>🔒 SSL Secured</span>
+            <span>Powered by Midtrans</span>
+            <span>PCI DSS Compliant</span>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Keterangan Step 4</strong>
+        Pengguna diarahkan ke halaman pembayaran Midtrans yang aman (HTTPS). Halaman menampilkan ringkasan pesanan dengan total <strong>Rp 49.000 IDR</strong> dan pilihan metode pembayaran (Transfer Bank, QRIS, Kartu Kredit, dompet digital).
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div>
+        <div class="step-title">Pembayaran Berhasil — Akses Diberikan</div>
+        <div class="step-desc">Midtrans mengkonfirmasi pembayaran, pengguna mendapat akses langsung ke produk</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+          </div>
+          <div class="browser-url">https://xales.id/@tweak.id/panduan-monetisasi-konten-digital</div>
+        </div>
+        <div class="browser-content">
+          <div class="mock-navbar">
+            <div class="mock-brand">Tweak</div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <div class="avatar" style="background:#f0ede8;">B</div>
+              <span style="font-size:0.8125rem;color:#1a1a1a;font-weight:500;">Budi</span>
+            </div>
+          </div>
+          <div class="success-page">
+            <div class="success-icon">✅</div>
+            <div class="success-title">Pembayaran Berhasil!</div>
+            <div class="success-subtitle">
+              Terima kasih atas pembelianmu. Kamu sekarang punya akses penuh ke konten ini.
+            </div>
+            <div class="success-details">
+              <div class="success-row">
+                <span>Produk</span>
+                <strong>Panduan Monetisasi Konten Digital</strong>
+              </div>
+              <div class="success-row">
+                <span>Jumlah Dibayar</span>
+                <strong style="color:#059669;">Rp 49.000</strong>
+              </div>
+              <div class="success-row">
+                <span>Mata Uang</span>
+                <strong>IDR (Rupiah Indonesia)</strong>
+              </div>
+              <div class="success-row">
+                <span>Metode</span>
+                <strong>BCA Virtual Account</strong>
+              </div>
+              <div class="success-row">
+                <span>Status</span>
+                <strong style="color:#059669;">✓ Lunas</strong>
+              </div>
+              <div class="success-row">
+                <span>Akses</span>
+                <strong style="color:#059669;">✓ Aktif Selamanya</strong>
+              </div>
+            </div>
+            <button class="success-access-btn">Baca Artikel Sekarang →</button>
+          </div>
+        </div>
+      </div>
+      <div class="annotation">
+        <strong>Keterangan Step 5</strong>
+        Setelah pembayaran dikonfirmasi oleh Midtrans (via webhook), pengguna diarahkan kembali ke halaman produk dengan status akses <strong>aktif</strong>. Data pembelian disimpan di database dan pengguna dapat membaca/menggunakan konten kapan saja.
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div style="background:#1a1a1a;color:#f7f5f2;border-radius:14px;padding:2rem;margin-top:1rem;">
+    <h3 style="font-size:1.125rem;font-weight:700;margin-bottom:1.25rem;">Ringkasan Alur Transaksi</h3>
+    <div style="display:grid;gap:0.75rem;">
+      <div style="display:flex;align-items:center;gap:0.875rem;font-size:0.875rem;">
+        <span style="background:rgba(255,255,255,0.15);width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">1</span>
+        <span>Pengguna melihat katalog produk di <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px;">xales.id/produk</code> dengan harga IDR yang jelas</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.875rem;font-size:0.875rem;">
+        <span style="background:rgba(255,255,255,0.15);width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">2</span>
+        <span>Pengguna membuka halaman produk, melihat paywall dengan harga dan tombol "Beli"</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.875rem;font-size:0.875rem;">
+        <span style="background:rgba(255,255,255,0.15);width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">3</span>
+        <span>Modal pembelian tampil: nama produk, total harga IDR, form nama &amp; email pembeli</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.875rem;font-size:0.875rem;">
+        <span style="background:rgba(255,255,255,0.15);width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">4</span>
+        <span>Pengguna diarahkan ke halaman Midtrans — memilih metode bayar (Transfer / QRIS / Kartu Kredit)</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.875rem;font-size:0.875rem;">
+        <span style="background:rgba(255,255,255,0.15);width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">5</span>
+        <span>Midtrans konfirmasi pembayaran → pengguna mendapat akses produk selamanya</span>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,0.1);font-size:0.75rem;color:rgba(255,255,255,0.45);">
+      Platform: Tweak · Domain: xales.id · Payment Gateway: Midtrans (PT Midtrans) · Mata Uang: IDR · Jenis Produk: Konten Digital
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

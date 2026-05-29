@@ -6,7 +6,9 @@
     "dev": "NODE_OPTIONS='--max-http-header-size=32768' next dev",
     "build": "next build",
     "start": "next start",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed:tweak": "npx tsx scripts/seed-tweak.ts",
+    "seed:paid": "npx tsx scripts/seed-paid-demo.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
