@@ -109,7 +109,7 @@ export default async function PostPage({ params, searchParams }: Props) {
       ],
     },
     orderBy: { viewCount: 'desc' },
-    take: 4,
+    take: 6,
     select: {
       id: true, slug: true, title: true, type: true,
       coverImage: true, isPremium: true, viewCount: true,
@@ -322,7 +322,7 @@ export default async function PostPage({ params, searchParams }: Props) {
               <div style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9c9690', marginBottom: '1.25rem' }}>
                 Artikel Terkait
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
                 {relatedPosts.map((rp) => {
                   const rpAuthor = rp.author.name ?? `@${rp.author.username}`
                   return (
