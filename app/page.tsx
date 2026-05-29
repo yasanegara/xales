@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import Navbar from '@/components/Navbar'
 import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
