@@ -11,7 +11,7 @@ export default function NewPostPage() {
   const [form, setForm] = useState<PostFormData>({
     title: '', description: '', type: 'markdown', content: '',
     category: '', tags: '', isPrivate: false, isPremium: false, price: '', discount: '',
-    affiliateEnabled: false, affiliateRate: '20', files: [],
+    affiliateEnabled: false, affiliateRate: '20', files: [], deletedFileIds: [],
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')

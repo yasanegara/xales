@@ -29,7 +29,12 @@ export async function PUT(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   try {
-    const { title, description, content, category, tags, published, isPrivate, isPremium, price, discount, affiliateEnabled, affiliateRate, newFiles } = await req.json()
+    const { title, description, content, category, tags, published, isPrivate, isPremium, price, discount, affiliateEnabled, affiliateRate, newFiles, deleteFileIds } = await req.json()
+
+    // Delete removed files first
+    if (deleteFileIds?.length) {
+      await db.postFile.deleteMany({ where: { id: { in: deleteFileIds }, postId: post.id } })
+    }
     const privateMode = isPrivate ?? post.isPrivate
 
     const updated = await db.post.update({

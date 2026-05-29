@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 
 export interface AttachedFile {
+  id?: string        // set for existing DB files; absent for new uploads
   name: string
   mimeType: string
   size: number
@@ -16,6 +17,7 @@ export interface AttachedFile {
 interface Props {
   files: AttachedFile[]
   onChange: (files: AttachedFile[]) => void
+  onDeleteExisting?: (id: string) => void
   isPremium: boolean
 }
 
@@ -47,7 +49,7 @@ function effectivePrice(price?: number, discount?: number) {
   return Math.round(price * (1 - discount / 100))
 }
 
-export default function PostFileUpload({ files, onChange, isPremium }: Props) {
+export default function PostFileUpload({ files, onChange, onDeleteExisting, isPremium }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [linkMode, setLinkMode] = useState(false)
@@ -73,7 +75,11 @@ export default function PostFileUpload({ files, onChange, isPremium }: Props) {
     setLinkMode(false)
   }
 
-  const remove = (i: number) => onChange(files.filter((_, idx) => idx !== i))
+  const remove = (i: number) => {
+    const file = files[i]
+    if (file.id && onDeleteExisting) onDeleteExisting(file.id)
+    onChange(files.filter((_, idx) => idx !== i))
+  }
 
   const update = (i: number, patch: Partial<AttachedFile>) =>
     onChange(files.map((f, idx) => idx === i ? { ...f, ...patch } : f))
@@ -137,6 +143,11 @@ export default function PostFileUpload({ files, onChange, isPremium }: Props) {
                     {file.mimeType === 'url/link' ? 'Link eksternal' : formatBytes(file.size)}
                   </div>
                 </div>
+                {file.id && (
+                  <span style={{ flexShrink: 0, fontSize: '0.7rem', fontWeight: 600, color: '#6e6a65', background: '#f0ede8', border: '1px solid #e5e0d8', borderRadius: '4px', padding: '0.15rem 0.5rem' }}>
+                    Tersimpan
+                  </span>
+                )}
                 <button type="button" onClick={() => update(i, { isFree: !file.isFree, price: undefined, discount: undefined })}
                   style={{ flexShrink: 0, fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer', padding: '0.25rem 0.625rem', borderRadius: '4px', border: `1px solid ${file.isFree ? '#86efac' : '#fcd34d'}`, background: file.isFree ? '#f0fdf4' : '#fffbeb', color: file.isFree ? '#15803d' : '#92400e' }}>
                   {file.isFree ? 'Gratis' : 'Berbayar'}

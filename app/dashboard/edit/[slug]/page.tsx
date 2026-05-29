@@ -31,7 +31,17 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
         discount: data.discount ? String(data.discount) : '',
         affiliateEnabled: data.affiliateEnabled ?? false,
         affiliateRate: data.affiliateRate ? String(data.affiliateRate) : '20',
-        files: [],
+        files: (data.files ?? []).map((f: { id: string; name: string; mimeType: string; size: number; isFree: boolean; price?: number; discount?: number; url?: string }) => ({
+          id: f.id,
+          name: f.name,
+          mimeType: f.mimeType,
+          size: f.size,
+          isFree: f.isFree,
+          price: f.price,
+          discount: f.discount,
+          url: f.url,
+        })),
+        deletedFileIds: [],
       })
     })
   }, [params])
@@ -56,7 +66,8 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
         price: (!form.isPrivate && form.isPremium && form.price) ? parseInt(form.price) : null,
         affiliateEnabled: !form.isPrivate && form.isPremium ? form.affiliateEnabled : false,
         affiliateRate: form.affiliateRate ? parseInt(form.affiliateRate) : 20,
-        newFiles: form.isPrivate ? [] : form.files,
+        newFiles: form.isPrivate ? [] : form.files.filter(f => !f.id),
+        deleteFileIds: form.deletedFileIds ?? [],
       }),
     })
     const data = await res.json()

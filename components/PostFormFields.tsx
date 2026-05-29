@@ -18,6 +18,7 @@ export interface PostFormData {
   affiliateEnabled: boolean
   affiliateRate: string     // % commission for affiliates
   files: AttachedFile[]
+  deletedFileIds: string[]
 }
 
 interface Props {
@@ -248,6 +249,7 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
         <PostFileUpload
           files={form.files}
           onChange={(files) => set({ files })}
+          onDeleteExisting={(id) => set({ deletedFileIds: [...(form.deletedFileIds ?? []), id] })}
           isPremium={form.isPremium}
         />
       </div>}
