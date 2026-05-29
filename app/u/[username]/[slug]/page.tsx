@@ -111,6 +111,71 @@ export default async function PostPage({ params, searchParams }: Props) {
 
   const canRead = !post.isPremium || isAuthor || isPurchased
 
+  // Login gate — all content requires login (author exempt)
+  if (!session && !isAuthor) {
+    const postUrl = `/@${post.author.username}/${slug}`
+    return (
+      <>
+        <Navbar />
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '2rem 1.5rem 4rem' }}>
+          {/* Post header teaser */}
+          <div style={{ marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+              <span style={{ background: post.type === 'html' ? '#ecfdf5' : '#eff6ff', color: post.type === 'html' ? '#059669' : '#2563eb', fontSize: '0.7rem', fontWeight: 600, padding: '0.2rem 0.6rem', borderRadius: '4px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                {post.type === 'html' ? 'App' : 'Article'}
+              </span>
+              {post.category && <span style={{ fontSize: '0.8125rem', color: '#6e6a65' }}>{post.category}</span>}
+            </div>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', fontWeight: 700, letterSpacing: '-0.02em', color: '#1a1a1a', lineHeight: 1.3, marginBottom: '0.875rem' }}>
+              {post.title}
+            </h1>
+            {post.description && (
+              <p style={{ color: '#6e6a65', fontSize: '1rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+                {post.description}
+              </p>
+            )}
+            {post.coverImage && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={post.coverImage} alt={post.title} style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: '10px', marginBottom: '1.5rem' }} />
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingTop: '1rem', borderTop: '1px solid #e5e0d8' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '7px', background: '#f0ede8', border: '1px solid #e5e0d8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8125rem', fontWeight: 700, color: '#6e6a65', overflow: 'hidden', flexShrink: 0 }}>
+                {post.author.profilePic
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={post.author.profilePic} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : (post.author.name?.[0] ?? post.author.username[0]).toUpperCase()
+                }
+              </div>
+              <span style={{ fontSize: '0.875rem', color: '#1a1a1a', fontWeight: 500 }}>
+                {post.author.name ?? `@${post.author.username}`}
+              </span>
+            </div>
+          </div>
+
+          {/* Login gate card */}
+          <div style={{ background: 'linear-gradient(150deg, #faf7f2 0%, #ede8e0 100%)', border: '1px solid #e5e0d8', borderRadius: '14px', padding: '2.5rem 2rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔒</div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1a1a1a', marginBottom: '0.625rem' }}>
+              Masuk untuk {post.type === 'html' ? 'menjalankan app' : 'membaca artikel'} ini
+            </h2>
+            <p style={{ fontSize: '0.9375rem', color: '#6e6a65', lineHeight: 1.6, marginBottom: '2rem' }}>
+              Tweak adalah platform untuk kreator berbagi artikel dan web app.<br />
+              Buat akun gratis dan akses ribuan konten menarik.
+            </p>
+            <div style={{ display: 'flex', gap: '0.875rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <a href={`/login?from=${encodeURIComponent(postUrl)}`} style={{ display: 'inline-block', background: '#1a1a1a', color: '#f7f5f2', fontWeight: 600, fontSize: '0.9375rem', padding: '0.75rem 2rem', borderRadius: '8px', textDecoration: 'none' }}>
+                Masuk
+              </a>
+              <a href={`/register?from=${encodeURIComponent(postUrl)}`} style={{ display: 'inline-block', background: '#ffffff', color: '#1a1a1a', fontWeight: 600, fontSize: '0.9375rem', padding: '0.75rem 2rem', borderRadius: '8px', border: '1px solid #e5e0d8', textDecoration: 'none' }}>
+                Daftar gratis
+              </a>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   // Extract ?ref= from the request — passed via searchParams
   const headings  = isMarkdown && canRead ? extractHeadings(post.content) : []
   const authorName = post.author.name ?? `@${post.author.username}`
