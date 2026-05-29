@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/prisma'
-
-export const PLATFORM_FEE_RATE = 0.10
+import { TRANSACTION_FEE } from '@/lib/fees'
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -59,12 +58,11 @@ export async function GET() {
     ...bundlePending.map(p => ({ id: p.id, type: 'bundle' as const, label: p.bundle.title, amount: p.amount, serviceFee: 0, payerName: p.payerName, createdAt: p.createdAt.toISOString() })),
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
-  // Revenue totals (exclude serviceFee from creator earnings)
+  // Revenue totals — transaction fee deducted per transaction (not passed to buyer)
   const totalRevenue = paidTransactions.reduce((s, t) => s + t.amount, 0)
-  const totalServiceFees = paidTransactions.reduce((s, t) => s + t.serviceFee, 0)
-  const revenueAfterFees = totalRevenue - totalServiceFees
-  const platformFee = Math.floor(revenueAfterFees * PLATFORM_FEE_RATE)
-  const creatorEarnings = revenueAfterFees - platformFee
+  const transactionCount = paidTransactions.length
+  const transactionFee = transactionCount * TRANSACTION_FEE
+  const creatorEarnings = totalRevenue - transactionFee
   const totalWithdrawn = withdrawals
     .filter(w => w.status === 'approved' || w.status === 'paid')
     .reduce((s, w) => s + w.amount, 0)
@@ -77,7 +75,7 @@ export async function GET() {
     bundle:  bundlePaid.reduce((s, p) => s + p.amount, 0),
   }
 
-  // Daily earnings — last 30 days
+  // Daily earnings — last 30 days (before transaction fee deduction)
   const now = new Date()
   const days: { date: string; amount: number }[] = []
   for (let i = 29; i >= 0; i--) {
@@ -86,12 +84,12 @@ export async function GET() {
     const dateStr = d.toISOString().slice(0, 10)
     const amount = paidTransactions
       .filter(t => t.createdAt.slice(0, 10) === dateStr)
-      .reduce((s, t) => s + t.amount - t.serviceFee, 0)
+      .reduce((s, t) => s + t.amount, 0)
     days.push({ date: dateStr, amount })
   }
 
   return NextResponse.json({
-    totalRevenue, platformFee, creatorEarnings, totalWithdrawn, availableBalance,
+    totalRevenue, transactionFee, transactionCount, creatorEarnings, totalWithdrawn, availableBalance,
     sourceBreakdown,
     dailyEarnings: days,
     transactions: paidTransactions,

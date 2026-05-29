@@ -34,7 +34,7 @@ interface Withdrawal {
 interface DayData { date: string; amount: number }
 interface SourceBreakdown { article: number; file: number; bundle: number }
 interface EarningsData {
-  totalRevenue: number; platformFee: number; creatorEarnings: number
+  totalRevenue: number; transactionFee: number; transactionCount: number; creatorEarnings: number
   totalWithdrawn: number; availableBalance: number
   sourceBreakdown: SourceBreakdown
   dailyEarnings: DayData[]
@@ -215,7 +215,7 @@ export default function EarningsPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.875rem', marginBottom: '2rem' }}>
         {[
           { label: 'Total Penjualan', value: formatIDR(data.totalRevenue), sub: 'semua transaksi lunas', accent: '#1a1a1a' },
-          { label: 'Fee Platform (10%)', value: formatIDR(data.platformFee), sub: 'dipotong otomatis', accent: '#dc2626' },
+          { label: 'Fee Transaksi', value: formatIDR(data.transactionFee), sub: `${data.transactionCount} transaksi × Rp 2.500`, accent: '#dc2626' },
           { label: 'Penghasilan Bersih', value: formatIDR(data.creatorEarnings), sub: 'setelah fee', accent: '#059669' },
           { label: 'Saldo Tersedia', value: formatIDR(data.availableBalance), sub: 'siap dicairkan', accent: '#0070f3' },
         ].map(s => (

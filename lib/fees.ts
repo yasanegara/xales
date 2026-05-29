@@ -1,4 +1,7 @@
-// Service fee per post type (IDR). Edit here to change rates.
+// Transaction fee per purchase (IDR) — paid by creator at withdrawal, not charged to buyer
+export const TRANSACTION_FEE = 2500
+
+// Service fee per post type (IDR). Legacy, kept for backwards compatibility
 export const SERVICE_FEES: Record<string, number> = {
   markdown: 1000,
   html: 1000,
