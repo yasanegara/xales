@@ -10,9 +10,6 @@ interface Creator {
   _count: { posts: number }
 }
 
-// Base positions relative to container center (reference width 560px)
-// Each avatar orbits its base position in an ellipse — phases distributed evenly
-// so the cluster always stays filled, never all converge/diverge at once.
 const CFGS = [
   { bx:-190, by:-55, sz:76, d:0.050, f:0.38, rx:10, ry: 8 },
   { bx:-112, by:-82, sz:58, d:0.080, f:0.43, rx: 8, ry:11 },
@@ -34,9 +31,17 @@ const CFGS = [
   { bx: 124, by: 20, sz:52, d:0.100, f:0.55, rx: 7, ry: 9 },
 ]
 
-// Evenly-distributed starting phase for each avatar (in radians)
-// This guarantees opposing movement: avatar i and i+N/2 always move opposite
 const PHASES = CFGS.map((_, i) => (i / CFGS.length) * Math.PI * 2)
+
+// Pre-compute connections between nearby avatars (base-position distance < 165px)
+const CONNECTIONS: [number, number][] = []
+for (let i = 0; i < CFGS.length; i++) {
+  for (let j = i + 1; j < CFGS.length; j++) {
+    const dx = CFGS[i].bx - CFGS[j].bx
+    const dy = CFGS[i].by - CFGS[j].by
+    if (Math.sqrt(dx * dx + dy * dy) < 165) CONNECTIONS.push([i, j])
+  }
+}
 
 export default function CreatorAvatars({
   creators,
@@ -47,32 +52,48 @@ export default function CreatorAvatars({
   totalUsers: number
   session: boolean
 }) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const avatarRefs   = useRef<(HTMLElement | null)[]>([])
-  const posRef       = useRef(CFGS.map(() => ({ x: 0, y: 0 })))
-  const mouseRef     = useRef({ nx: 0.5, ny: 0.5, active: false })
-  const idleTimer    = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [scale, setScale] = useState(1)
+  const containerRef  = useRef<HTMLDivElement>(null)
+  const avatarRefs    = useRef<(HTMLElement | null)[]>([])
+  const lineRefs      = useRef<(SVGLineElement | null)[]>([])
+  const nodeRefs      = useRef<(SVGCircleElement | null)[]>([])
+  const posRef        = useRef(CFGS.map(() => ({ x: 0, y: 0 })))
+  const mouseRef      = useRef({ nx: 0.5, ny: 0.5, active: false })
+  const idleTimer     = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const containerSize = useRef({ w: 560, h: 260 })
+  const scaleRef      = useRef(1)
 
+  const [scale, setScale] = useState(1)
   const count   = Math.min(creators.length, CFGS.length)
   const cfgsRef = useRef(CFGS.slice(0, count))
   cfgsRef.current = CFGS.slice(0, count)
 
-  // Scale to container width
+  // Valid connections given current count
+  const validConns = CONNECTIONS.filter(([a, b]) => a < count && b < count)
+
   useEffect(() => {
     if (!containerRef.current) return
     const obs = new ResizeObserver(([e]) => {
-      setScale(Math.min(1, Math.max(0.42, e.contentRect.width / 560)))
+      const w = e.contentRect.width
+      const h = e.contentRect.height
+      containerSize.current = { w, h }
+      const s = Math.min(1, Math.max(0.42, w / 560))
+      scaleRef.current = s
+      setScale(s)
     })
     obs.observe(containerRef.current)
     return () => obs.disconnect()
   }, [])
 
-  // RAF animation loop — direct DOM mutation, no re-renders
   useEffect(() => {
     let raf: number
     const loop = (ts: number) => {
       const t = ts / 1000
+      const s = scaleRef.current
+      const { w, h } = containerSize.current
+      const cx = w / 2
+      const cy = h / 2
+
+      // Update avatar positions
       cfgsRef.current.forEach((c, i) => {
         const el  = avatarRefs.current[i]
         const pos = posRef.current[i]
@@ -85,8 +106,6 @@ export default function CreatorAvatars({
           pos.x += (tx - pos.x) * 0.09
           pos.y += (ty - pos.y) * 0.09
         } else {
-          // Orbital: cos for X, sin for Y → each avatar traces an ellipse
-          // Phase distributed evenly across all avatars → always opposing movement
           const phase = PHASES[i]
           tx = Math.cos(t * c.f + phase) * c.rx
           ty = Math.sin(t * c.f + phase) * c.ry
@@ -95,10 +114,34 @@ export default function CreatorAvatars({
         }
         el.style.transform = `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px))`
       })
+
+      // Update SVG lines + nodes
+      validConns.forEach(([ai, bi], ci) => {
+        const lineEl = lineRefs.current[ci]
+        const nodeEl = nodeRefs.current[ci]
+        if (!lineEl || !nodeEl) return
+
+        const pa = posRef.current[ai]
+        const pb = posRef.current[bi]
+        const x1 = cx + CFGS[ai].bx * s + pa.x
+        const y1 = cy + CFGS[ai].by * s + pa.y
+        const x2 = cx + CFGS[bi].bx * s + pb.x
+        const y2 = cy + CFGS[bi].by * s + pb.y
+
+        lineEl.setAttribute('x1', x1.toFixed(1))
+        lineEl.setAttribute('y1', y1.toFixed(1))
+        lineEl.setAttribute('x2', x2.toFixed(1))
+        lineEl.setAttribute('y2', y2.toFixed(1))
+
+        nodeEl.setAttribute('cx', ((x1 + x2) / 2).toFixed(1))
+        nodeEl.setAttribute('cy', ((y1 + y2) / 2).toFixed(1))
+      })
+
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(raf)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const activate = (nx: number, ny: number) => {
@@ -124,7 +167,6 @@ export default function CreatorAvatars({
 
   return (
     <div>
-      {/* Cluster */}
       <div
         ref={containerRef}
         onMouseMove={onMouseMove}
@@ -133,6 +175,33 @@ export default function CreatorAvatars({
         onTouchEnd={() => { mouseRef.current.active = false }}
         style={{ position: 'relative', height: '260px', overflow: 'hidden' }}
       >
+        {/* SVG layer — lines + midpoint nodes */}
+        <svg
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            pointerEvents: 'none', zIndex: 0,
+            overflow: 'visible',
+          }}
+        >
+          {validConns.map(([, ], ci) => (
+            <g key={ci}>
+              <line
+                ref={el => { lineRefs.current[ci] = el }}
+                stroke="#d0c8bc"
+                strokeWidth="0.75"
+                strokeLinecap="round"
+              />
+              <circle
+                ref={el => { nodeRefs.current[ci] = el }}
+                r="2"
+                fill="#c4bbb0"
+              />
+            </g>
+          ))}
+        </svg>
+
+        {/* Avatar links — above SVG */}
         {CFGS.slice(0, count).map((cfg, i) => {
           const cr  = creators[i]
           const lbl = cr.name ?? `@${cr.username}`
@@ -149,7 +218,7 @@ export default function CreatorAvatars({
                 top:  `calc(50% + ${cfg.by * scale}px)`,
                 textDecoration: 'none',
                 display: 'block',
-                zIndex: CFGS.length - i,
+                zIndex: CFGS.length - i + 1,
               }}
             >
               <div
@@ -181,7 +250,7 @@ export default function CreatorAvatars({
         })}
       </div>
 
-      {/* Stats + CTA — below cluster */}
+      {/* Stats + CTA */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
         <div>
           <span style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#1a1a1a' }}>
