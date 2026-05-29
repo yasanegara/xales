@@ -92,83 +92,63 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         background: 'rgba(247,245,242,0.95)', backdropFilter: 'blur(8px)',
         borderBottom: '1px solid #e5e0d8',
       }}>
-        <div style={{ maxWidth: '860px', margin: '0 auto', padding: '0 1rem' }}>
-          {/* Row 1: tabs + type */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', height: '44px' }}>
-            <div style={{ display: 'flex', gap: '0.25rem' }}>
-              {tabs.map(t => {
-                if (t.needsAuth && !session) return null
-                const active = tab === t.key
-                return (
-                  <Link key={t.key} href={makeHref({ tab: t.key })}
-                    style={{ padding: '0.3rem 0.875rem', borderRadius: '20px', fontSize: '0.875rem', fontWeight: active ? 600 : 400, textDecoration: 'none', background: active ? '#1a1a1a' : 'transparent', color: active ? '#f7f5f2' : '#6e6a65', transition: 'all 0.15s' }}>
-                    {t.label}
-                  </Link>
-                )
-              })}
-            </div>
-            <div style={{ display: 'flex', gap: '0.25rem' }}>
-              {typeLinks.map(t => {
-                const active = type === t.value
-                return (
-                  <Link key={t.value} href={makeHref({ type: t.value, tag: '' })}
-                    style={{ padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: active ? 600 : 400, textDecoration: 'none', background: active ? '#f0ede8' : 'transparent', color: active ? '#1a1a1a' : '#9c9690', border: active ? '1px solid #d5c9b0' : '1px solid transparent' }}>
-                    {t.label}
-                  </Link>
-                )
-              })}
-            </div>
+        <div style={{ maxWidth: '860px', margin: '0 auto', padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', height: '44px' }}>
+          <div style={{ display: 'flex', gap: '0.25rem' }}>
+            {tabs.map(t => {
+              if (t.needsAuth && !session) return null
+              const active = tab === t.key
+              return (
+                <Link key={t.key} href={makeHref({ tab: t.key })}
+                  style={{ padding: '0.3rem 0.875rem', borderRadius: '20px', fontSize: '0.875rem', fontWeight: active ? 600 : 400, textDecoration: 'none', background: active ? '#1a1a1a' : 'transparent', color: active ? '#f7f5f2' : '#6e6a65', transition: 'all 0.15s' }}>
+                  {t.label}
+                </Link>
+              )
+            })}
           </div>
-
-          {/* Row 2: tag chips — only if tags exist */}
-          {topTags.length > 0 && (
-            <div style={{
-              display: 'flex', gap: '0.375rem', paddingBottom: '0.625rem',
-              overflowX: 'auto', scrollbarWidth: 'none',
-            }}>
-              <Link href={makeHref({ tag: '' })}
-                style={{
-                  flexShrink: 0, padding: '0.2rem 0.75rem', borderRadius: '20px',
-                  fontSize: '0.8rem', fontWeight: !tag ? 600 : 400, textDecoration: 'none',
-                  background: !tag ? '#1a1a1a' : '#f0ede8',
-                  color: !tag ? '#f7f5f2' : '#6e6a65',
-                  border: '1px solid transparent', whiteSpace: 'nowrap',
-                }}>
-                Semua
-              </Link>
-              {topTags.map(t => {
-                const active = tag === t
-                return (
-                  <Link key={t} href={makeHref({ tag: t })}
-                    style={{
-                      flexShrink: 0, padding: '0.2rem 0.75rem', borderRadius: '20px',
-                      fontSize: '0.8rem', fontWeight: active ? 600 : 400, textDecoration: 'none',
-                      background: active ? '#1a1a1a' : '#f0ede8',
-                      color: active ? '#f7f5f2' : '#6e6a65',
-                      border: '1px solid transparent', whiteSpace: 'nowrap',
-                    }}>
-                    #{t}
-                  </Link>
-                )
-              })}
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: '0.25rem' }}>
+            {typeLinks.map(t => {
+              const active = type === t.value
+              return (
+                <Link key={t.value} href={makeHref({ type: t.value, tag: '' })}
+                  style={{ padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: active ? 600 : 400, textDecoration: 'none', background: active ? '#f0ede8' : 'transparent', color: active ? '#1a1a1a' : '#9c9690', border: active ? '1px solid #d5c9b0' : '1px solid transparent' }}>
+                  {t.label}
+                </Link>
+              )
+            })}
+          </div>
         </div>
       </div>
 
       <main style={{ maxWidth: '860px', margin: '0 auto', padding: '1.25rem 1rem 3rem' }}>
         {!session && (
-          <div style={{ textAlign: 'center', padding: '2rem 0 1.75rem', borderBottom: '1px solid #e5e0d8', marginBottom: '1.5rem' }}>
-            <h1 style={{ fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#1a1a1a', marginBottom: '0.625rem' }}>
+          <div style={{ textAlign: 'center', padding: '2.25rem 0 2rem', borderBottom: '1px solid #e5e0d8', marginBottom: '1.5rem' }}>
+            <h1 style={{ fontSize: 'clamp(1.875rem, 5vw, 2.75rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#1a1a1a', marginBottom: '0.75rem', fontFamily: 'Georgia, serif' }}>
               Publish. Share. Earn.
             </h1>
-            <p style={{ color: '#6e6a65', fontSize: '1rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-              Platform untuk kreator Indonesia: tulis artikel, bangun audiens, monetisasi karya.
+            <p style={{ color: '#6e6a65', fontSize: '1rem', lineHeight: 1.7, marginBottom: '1.5rem', maxWidth: '480px', margin: '0 auto 1.5rem' }}>
+              Platform untuk kreator Indonesia — tulis artikel, bangun audiens, monetisasi karya.
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
               <Link href="/register" style={{ background: '#1a1a1a', color: '#f7f5f2', padding: '0.625rem 1.5rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 600 }}>Mulai gratis</Link>
               <Link href="/login" style={{ background: '#ffffff', color: '#1a1a1a', padding: '0.625rem 1.5rem', borderRadius: '8px', border: '1px solid #e5e0d8', textDecoration: 'none', fontSize: '0.9375rem' }}>Masuk</Link>
             </div>
+          </div>
+        )}
+
+        {/* Tag chips — below hero */}
+        {topTags.length > 0 && (
+          <div style={{ display: 'flex', gap: '0.375rem', marginBottom: '1.25rem', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: '2px' }}>
+            <Link href={makeHref({ tag: '' })} style={{ flexShrink: 0, padding: '0.3rem 0.875rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: !tag ? 600 : 400, textDecoration: 'none', background: !tag ? '#1a1a1a' : '#f0ede8', color: !tag ? '#f7f5f2' : '#6e6a65', whiteSpace: 'nowrap', border: '1px solid transparent' }}>
+              Semua
+            </Link>
+            {topTags.map(t => {
+              const active = tag === t
+              return (
+                <Link key={t} href={makeHref({ tag: t })} style={{ flexShrink: 0, padding: '0.3rem 0.875rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: active ? 600 : 400, textDecoration: 'none', background: active ? '#1a1a1a' : '#f0ede8', color: active ? '#f7f5f2' : '#6e6a65', whiteSpace: 'nowrap', border: '1px solid transparent' }}>
+                  #{t}
+                </Link>
+              )
+            })}
           </div>
         )}
 
