@@ -61,8 +61,22 @@ export default function Navbar() {
                   textDecoration: 'none',
                   letterSpacing: '-0.01em',
                   fontFamily: 'var(--font-brand, system-ui, sans-serif)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.1rem',
                 }}
               >
+                <span style={{
+                  fontFamily: 'var(--font-hand, cursive)',
+                  fontWeight: 400,
+                  fontSize: '1rem',
+                  display: 'inline-block',
+                  transform: 'rotate(-12deg) translateY(1px)',
+                  marginRight: '0.15rem',
+                  opacity: 0.85,
+                }}>
+                  nge-
+                </span>
                 + t
               </Link>
 
