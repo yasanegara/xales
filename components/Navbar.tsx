@@ -35,29 +35,15 @@ export default function Navbar() {
         <Link
           href="/"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            textDecoration: 'none',
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/tweak-icon.svg"
-            alt="tweak icon"
-            width={28}
-            height={28}
-            style={{ display: 'block', borderRadius: '6px' }}
-          />
-          <span style={{
             fontSize: '1.25rem',
             fontWeight: 700,
             color: '#1a1a1a',
+            textDecoration: 'none',
             letterSpacing: '-0.01em',
             fontFamily: 'var(--font-brand, system-ui, sans-serif)',
-          }}>
-            tweak
-          </span>
+          }}
+        >
+          tweak
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
