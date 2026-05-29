@@ -46,11 +46,7 @@ export default function FeedGrid({ initialPosts, initialHasMore, initialCursor, 
 
   return (
     <div>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '1.25rem',
-      }}>
+      <div className="feed-grid">
         {posts.map((post, i) => (
           <div key={post.id}>
             {i > 0 && i % 16 === 0 && (

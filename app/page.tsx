@@ -156,7 +156,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       {/* Hero — only for logged-out users */}
       {!session && (
         <div style={{ borderBottom: '1px solid #e5e0d8', background: '#ffffff' }}>
-          <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '4rem 1.5rem 4.5rem', textAlign: 'center' }}>
+          <div style={{ maxWidth: '1100px', margin: '0 auto' }} className="home-hero">
             <h1 style={{
               fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 800,
               letterSpacing: '-0.04em', color: '#1a1a1a', lineHeight: 1.1,
@@ -194,7 +194,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {/* Creator showcase — always visible */}
       <div style={{ borderBottom: '1px solid #e5e0d8', background: '#fafaf8' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }} className="home-showcase">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div>
               <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1a1a1a' }}>
@@ -209,7 +209,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             )}
           </div>
           {/* Creator avatars */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div className="creator-strip">
             {recentCreators.map(creator => (
               <Link key={creator.username} href={`/@${creator.username}`}
                 style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.625rem 0.375rem 0.375rem', background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '20px', transition: 'border-color 0.15s' }}>
@@ -234,7 +234,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       </div>
 
-      <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '1.75rem 1.5rem 4rem' }}>
+      <main style={{ maxWidth: '1100px', margin: '0 auto' }} className="home-main">
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
           <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
             {tab === 'trending' ? 'Trending' : tab === 'diikuti' ? 'Diikuti' : 'Jelajahi'}
@@ -258,11 +258,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
         {/* CTA join banner — bottom of feed, non-logged in only */}
         {!session && (
-          <div style={{
-            marginTop: '4rem', padding: '3rem 2rem',
-            background: '#1a1a1a', borderRadius: '16px',
-            textAlign: 'center',
-          }}>
+          <div className="home-cta">
             <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em', marginBottom: '0.75rem', lineHeight: 1.2 }}>
               Siap jadi kreator?
             </h2>
