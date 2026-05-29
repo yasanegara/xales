@@ -64,13 +64,13 @@ function PostCard({ post, idx, username }: { post: GridPost; idx: number; userna
         <img
           src={post.coverImage}
           alt={post.title}
+          loading="lazy"
+          decoding="async"
           style={{
-            position: 'absolute',
-            top: '50%', left: '50%',
-            transform: `translate(-50%, -50%) scale(${hovered ? 1.04 : 1})`,
-            minWidth: '100%', minHeight: '100%',
-            width: 'auto', height: 'auto',
-            maxWidth: 'none',
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center',
+            transform: hovered ? 'scale(1.04)' : 'scale(1)',
             transition: 'transform 0.35s ease',
           }}
         />

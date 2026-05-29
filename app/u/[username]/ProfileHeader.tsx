@@ -20,12 +20,6 @@ interface Props {
   reputationScore: number
 }
 
-function reputationLevel(score: number) {
-  if (score >= 2000) return { label: 'Master',      color: '#7c3aed', bg: '#f5f3ff' }
-  if (score >= 500)  return { label: 'Kreator Pro', color: '#0284c7', bg: '#f0f9ff' }
-  if (score >= 100)  return { label: 'Kontributor', color: '#059669', bg: '#f0fdf4' }
-  return               { label: 'Pemula',         color: '#9c9690', bg: '#f7f5f2' }
-}
 
 const BADGES = [
   { icon: '✍️', label: 'Kreator', desc: 'Sudah publish minimal 1 konten', color: '#6366f1', bg: '#eef2ff', active: (p: Props) => p.postCount >= 1 },
@@ -36,7 +30,7 @@ const BADGES = [
 export default function ProfileHeader(props: Props) {
   const { username, name, profilePic, bio, status, createdAt,
     postCount, followers, following, totalViews, totalLikes,
-    verified, reputationScore } = props
+    verified } = props
 
   const [mobile, setMobile] = useState(false)
   useEffect(() => {
@@ -47,7 +41,6 @@ export default function ProfileHeader(props: Props) {
   }, [])
 
   const sz   = mobile ? '88px' : '110px'
-  const lvl  = reputationLevel(reputationScore)
 
   const stats = [
     { label: 'Post',      value: postCount },
@@ -56,7 +49,7 @@ export default function ProfileHeader(props: Props) {
   ]
 
   return (
-    <div style={{ display: 'flex', gap: mobile ? '1.25rem' : '2rem', marginBottom: '2rem', alignItems: 'flex-start' }}>
+    <div style={{ display: 'flex', gap: mobile ? '1.25rem' : '2rem', marginBottom: '1rem', alignItems: 'flex-start' }}>
 
       {/* Left col */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, width: sz, gap: '6px' }}>
@@ -94,12 +87,6 @@ export default function ProfileHeader(props: Props) {
           <span style={{ fontSize: '0.65rem', fontWeight: 600, color: verified ? '#1d4ed8' : '#6e6a65' }}>Terverifikasi</span>
         </div>
 
-        {/* Reputation */}
-        <div title={`Skor reputasi: ${reputationScore}`}
-          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: lvl.bg, border: `1px solid ${lvl.color}44`, borderRadius: '7px', padding: '0.275rem 0.5rem' }}>
-          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: lvl.color }}>{lvl.label}</span>
-          <span style={{ fontSize: '0.65rem', fontWeight: 600, color: lvl.color, opacity: 0.7 }}>{reputationScore}</span>
-        </div>
       </div>
 
       {/* Right col */}
