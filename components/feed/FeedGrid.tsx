@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { FullCard, type FeedPost } from './FeedCard'
+import { GridCard, type FeedPost } from './FeedCard'
+import HeroCarousel from './HeroCarousel'
 import SuggestedUsers from '@/components/SuggestedUsers'
+
+const HERO_COUNT = 5
 
 interface Props {
   initialPosts: FeedPost[]
@@ -42,34 +45,34 @@ export default function FeedGrid({ initialPosts, initialHasMore, initialCursor, 
     )
   }
 
+  const heroPosts = posts.slice(0, HERO_COUNT)
+  const gridPosts = posts.slice(HERO_COUNT)
+
   return (
     <div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
-        {posts.map((post, i) => (
-          <div key={post.id}>
-            {i > 0 && i % 6 === 0 && (
-              <div style={{ margin: '0.5rem 0 1rem' }}>
-                <SuggestedUsers compact />
-              </div>
-            )}
-            <FullCard post={post} />
-          </div>
-        ))}
-      </div>
+      {/* Hero carousel */}
+      <HeroCarousel posts={heroPosts} />
+
+      {/* 2-column grid */}
+      {gridPosts.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem', marginTop: '0.25rem', marginBottom: '1.5rem' }}>
+          {gridPosts.map((post, i) => (
+            <div key={post.id}>
+              {i > 0 && i % 8 === 0 && (
+                <div style={{ gridColumn: '1 / -1', margin: '0.5rem 0' }}>
+                  <SuggestedUsers compact />
+                </div>
+              )}
+              <GridCard post={post} />
+            </div>
+          ))}
+        </div>
+      )}
 
       {hasMore && (
         <div style={{ textAlign: 'center', paddingBottom: '2rem' }}>
-          <button
-            onClick={loadMore}
-            disabled={loading}
-            style={{
-              padding: '0.625rem 2rem', borderRadius: '8px',
-              border: '1px solid #e5e0d8', background: '#ffffff',
-              color: '#1a1a1a', fontSize: '0.875rem', fontWeight: 500,
-              cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.6 : 1,
-              transition: 'border-color 0.15s',
-            }}
-          >
+          <button onClick={loadMore} disabled={loading}
+            style={{ padding: '0.625rem 2rem', borderRadius: '8px', border: '1px solid #e5e0d8', background: '#ffffff', color: '#1a1a1a', fontSize: '0.875rem', fontWeight: 500, cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.6 : 1 }}>
             {loading ? 'Memuat...' : 'Tampilkan lebih banyak'}
           </button>
         </div>

@@ -51,6 +51,67 @@ function PremiumBadge() {
   return <Badge bg="#fef3c7" color="#b45309">Premium</Badge>
 }
 
+// ─── Grid card (2-column, 16:9 cover) ────────────────────────────────────
+export function GridCard({ post }: { post: FeedPost }) {
+  const [hovered, setHovered] = useState(false)
+  const isApp  = post.type === 'html'
+  const fallback = isApp
+    ? 'linear-gradient(145deg, #1e3a5f, #0f2340)'
+    : 'linear-gradient(145deg, #2d1b0e, #1a0f07)'
+
+  return (
+    <Link href={`/@${post.author.username}/${post.slug}`}
+      style={{ textDecoration: 'none', display: 'block' }}
+      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+    >
+      <article style={{
+        background: '#ffffff',
+        border: `1px solid ${hovered ? '#c8c0b4' : '#e5e0d8'}`,
+        borderRadius: '12px', overflow: 'hidden',
+        boxShadow: hovered ? '0 6px 24px rgba(0,0,0,0.09)' : '0 1px 4px rgba(0,0,0,0.04)',
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+      }}>
+        {/* Cover 16:9 */}
+        <div style={{ aspectRatio: '16/9', position: 'relative', overflow: 'hidden' }}>
+          {post.coverImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={post.coverImage} alt={post.title} loading="lazy" decoding="async"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.04)' : 'scale(1)', transition: 'transform 0.4s ease' }} />
+          ) : (
+            <div style={{ position: 'absolute', inset: 0, background: fallback, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '2rem', opacity: 0.2 }}>{isApp ? '⬡' : '✦'}</span>
+            </div>
+          )}
+          {/* Type badge */}
+          <div style={{ position: 'absolute', top: '0.5rem', left: '0.5rem', display: 'flex', gap: '0.3rem' }}>
+            <Badge bg={isApp ? '#065f46' : '#1e40af'} color="#fff">{isApp ? 'App' : 'Artikel'}</Badge>
+            {post.isPremium && <Badge bg="#b45309" color="#fef3c7">★</Badge>}
+          </div>
+        </div>
+
+        {/* Text */}
+        <div style={{ padding: '0.75rem' }}>
+          <h3 style={{
+            fontSize: '0.9rem', fontWeight: 700, color: '#1a1a1a',
+            lineHeight: 1.4, margin: '0 0 0.375rem',
+            fontFamily: 'Georgia, serif',
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden',
+          }}>
+            {post.title}
+          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.7rem', color: '#9c9690' }}>
+            <Avatar author={post.author} size={16} />
+            <span style={{ color: '#6e6a65', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '80px' }}>
+              {post.author.name ?? `@${post.author.username}`}
+            </span>
+            <span style={{ flexShrink: 0 }}>· 👁 {post.viewCount.toLocaleString()}</span>
+          </div>
+        </div>
+      </article>
+    </Link>
+  )
+}
+
 // ─── Full card (Instagram-style, one per screen) ──────────────────────────
 export function FullCard({ post }: { post: FeedPost }) {
   const [hovered, setHovered] = useState(false)
