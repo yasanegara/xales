@@ -5,9 +5,12 @@ export const runtime = 'nodejs'
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const host  = new URL(req.url).host
-  const proto = req.headers.get('x-forwarded-proto') ?? 'https'
-  const baseUrl = `${proto}://${host}`
+  const fwdHost  = req.headers.get('x-forwarded-host')
+  const fwdProto = req.headers.get('x-forwarded-proto') ?? 'https'
+  const rawHost  = new URL(req.url).host
+  const host     = (fwdHost ?? (rawHost.includes('localhost') ? 'xales.id' : rawHost)) || 'xales.id'
+  const proto    = fwdHost ? fwdProto : 'https'
+  const baseUrl  = `${proto}://${host}`
 
   const post = await db.post.findUnique({
     where: { slug, published: true },

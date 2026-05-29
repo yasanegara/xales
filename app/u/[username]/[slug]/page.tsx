@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -36,11 +38,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const authorName = post.author.name ?? `@${post.author.username}`
   const description = post.description ?? undefined
 
-  // Derive base URL from actual request headers — reliable regardless of env vars
+  // Derive base URL — prefer forwarded host (Railway proxy sets this)
   const headersList = await headers()
-  const host  = headersList.get('host') ?? 'xales.id'
-  const proto = headersList.get('x-forwarded-proto') ?? 'https'
-  const baseUrl = `${proto}://${host}`
+  const fwdHost  = headersList.get('x-forwarded-host')
+  const fwdProto = headersList.get('x-forwarded-proto') ?? 'https'
+  const rawHost  = headersList.get('host') ?? ''
+  const host     = (fwdHost ?? (rawHost.includes('localhost') ? 'xales.id' : rawHost)) || 'xales.id'
+  const proto    = fwdHost ? fwdProto : 'https'
+  const baseUrl  = `${proto}://${host}`
 
   // Use cover image directly if it's a public URL; generated OG card otherwise
   const isUrl = post.coverImage?.startsWith('http')
