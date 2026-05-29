@@ -13,24 +13,24 @@ interface Creator {
 // Base positions relative to container center (reference width 560px)
 // depth = parallax sensitivity, freq/amp = idle float params
 const CFGS = [
-  { bx:-185, by:-50, sz:52, d:0.050, fx:0.40, fy:0.35, px:0.0, py:1.2, ax:8,  ay:10 },
-  { bx:-110, by:-75, sz:40, d:0.080, fx:0.50, fy:0.45, px:2.1, py:0.7, ax:7,  ay:12 },
-  { bx: -42, by:-65, sz:36, d:0.100, fx:0.30, fy:0.55, px:1.0, py:2.5, ax:6,  ay: 8 },
-  { bx:  28, by:-72, sz:56, d:0.040, fx:0.45, fy:0.40, px:3.2, py:0.3, ax:9,  ay:11 },
-  { bx:  98, by:-58, sz:44, d:0.070, fx:0.35, fy:0.50, px:0.8, py:1.8, ax:7,  ay: 9 },
-  { bx: 165, by:-44, sz:48, d:0.060, fx:0.55, fy:0.30, px:1.5, py:0.9, ax:8,  ay:13 },
-  { bx:-195, by: 12, sz:36, d:0.090, fx:0.42, fy:0.48, px:2.7, py:1.4, ax:6,  ay: 8 },
-  { bx:-125, by: 36, sz:56, d:0.040, fx:0.38, fy:0.42, px:0.5, py:2.1, ax:10, ay:12 },
-  { bx: -52, by: 58, sz:44, d:0.070, fx:0.52, fy:0.36, px:1.9, py:0.6, ax:7,  ay:10 },
-  { bx:  18, by: 50, sz:36, d:0.090, fx:0.31, fy:0.53, px:2.3, py:1.7, ax:6,  ay: 9 },
-  { bx:  88, by: 65, sz:52, d:0.050, fx:0.47, fy:0.38, px:0.2, py:2.8, ax:8,  ay:11 },
-  { bx: 158, by: 42, sz:40, d:0.080, fx:0.36, fy:0.44, px:3.0, py:1.0, ax:7,  ay:10 },
-  { bx:-170, by:-15, sz:44, d:0.060, fx:0.44, fy:0.52, px:1.2, py:2.3, ax:8,  ay: 9 },
-  { bx: 192, by: 14, sz:36, d:0.090, fx:0.33, fy:0.41, px:2.6, py:0.4, ax:6,  ay:11 },
-  { bx: -88, by: -8, sz:48, d:0.050, fx:0.49, fy:0.46, px:0.9, py:1.5, ax:9,  ay:12 },
-  { bx:  54, by:-18, sz:40, d:0.070, fx:0.41, fy:0.34, px:1.7, py:2.6, ax:7,  ay: 8 },
-  { bx: -18, by: 22, sz:52, d:0.040, fx:0.37, fy:0.51, px:3.1, py:0.8, ax:8,  ay:10 },
-  { bx: 122, by: 18, sz:36, d:0.100, fx:0.53, fy:0.39, px:0.4, py:1.9, ax:6,  ay: 9 },
+  { bx:-190, by:-55, sz:76, d:0.050, fx:0.40, fy:0.35, px:0.0, py:1.2, ax:8,  ay:10 },
+  { bx:-112, by:-82, sz:58, d:0.080, fx:0.50, fy:0.45, px:2.1, py:0.7, ax:7,  ay:12 },
+  { bx: -44, by:-70, sz:52, d:0.100, fx:0.30, fy:0.55, px:1.0, py:2.5, ax:6,  ay: 8 },
+  { bx:  28, by:-78, sz:82, d:0.040, fx:0.45, fy:0.40, px:3.2, py:0.3, ax:9,  ay:11 },
+  { bx: 100, by:-62, sz:64, d:0.070, fx:0.35, fy:0.50, px:0.8, py:1.8, ax:7,  ay: 9 },
+  { bx: 170, by:-48, sz:70, d:0.060, fx:0.55, fy:0.30, px:1.5, py:0.9, ax:8,  ay:13 },
+  { bx:-200, by: 14, sz:52, d:0.090, fx:0.42, fy:0.48, px:2.7, py:1.4, ax:6,  ay: 8 },
+  { bx:-128, by: 42, sz:82, d:0.040, fx:0.38, fy:0.42, px:0.5, py:2.1, ax:10, ay:12 },
+  { bx: -54, by: 66, sz:64, d:0.070, fx:0.52, fy:0.36, px:1.9, py:0.6, ax:7,  ay:10 },
+  { bx:  18, by: 56, sz:52, d:0.090, fx:0.31, fy:0.53, px:2.3, py:1.7, ax:6,  ay: 9 },
+  { bx:  90, by: 72, sz:76, d:0.050, fx:0.47, fy:0.38, px:0.2, py:2.8, ax:8,  ay:11 },
+  { bx: 162, by: 48, sz:58, d:0.080, fx:0.36, fy:0.44, px:3.0, py:1.0, ax:7,  ay:10 },
+  { bx:-174, by:-18, sz:64, d:0.060, fx:0.44, fy:0.52, px:1.2, py:2.3, ax:8,  ay: 9 },
+  { bx: 196, by: 16, sz:52, d:0.090, fx:0.33, fy:0.41, px:2.6, py:0.4, ax:6,  ay:11 },
+  { bx: -90, by: -8, sz:70, d:0.050, fx:0.49, fy:0.46, px:0.9, py:1.5, ax:9,  ay:12 },
+  { bx:  56, by:-20, sz:58, d:0.070, fx:0.41, fy:0.34, px:1.7, py:2.6, ax:7,  ay: 8 },
+  { bx: -18, by: 24, sz:76, d:0.040, fx:0.37, fy:0.51, px:3.1, py:0.8, ax:8,  ay:10 },
+  { bx: 124, by: 20, sz:52, d:0.100, fx:0.53, fy:0.39, px:0.4, py:1.9, ax:6,  ay: 9 },
 ]
 
 export default function CreatorAvatars({
@@ -116,21 +116,6 @@ export default function CreatorAvatars({
 
   return (
     <div>
-      {/* Stats row */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <div>
-          <span style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#1a1a1a' }}>
-            {totalUsers.toLocaleString('id-ID')} kreator
-          </span>
-          <span style={{ fontSize: '0.875rem', color: '#9c9690' }}> sudah bergabung</span>
-        </div>
-        {!session && (
-          <Link href="/register" style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#1a1a1a', textDecoration: 'none', borderBottom: '1.5px solid #1a1a1a', paddingBottom: '1px' }}>
-            Bergabung sekarang →
-          </Link>
-        )}
-      </div>
-
       {/* Cluster */}
       <div
         ref={containerRef}
@@ -138,7 +123,7 @@ export default function CreatorAvatars({
         onMouseLeave={() => { mouseRef.current.active = false }}
         onTouchMove={onTouchMove}
         onTouchEnd={() => { mouseRef.current.active = false }}
-        style={{ position: 'relative', height: '200px', overflow: 'hidden' }}
+        style={{ position: 'relative', height: '260px', overflow: 'hidden' }}
       >
         {CFGS.slice(0, count).map((cfg, i) => {
           const cr  = creators[i]
@@ -186,6 +171,21 @@ export default function CreatorAvatars({
             </Link>
           )
         })}
+      </div>
+
+      {/* Stats + CTA — below cluster */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div>
+          <span style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#1a1a1a' }}>
+            {totalUsers.toLocaleString('id-ID')} kreator
+          </span>
+          <span style={{ fontSize: '0.875rem', color: '#9c9690' }}> sudah bergabung</span>
+        </div>
+        {!session && (
+          <Link href="/register" style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#1a1a1a', textDecoration: 'none', borderBottom: '1.5px solid #1a1a1a', paddingBottom: '1px' }}>
+            Bergabung sekarang →
+          </Link>
+        )}
       </div>
     </div>
   )
