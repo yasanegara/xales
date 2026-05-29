@@ -49,6 +49,18 @@ export default function Navbar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           {session ? (
             <>
+              <span style={{
+                fontFamily: 'var(--font-hand, cursive)',
+                fontWeight: 600,
+                fontSize: '1.05rem',
+                color: '#1a1a1a',
+                display: 'inline-block',
+                transform: 'rotate(-12deg) translateY(2px)',
+                pointerEvents: 'none',
+                userSelect: 'none',
+              }}>
+                Nge-
+              </span>
               <Link
                 href="/dashboard/new"
                 style={{
@@ -61,22 +73,8 @@ export default function Navbar() {
                   textDecoration: 'none',
                   letterSpacing: '-0.01em',
                   fontFamily: 'var(--font-brand, system-ui, sans-serif)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.1rem',
                 }}
               >
-                <span style={{
-                  fontFamily: 'var(--font-hand, cursive)',
-                  fontWeight: 400,
-                  fontSize: '1rem',
-                  display: 'inline-block',
-                  transform: 'rotate(-12deg) translateY(1px)',
-                  marginRight: '0.15rem',
-                  opacity: 0.85,
-                }}>
-                  nge-
-                </span>
                 + t
               </Link>
 
