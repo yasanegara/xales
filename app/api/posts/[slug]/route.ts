@@ -29,7 +29,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   try {
-    const { title, description, content, category, tags, published, isPrivate, isPremium, price, discount, affiliateEnabled, affiliateRate, newFiles, deleteFileIds } = await req.json()
+    const { title, description, content, category, tags, published, isPrivate, isPremium, price, discount, affiliateEnabled, affiliateRate, coverImage, newFiles, deleteFileIds } = await req.json()
 
     // Delete removed files first
     if (deleteFileIds?.length) {
@@ -48,6 +48,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
         price: (!privateMode && isPremium) ? (price ?? null) : null,
         discount: (!privateMode && isPremium) ? (discount ?? null) : null,
         affiliateEnabled: (!privateMode && isPremium) ? (affiliateEnabled ?? false) : false,
+        ...(coverImage !== undefined ? { coverImage: coverImage ?? null } : {}),
         affiliateRate: affiliateRate ?? 20,
         ...(newFiles?.length
           ? {

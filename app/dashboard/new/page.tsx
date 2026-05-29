@@ -11,7 +11,7 @@ export default function NewPostPage() {
   const [form, setForm] = useState<PostFormData>({
     title: '', description: '', type: 'markdown', content: '',
     category: '', tags: '', isPrivate: false, isPremium: false, price: '', discount: '',
-    affiliateEnabled: false, affiliateRate: '20', files: [], deletedFileIds: [],
+    affiliateEnabled: false, affiliateRate: '20', coverImage: '', files: [], deletedFileIds: [],
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -37,6 +37,7 @@ export default function NewPostPage() {
         price: (!form.isPrivate && form.isPremium && form.price) ? parseInt(form.price) : null,
         affiliateEnabled: !form.isPrivate && form.isPremium ? form.affiliateEnabled : false,
         affiliateRate: form.affiliateRate ? parseInt(form.affiliateRate) : 20,
+        coverImage: form.coverImage || null,
         files: form.isPrivate ? [] : form.files,
       }),
     })

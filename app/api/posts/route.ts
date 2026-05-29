@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const { title, description, type, content, category, tags, published, isPrivate, isPremium, price, discount, affiliateEnabled, affiliateRate, files } = await req.json()
+    const { title, description, type, content, category, tags, published, isPrivate, isPremium, price, discount, affiliateEnabled, affiliateRate, coverImage, files } = await req.json()
 
     if (!title || !type || !content)
       return NextResponse.json({ error: 'Title, type, dan content wajib diisi' }, { status: 400 })
@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
         discount: (!privateMode && isPremium) ? (discount ?? null) : null,
         affiliateEnabled: (!privateMode && isPremium) ? (affiliateEnabled ?? false) : false,
         affiliateRate: affiliateRate ?? 20,
+        coverImage: coverImage ?? null,
         authorId: session.user.id,
         ...(files?.length
           ? {

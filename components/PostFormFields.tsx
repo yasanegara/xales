@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef, useState } from 'react'
 import PostEditor from './PostEditor'
 import PostFileUpload from './PostFileUpload'
 import type { AttachedFile } from './PostFileUpload'
@@ -17,6 +18,7 @@ export interface PostFormData {
   discount: string          // % off article price
   affiliateEnabled: boolean
   affiliateRate: string     // % commission for affiliates
+  coverImage: string
   files: AttachedFile[]
   deletedFileIds: string[]
 }
@@ -39,6 +41,20 @@ export function formatIDR(value: string) {
 
 export default function PostFormFields({ form, onChange, error, loading, isEdit, onSaveDraft, onPublish }: Props) {
   const set = (patch: Partial<PostFormData>) => onChange({ ...form, ...patch })
+  const coverInputRef = useRef<HTMLInputElement>(null)
+  const [urlMode, setUrlMode] = useState(false)
+  const [urlInput, setUrlInput] = useState('')
+
+  const handleCoverFile = (file: File) => {
+    if (file.size > 5 * 1024 * 1024) { alert('Cover maks 5MB'); return }
+    const reader = new FileReader()
+    reader.onload = (e) => set({ coverImage: e.target!.result as string })
+    reader.readAsDataURL(file)
+  }
+
+  const applyCoverUrl = () => {
+    if (urlInput.trim()) { set({ coverImage: urlInput.trim() }); setUrlInput(''); setUrlMode(false) }
+  }
 
   const inputStyle = {
     width: '100%', background: '#fafaf8', border: '1px solid #e5e0d8',
@@ -75,6 +91,67 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
           </div>
         </div>
       )}
+
+      {/* Cover image */}
+      <div style={card}>
+        <label style={labelStyle}>Cover Image</label>
+        {form.coverImage ? (
+          <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={form.coverImage}
+              alt="Cover"
+              style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+            />
+            <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', display: 'flex', gap: '0.375rem' }}>
+              <button type="button" onClick={() => coverInputRef.current?.click()}
+                style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', border: 'none', borderRadius: '6px', padding: '0.375rem 0.625rem', color: '#fff', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
+                Ganti
+              </button>
+              <button type="button" onClick={() => set({ coverImage: '' })}
+                style={{ background: 'rgba(220,38,38,0.75)', backdropFilter: 'blur(4px)', border: 'none', borderRadius: '6px', padding: '0.375rem 0.625rem', color: '#fff', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
+                Hapus
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div
+            onClick={() => coverInputRef.current?.click()}
+            style={{ border: '2px dashed #d0c9b8', borderRadius: '8px', aspectRatio: '16/9', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', background: '#fafaf8', marginBottom: '0.75rem' }}
+          >
+            <span style={{ fontSize: '1.75rem' }}>🖼</span>
+            <span style={{ fontSize: '0.875rem', color: '#9c9690' }}>Klik untuk upload cover</span>
+            <span style={{ fontSize: '0.75rem', color: '#b0a898' }}>JPG, PNG · maks 5MB · rasio 16:9 ideal</span>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {!form.coverImage && (
+            <button type="button" onClick={() => setUrlMode(v => !v)}
+              style={{ fontSize: '0.8125rem', color: urlMode ? '#1a1a1a' : '#6e6a65', background: urlMode ? '#f0ede8' : 'transparent', border: '1px solid #e5e0d8', borderRadius: '6px', padding: '0.3rem 0.75rem', cursor: 'pointer' }}>
+              🔗 Pakai URL
+            </button>
+          )}
+        </div>
+
+        {urlMode && !form.coverImage && (
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.625rem' }}>
+            <input
+              type="url" value={urlInput} onChange={e => setUrlInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && applyCoverUrl()}
+              placeholder="https://images.unsplash.com/..."
+              style={{ flex: 1, background: '#fafaf8', border: '1px solid #e5e0d8', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.875rem', color: '#1a1a1a', outline: 'none' }}
+            />
+            <button type="button" onClick={applyCoverUrl} disabled={!urlInput.trim()}
+              style={{ background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.5rem 1rem', fontSize: '0.875rem', fontWeight: 600, cursor: urlInput.trim() ? 'pointer' : 'not-allowed', opacity: urlInput.trim() ? 1 : 0.4 }}>
+              Terapkan
+            </button>
+          </div>
+        )}
+
+        <input ref={coverInputRef} type="file" accept="image/*" style={{ display: 'none' }}
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleCoverFile(f); e.target.value = '' }} />
+      </div>
 
       {/* Basic info */}
       <div style={card}>
