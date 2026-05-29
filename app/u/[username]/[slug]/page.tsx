@@ -129,11 +129,63 @@ export default async function PostPage({ params, searchParams }: Props) {
     },
   }) : []
 
+  // App type: full-screen iframe, no platform chrome
+  if (post.type === 'html' && canRead) {
+    return (
+      <>
+        <ViewTracker slug={post.slug} />
+        {/* Thin floating back bar */}
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+          display: 'flex', alignItems: 'center', gap: '0.75rem',
+          padding: '0.5rem 1rem',
+          background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid #e5e0d8',
+        }}>
+          <Link href="/" style={{ fontSize: '0.8125rem', color: '#6e6a65', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+            ← Tweak
+          </Link>
+          <span style={{ color: '#e5e0d8' }}>·</span>
+          <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {post.title}
+          </span>
+          <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: '#9c9690' }}>
+            by {authorName}
+          </span>
+        </div>
+        <div style={{ paddingTop: '37px' }}>
+          <PostViewer type={post.type} content={post.content} title={post.title} />
+        </div>
+      </>
+    )
+  }
+
+  // App type with paywall
+  if (post.type === 'html' && !canRead) {
+    return (
+      <>
+        <Navbar />
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', fontWeight: 700, letterSpacing: '-0.02em', color: '#1a1a1a', marginBottom: '1rem' }}>
+            {post.title}
+          </h1>
+          <Paywall
+            slug={post.slug} title={post.title} price={post.price!}
+            authorName={authorName} authorUsername={post.author.username}
+            authorWaNumber={post.author.waNumber} authorWaMessage={post.author.waMessage}
+            refCode={refCode} files={post.files} isPurchased={false}
+            preview={post.content?.slice(0, 600) ?? ''} postType={post.type} coverImage={post.coverImage}
+          />
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <Navbar />
 
-      <div style={{ maxWidth: post.type === 'html' ? '100%' : '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
 
         {/* Post header */}
         <div style={{ maxWidth: isMarkdown ? '760px' : '100%', marginBottom: '2rem' }}>
