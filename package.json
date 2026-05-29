@@ -8,7 +8,8 @@
     "start": "next start",
     "postinstall": "prisma generate",
     "seed:tweak": "npx tsx scripts/seed-tweak.ts",
-    "seed:paid": "npx tsx scripts/seed-paid-demo.ts"
+    "seed:paid": "npx tsx scripts/seed-paid-demo.ts",
+    "seed:creators": "npx tsx scripts/seed-creators.ts && npx tsx scripts/seed-creators-2.ts && npx tsx scripts/seed-creators-3.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
