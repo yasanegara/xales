@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
+import CollapsibleSection from '@/components/CollapsibleSection'
 
 export const metadata = { title: 'Dashboard' }
 
@@ -121,31 +122,28 @@ export default async function DashboardPage() {
 
       {/* Recent purchases */}
       {purchases.length > 0 && (
-        <div style={{ background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '10px', overflow: 'hidden', marginBottom: '1.5rem' }}>
-          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #e5e0d8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1a1a1a' }}>Pembelian Terbaru</h2>
-          </div>
-          {purchases.map((p, i) => (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.875rem 1.25rem', borderBottom: i < purchases.length - 1 ? '1px solid #f0ede8' : 'none' }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.post.title}</div>
-                <div style={{ fontSize: '0.75rem', color: '#9c9690', marginTop: '0.125rem' }}>{formatDate(p.createdAt)}</div>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <CollapsibleSection title="Pembelian Terbaru">
+            {purchases.map((p, i) => (
+              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.875rem 1.25rem', borderBottom: i < purchases.length - 1 ? '1px solid #f0ede8' : 'none' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.post.title}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#9c9690', marginTop: '0.125rem' }}>{formatDate(p.createdAt)}</div>
+                </div>
+                <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#1a1a1a' }}>Rp {formatIDR(p.amount)}</div>
+                </div>
               </div>
-              <div style={{ flexShrink: 0, textAlign: 'right' }}>
-                <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#1a1a1a' }}>Rp {formatIDR(p.amount)}</div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </CollapsibleSection>
         </div>
       )}
 
       {/* Recent posts */}
-      <div style={{ background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '10px', overflow: 'hidden' }}>
-        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #e5e0d8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1a1a1a' }}>Post Terbaru</h2>
-          <Link href="/dashboard/posts" style={{ fontSize: '0.8125rem', color: '#0070f3', textDecoration: 'none' }}>Lihat semua →</Link>
-        </div>
-
+      <CollapsibleSection
+        title="Post Terbaru"
+        right={<Link href="/dashboard/posts" style={{ fontSize: '0.8125rem', color: '#0070f3', textDecoration: 'none' }}>Lihat semua →</Link>}
+      >
         {recentPosts.length === 0 ? (
           <div style={{ padding: '3rem', textAlign: 'center', color: '#6e6a65' }}>
             <p style={{ marginBottom: '1rem' }}>Belum ada post.</p>
@@ -174,7 +172,7 @@ export default async function DashboardPage() {
             </div>
           ))
         )}
-      </div>
+      </CollapsibleSection>
     </div>
   )
 }
