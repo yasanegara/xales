@@ -81,10 +81,10 @@ function generatePosterOnCanvas(
   // XALES wordmark
   ctx.font = `bold 48px ${F}`
   ctx.fillStyle = '#f0ede8'
-  ctx.fillText('XALES', PAD, 120)
+  ctx.fillText('tweak', PAD, 120)
 
   // Dot separator after wordmark
-  const wMeasure = ctx.measureText('XALES').width
+  const wMeasure = ctx.measureText('tweak').width
   ctx.beginPath()
   ctx.arc(PAD + wMeasure + 28, 110, 5, 0, Math.PI * 2)
   ctx.fillStyle = '#6e6a65'
@@ -141,17 +141,17 @@ function generatePosterOnCanvas(
   ctx.fillStyle = 'rgba(240,237,232,0.6)'
   ctx.fillText(authorName, PAD, 1770)
 
-  // xales.id — right-aligned
+  // tweak.id — right-aligned
   ctx.font = `bold 36px ${F}`
   ctx.fillStyle = '#f0ede8'
-  const domain = 'xales.id'
+  const domain = 'tweak.id'
   const dW = ctx.measureText(domain).width
   ctx.fillText(domain, W - PAD - dW, 1770)
 
   // URL hint line
   ctx.font = `26px ${F}`
   ctx.fillStyle = 'rgba(255,255,255,0.22)'
-  ctx.fillText(`xales.id/@${authorName.replace('@', '')}`, PAD, 1850)
+  ctx.fillText(`tweak.id/@${authorName.replace('@', '')}`, PAD, 1850)
 
   // Bottom cream accent line
   ctx.fillStyle = '#f0ede8'
@@ -179,7 +179,7 @@ export default function ShareModal({
   const myUsername = session?.user?.username
   const baseUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/@${authorUsername}/${slug}`
-    : `https://xales.id/@${authorUsername}/${slug}`
+    : `https://tweak.id/@${authorUsername}/${slug}`
   // Non-authors get affiliate ref appended automatically
   const postUrl = myUsername && !isAuthor
     ? `${baseUrl}?ref=${myUsername}`

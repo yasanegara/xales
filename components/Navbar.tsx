@@ -35,14 +35,15 @@ export default function Navbar() {
         <Link
           href="/"
           style={{
-            fontSize: '1.25rem',
-            fontWeight: 700,
+            fontSize: '1.375rem',
+            fontWeight: 800,
             color: '#1a1a1a',
             textDecoration: 'none',
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.03em',
+            fontFamily: 'var(--font-brand, Georgia, serif)',
           }}
         >
-          XALES
+          tweak
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
 
-export const metadata = { title: 'Affiliate · XALES' }
+export const metadata = { title: 'Affiliate · tweak' }
 
 function formatIDR(n: number) {
   return new Intl.NumberFormat('id-ID').format(n)
@@ -29,7 +29,7 @@ export default async function AffiliatePage() {
   }, 0)
 
   const myUsername = session!.user.username!
-  const myAffiliateUrl = `https://xales.id/@${myUsername}`
+  const myAffiliateUrl = `https://tweak.id/@${myUsername}`
 
   return (
     <div>
@@ -56,7 +56,7 @@ export default async function AffiliatePage() {
 
       {/* Affiliate link info */}
       <div style={{ background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '10px', padding: '1.25rem', marginBottom: '1.5rem' }}>
-        <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1a1a1a', marginBottom: '0.5rem' }}>Cara Kerja Affiliate XALES</div>
+        <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1a1a1a', marginBottom: '0.5rem' }}>Cara Kerja Affiliate tweak</div>
         <div style={{ fontSize: '0.875rem', color: '#6e6a65', lineHeight: 1.7 }}>
           <p>1. Klik tombol <strong>↗ Bagikan</strong> di artikel manapun saat kamu login</p>
           <p>2. Link yang di-copy otomatis menyertakan <code style={{ background: '#f0ede8', padding: '0.1rem 0.35rem', borderRadius: '3px' }}>?ref={myUsername}</code></p>

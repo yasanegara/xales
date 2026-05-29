@@ -51,8 +51,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '56px 72px', paddingLeft: '80px' }}>
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-            <span style={{ fontSize: '22px', fontWeight: 800, color: '#9c9690', letterSpacing: '0.2em' }}>
-              XALES
+            <span style={{ fontSize: '22px', fontWeight: 800, color: '#9c9690', letterSpacing: '-0.02em' }}>
+              tweak
             </span>
             <span style={{ fontSize: '14px', color: '#c8c2b8' }}>·</span>
             <span
@@ -109,7 +109,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
             oleh {authorName}
           </span>
           <span style={{ fontSize: '22px', fontWeight: 700, color: '#ffffff' }}>
-            xales.id
+            tweak.id
           </span>
         </div>
       </div>

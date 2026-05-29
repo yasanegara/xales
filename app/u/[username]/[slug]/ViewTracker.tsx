@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 
 function getDeviceId(): string {
-  const key = 'xales_device_id'
+  const key = 'tweak_device_id'
   let id = localStorage.getItem(key)
   if (!id) {
     id = crypto.randomUUID()

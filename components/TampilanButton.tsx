@@ -4,19 +4,30 @@ import { useState, useEffect, useRef } from 'react'
 
 const FONT_SIZES = { sm: '0.9rem', md: '1rem', lg: '1.175rem' } as const
 type FontSize = keyof typeof FONT_SIZES
-export const READING_EVENT = 'xales-reading-settings'
+
+const FONT_FAMILIES = {
+  sans:  { label: 'Sans',  css: 'system-ui, -apple-system, sans-serif', preview: 'Aa' },
+  serif: { label: 'Serif', css: 'Georgia, "Times New Roman", serif',    preview: 'Aa' },
+  mono:  { label: 'Mono',  css: 'var(--font-mono, monospace)',           preview: 'Aa' },
+} as const
+type FontFamily = keyof typeof FONT_FAMILIES
+
+export const READING_EVENT = 'tweak-reading-settings'
 
 export default function TampilanButton() {
-  const [readMode, setReadMode] = useState(false)
-  const [fontSize, setFontSize] = useState<FontSize>('md')
+  const [readMode, setReadMode]   = useState(false)
+  const [fontSize, setFontSize]   = useState<FontSize>('md')
+  const [fontFamily, setFontFamily] = useState<FontFamily>('sans')
   const [showPanel, setShowPanel] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const mode = localStorage.getItem('xales_read_mode')
-    const size = localStorage.getItem('xales_font_size') as FontSize | null
+    const mode = localStorage.getItem('tweak_read_mode')
+    const size = localStorage.getItem('tweak_font_size') as FontSize | null
+    const fam  = localStorage.getItem('tweak_font_family') as FontFamily | null
     if (mode === '1') setReadMode(true)
     if (size && size in FONT_SIZES) setFontSize(size)
+    if (fam  && fam  in FONT_FAMILIES) setFontFamily(fam)
   }, [])
 
   useEffect(() => {
@@ -29,21 +40,27 @@ export default function TampilanButton() {
     return () => document.removeEventListener('mousedown', onClickOutside)
   }, [showPanel])
 
-  const dispatch = (rm: boolean, fs: FontSize) => {
-    window.dispatchEvent(new CustomEvent(READING_EVENT, { detail: { readMode: rm, fontSize: fs } }))
+  const dispatch = (rm: boolean, fs: FontSize, ff: FontFamily) => {
+    window.dispatchEvent(new CustomEvent(READING_EVENT, { detail: { readMode: rm, fontSize: fs, fontFamily: ff } }))
   }
 
   const toggleReadMode = () => {
     const next = !readMode
     setReadMode(next)
-    localStorage.setItem('xales_read_mode', next ? '1' : '0')
-    dispatch(next, fontSize)
+    localStorage.setItem('tweak_read_mode', next ? '1' : '0')
+    dispatch(next, fontSize, fontFamily)
   }
 
   const setSize = (size: FontSize) => {
     setFontSize(size)
-    localStorage.setItem('xales_font_size', size)
-    dispatch(readMode, size)
+    localStorage.setItem('tweak_font_size', size)
+    dispatch(readMode, size, fontFamily)
+  }
+
+  const setFamily = (fam: FontFamily) => {
+    setFontFamily(fam)
+    localStorage.setItem('tweak_font_family', fam)
+    dispatch(readMode, fontSize, fam)
   }
 
   return (
@@ -71,7 +88,7 @@ export default function TampilanButton() {
           position: 'absolute', top: 'calc(100% + 8px)', right: 0,
           background: '#ffffff', border: '1px solid #e5e0d8',
           borderRadius: '10px', padding: '1.125rem',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)', zIndex: 40, width: '240px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)', zIndex: 40, width: '252px',
         }}>
           {/* Read Mode */}
           <div style={{ marginBottom: '1.125rem' }}>
@@ -98,6 +115,34 @@ export default function TampilanButton() {
                 <div style={{ position: 'absolute', top: '3px', left: readMode ? '19px' : '3px', width: '14px', height: '14px', background: '#ffffff', borderRadius: '50%', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
               </div>
             </button>
+          </div>
+
+          {/* Font Family */}
+          <div style={{ marginBottom: '1.125rem' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9c9690', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.625rem' }}>
+              Font
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {(Object.entries(FONT_FAMILIES) as [FontFamily, typeof FONT_FAMILIES[FontFamily]][]).map(([key, val]) => (
+                <button
+                  key={key}
+                  onClick={() => setFamily(key)}
+                  style={{
+                    flex: 1, padding: '0.5rem 0.25rem',
+                    border: `1px solid ${fontFamily === key ? '#1a1a1a' : '#e5e0d8'}`,
+                    borderRadius: '6px',
+                    background: fontFamily === key ? '#1a1a1a' : '#f7f5f2',
+                    color: fontFamily === key ? '#ffffff' : '#6e6a65',
+                    cursor: 'pointer', lineHeight: 1,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <span style={{ fontSize: '1rem', fontFamily: val.css, fontWeight: key === 'mono' ? 400 : 600 }}>{val.preview}</span>
+                  <span style={{ fontSize: '0.6rem', fontWeight: 400, opacity: 0.7 }}>{val.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Font Size */}

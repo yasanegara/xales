@@ -6,7 +6,7 @@ import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
 
-export const metadata = { title: 'Library · XALES' }
+export const metadata = { title: 'Library · tweak' }
 
 export default async function LibraryPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const session = await getServerSession(authOptions)

@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { db } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
 
-export const metadata = { title: 'Purchases · Admin · XALES' }
+export const metadata = { title: 'Purchases · Admin · tweak' }
 
 function formatIDR(n: number) {
   return new Intl.NumberFormat('id-ID').format(n)

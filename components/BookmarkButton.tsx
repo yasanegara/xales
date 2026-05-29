@@ -11,7 +11,7 @@ interface Bookmark {
 export default function BookmarkButton({ slug }: { slug: string }) {
   const [bookmark, setBookmark] = useState<Bookmark | null>(null)
   const [saved, setSaved] = useState(false)
-  const key = `xales_bm_${slug}`
+  const key = `tweak_bm_${slug}`
 
   useEffect(() => {
     const raw = localStorage.getItem(key)

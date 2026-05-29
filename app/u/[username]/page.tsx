@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!user) return { title: 'User not found' }
   return {
     title: user.name ?? `@${username}`,
-    description: user.bio ?? `Posts by @${username} on XALES`,
+    description: user.bio ?? `Posts by @${username} on tweak`,
   }
 }
 

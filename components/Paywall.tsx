@@ -184,7 +184,7 @@ export default function Paywall({ slug, title, price, authorName, authorWaNumber
                     <button
                       onClick={() => {
                         if (file.mimeType === 'url/link') {
-                          // Go to standalone app page (no XALES header)
+                          // Go to standalone app page (no tweak header)
                           router.push(`/app/${file.id}`)
                         } else {
                           window.location.href = `/api/posts/${slug}/files/${file.id}/purchase`

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 import AdminPostActions from './AdminPostActions'
 
-export const metadata = { title: 'Posts · Admin · XALES' }
+export const metadata = { title: 'Posts · Admin · tweak' }
 
 export default async function AdminPostsPage({ searchParams }: { searchParams: Promise<{ page?: string; q?: string }> }) {
   const sp = await searchParams
