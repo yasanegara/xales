@@ -27,13 +27,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const post = await db.post.findUnique({
     where: { slug },
-    include: { author: { select: { name: true, username: true } } },
+    select: { title: true, description: true, coverImage: true, author: { select: { name: true, username: true } } },
   })
   if (!post) return { title: 'Post not found' }
 
   const authorName = post.author.name ?? `@${post.author.username}`
   const description = post.description ?? undefined
-  const ogImageUrl = `/api/og/${slug}`
+
+  // Use cover image directly if it's a URL; fall back to generated OG card
+  const isUrl = post.coverImage?.startsWith('http')
+  const ogImageUrl = isUrl ? post.coverImage! : `/api/og/${slug}`
+  const ogImageDims = isUrl
+    ? { width: 1200, height: 630 }
+    : { width: 1200, height: 630 }
 
   return {
     title: post.title,
@@ -44,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       url: `/@${post.author.username}/${slug}`,
       authors: [authorName],
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
+      images: [{ url: ogImageUrl, ...ogImageDims, alt: post.title }],
     },
     twitter: {
       card: 'summary_large_image',
