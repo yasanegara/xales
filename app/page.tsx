@@ -88,36 +88,59 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     <>
       <Navbar />
 
-      {/* Sticky filter bar */}
+      {/* Unified scrollable filter strip */}
       <div style={{
         position: 'sticky', top: '56px', zIndex: 40,
-        background: 'rgba(247,245,242,0.95)', backdropFilter: 'blur(8px)',
+        background: 'rgba(247,245,242,0.96)', backdropFilter: 'blur(10px)',
         borderBottom: '1px solid #e5e0d8',
       }}>
-        <div style={{ padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', height: '44px' }}>
-          <div style={{ display: 'flex', gap: '0.25rem' }}>
-            {tabs.map(t => {
-              if (t.needsAuth && !session) return null
-              const active = tab === t.key
-              return (
-                <Link key={t.key} href={makeHref({ tab: t.key })}
-                  style={{ padding: '0.3rem 0.875rem', borderRadius: '20px', fontSize: '0.875rem', fontWeight: active ? 600 : 400, textDecoration: 'none', background: active ? '#1a1a1a' : 'transparent', color: active ? '#f7f5f2' : '#6e6a65', transition: 'all 0.15s' }}>
-                  {t.label}
-                </Link>
-              )
-            })}
-          </div>
-          <div style={{ display: 'flex', gap: '0.25rem' }}>
-            {typeLinks.map(t => {
-              const active = type === t.value
-              return (
-                <Link key={t.value} href={makeHref({ type: t.value, tag: '' })}
-                  style={{ padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: active ? 600 : 400, textDecoration: 'none', background: active ? '#f0ede8' : 'transparent', color: active ? '#1a1a1a' : '#9c9690', border: active ? '1px solid #d5c9b0' : '1px solid transparent' }}>
-                  {t.label}
-                </Link>
-              )
-            })}
-          </div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '0.25rem',
+          padding: '0.5rem 1.5rem',
+          overflowX: 'auto', scrollbarWidth: 'none',
+          WebkitOverflowScrolling: 'touch',
+        }}>
+          {/* Tabs */}
+          {tabs.map(t => {
+            if (t.needsAuth && !session) return null
+            const active = tab === t.key
+            return (
+              <Link key={t.key} href={makeHref({ tab: t.key })}
+                style={{ flexShrink: 0, padding: '0.3rem 0.875rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: active ? 700 : 400, textDecoration: 'none', background: active ? '#1a1a1a' : 'transparent', color: active ? '#f7f5f2' : '#6e6a65', transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
+                {t.label}
+              </Link>
+            )
+          })}
+
+          {/* Divider */}
+          <span style={{ flexShrink: 0, color: '#d5c9b0', padding: '0 0.25rem', fontSize: '0.75rem' }}>|</span>
+
+          {/* Type filter */}
+          {typeLinks.map(t => {
+            const active = type === t.value
+            return (
+              <Link key={t.value} href={makeHref({ type: t.value, tag: '' })}
+                style={{ flexShrink: 0, padding: '0.3rem 0.875rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: active ? 700 : 400, textDecoration: 'none', background: active ? '#f0ede8' : 'transparent', color: active ? '#1a1a1a' : '#9c9690', border: active ? '1px solid #d5c9b0' : '1px solid transparent', transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
+                {t.label}
+              </Link>
+            )
+          })}
+
+          {/* Tag chips */}
+          {topTags.length > 0 && (
+            <>
+              <span style={{ flexShrink: 0, color: '#d5c9b0', padding: '0 0.25rem', fontSize: '0.75rem' }}>|</span>
+              {topTags.map(t => {
+                const active = tag === t
+                return (
+                  <Link key={t} href={makeHref({ tag: t })}
+                    style={{ flexShrink: 0, padding: '0.3rem 0.875rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: active ? 700 : 400, textDecoration: 'none', background: active ? '#1a1a1a' : 'transparent', color: active ? '#f7f5f2' : '#9c9690', whiteSpace: 'nowrap', transition: 'all 0.15s' }}>
+                    #{t}
+                  </Link>
+                )
+              })}
+            </>
+          )}
         </div>
       </div>
 
@@ -134,23 +157,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               <Link href="/register" style={{ background: '#1a1a1a', color: '#f7f5f2', padding: '0.625rem 1.5rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 600 }}>Mulai gratis</Link>
               <Link href="/login" style={{ background: '#ffffff', color: '#1a1a1a', padding: '0.625rem 1.5rem', borderRadius: '8px', border: '1px solid #e5e0d8', textDecoration: 'none', fontSize: '0.9375rem' }}>Masuk</Link>
             </div>
-          </div>
-        )}
-
-        {/* Tag chips — below hero */}
-        {topTags.length > 0 && (
-          <div style={{ display: 'flex', gap: '0.375rem', marginBottom: '1.25rem', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: '2px' }}>
-            <Link href={makeHref({ tag: '' })} style={{ flexShrink: 0, padding: '0.3rem 0.875rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: !tag ? 600 : 400, textDecoration: 'none', background: !tag ? '#1a1a1a' : '#f0ede8', color: !tag ? '#f7f5f2' : '#6e6a65', whiteSpace: 'nowrap', border: '1px solid transparent' }}>
-              Semua
-            </Link>
-            {topTags.map(t => {
-              const active = tag === t
-              return (
-                <Link key={t} href={makeHref({ tag: t })} style={{ flexShrink: 0, padding: '0.3rem 0.875rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: active ? 600 : 400, textDecoration: 'none', background: active ? '#1a1a1a' : '#f0ede8', color: active ? '#f7f5f2' : '#6e6a65', whiteSpace: 'nowrap', border: '1px solid transparent' }}>
-                  #{t}
-                </Link>
-              )
-            })}
           </div>
         )}
 
