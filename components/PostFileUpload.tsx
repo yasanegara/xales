@@ -16,8 +16,7 @@ export interface AttachedFile {
 
 interface Props {
   files: AttachedFile[]
-  onChange: (files: AttachedFile[]) => void
-  onDeleteExisting?: (id: string) => void
+  onChange: (files: AttachedFile[], removedId?: string) => void
   isPremium: boolean
 }
 
@@ -49,7 +48,7 @@ function effectivePrice(price?: number, discount?: number) {
   return Math.round(price * (1 - discount / 100))
 }
 
-export default function PostFileUpload({ files, onChange, onDeleteExisting, isPremium }: Props) {
+export default function PostFileUpload({ files, onChange, isPremium }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [linkMode, setLinkMode] = useState(false)
@@ -77,8 +76,7 @@ export default function PostFileUpload({ files, onChange, onDeleteExisting, isPr
 
   const remove = (i: number) => {
     const file = files[i]
-    if (file.id && onDeleteExisting) onDeleteExisting(file.id)
-    onChange(files.filter((_, idx) => idx !== i))
+    onChange(files.filter((_, idx) => idx !== i), file.id)
   }
 
   const update = (i: number, patch: Partial<AttachedFile>) =>

@@ -325,8 +325,12 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
       {!form.isPrivate && <div style={card}>
         <PostFileUpload
           files={form.files}
-          onChange={(files) => set({ files })}
-          onDeleteExisting={(id) => set({ deletedFileIds: [...(form.deletedFileIds ?? []), id] })}
+          onChange={(files, removedId) => set({
+            files,
+            deletedFileIds: removedId
+              ? [...(form.deletedFileIds ?? []), removedId]
+              : form.deletedFileIds,
+          })}
           isPremium={form.isPremium}
         />
       </div>}
