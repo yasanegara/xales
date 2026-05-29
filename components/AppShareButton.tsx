@@ -4,13 +4,13 @@ import { useState } from 'react'
 
 interface Props {
   title: string
-  url: string
 }
 
-export default function AppShareButton({ title, url }: Props) {
+export default function AppShareButton({ title }: Props) {
   const [copied, setCopied] = useState(false)
 
   const share = async () => {
+    const url = window.location.href
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({ title, url })

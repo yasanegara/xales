@@ -158,10 +158,7 @@ export default async function PostPage({ params, searchParams }: Props) {
           </span>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>by {authorName}</span>
-            <AppShareButton
-              title={post.title}
-              url={`${process.env.NEXT_PUBLIC_APP_URL ?? 'https://tweak.id'}/@${post.author.username}/${post.slug}`}
-            />
+            <AppShareButton title={post.title} />
           </div>
         </div>
         <div style={{ paddingTop: '37px' }}>
