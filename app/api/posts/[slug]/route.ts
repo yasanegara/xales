@@ -29,7 +29,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   try {
-    const { title, description, content, category, tags, published, isPrivate, isPremium, price, discount, newFiles } = await req.json()
+    const { title, description, content, category, tags, published, isPrivate, isPremium, price, discount, affiliateEnabled, affiliateRate, newFiles } = await req.json()
     const privateMode = isPrivate ?? post.isPrivate
 
     const updated = await db.post.update({
@@ -42,6 +42,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
         isPremium: privateMode ? false : (isPremium ?? post.isPremium),
         price: (!privateMode && isPremium) ? (price ?? null) : null,
         discount: (!privateMode && isPremium) ? (discount ?? null) : null,
+        affiliateEnabled: (!privateMode && isPremium) ? (affiliateEnabled ?? false) : false,
+        affiliateRate: affiliateRate ?? 20,
         ...(newFiles?.length
           ? {
               files: {

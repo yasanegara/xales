@@ -14,7 +14,9 @@ export interface PostFormData {
   isPrivate: boolean
   isPremium: boolean
   price: string
-  discount: string   // % off article price
+  discount: string          // % off article price
+  affiliateEnabled: boolean
+  affiliateRate: string     // % commission for affiliates
   files: AttachedFile[]
 }
 
@@ -156,6 +158,7 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
 
         {form.isPremium && (
           <div>
+            {/* Price + Discount */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px', gap: '0.75rem', alignItems: 'flex-end' }}>
               <div>
                 <label style={labelStyle}>Harga (IDR) *</label>
@@ -194,6 +197,47 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
                   <span style={{ color: '#059669' }}>= Rp {new Intl.NumberFormat('id-ID').format(parseInt(form.price))}</span>
                 )}
               </p>
+            )}
+
+            {/* Affiliate divider */}
+            <div style={{ borderTop: '1px solid #f0ede8', margin: '1rem 0' }} />
+
+            {/* Affiliate toggle */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1a1a1a' }}>Program Afiliasi</div>
+                <div style={{ fontSize: '0.8rem', color: '#6e6a65', marginTop: '2px' }}>
+                  Beri komisi kepada siapa pun yang membawa pembeli
+                </div>
+              </div>
+              <button type="button"
+                onClick={() => set({ affiliateEnabled: !form.affiliateEnabled, affiliateRate: form.affiliateEnabled ? '' : (form.affiliateRate || '20') })}
+                style={{ flexShrink: 0, width: '44px', height: '24px', borderRadius: '12px', background: form.affiliateEnabled ? '#059669' : '#d1cdc7', border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s' }}>
+                <span style={{ position: 'absolute', top: '3px', left: form.affiliateEnabled ? '22px' : '3px', width: '18px', height: '18px', background: '#ffffff', borderRadius: '50%', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+              </button>
+            </div>
+
+            {form.affiliateEnabled && (
+              <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
+                <div style={{ width: '140px' }}>
+                  <label style={labelStyle}>Komisi %</label>
+                  <div style={{ position: 'relative' }}>
+                    <input type="number" min={1} max={80} value={form.affiliateRate}
+                      onChange={(e) => set({ affiliateRate: e.target.value })}
+                      style={{ ...inputStyle, paddingRight: '1.75rem' }} placeholder="20" />
+                    <span style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9c9690', fontSize: '0.875rem' }}>%</span>
+                  </div>
+                </div>
+                {form.price && form.affiliateRate && (
+                  <p style={{ fontSize: '0.8125rem', color: '#6e6a65', marginBottom: '0.75rem' }}>
+                    Afiliasi dapat{' '}
+                    <strong style={{ color: '#059669' }}>
+                      Rp {new Intl.NumberFormat('id-ID').format(Math.round(parseInt(form.price) * parseInt(form.affiliateRate) / 100))}
+                    </strong>
+                    {' '}per penjualan
+                  </p>
+                )}
+              </div>
             )}
           </div>
         )}

@@ -29,6 +29,8 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
         isPremium: data.isPremium ?? false,
         price: data.price ? String(data.price) : '',
         discount: data.discount ? String(data.discount) : '',
+        affiliateEnabled: data.affiliateEnabled ?? false,
+        affiliateRate: data.affiliateRate ? String(data.affiliateRate) : '20',
         files: [],
       })
     })
@@ -52,6 +54,8 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
         isPrivate: form.isPrivate,
         isPremium: form.isPrivate ? false : form.isPremium,
         price: (!form.isPrivate && form.isPremium && form.price) ? parseInt(form.price) : null,
+        affiliateEnabled: !form.isPrivate && form.isPremium ? form.affiliateEnabled : false,
+        affiliateRate: form.affiliateRate ? parseInt(form.affiliateRate) : 20,
         newFiles: form.isPrivate ? [] : form.files,
       }),
     })
