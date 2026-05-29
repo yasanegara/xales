@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FeaturedCard, MediumCard, ListCard, type FeedPost } from './FeedCard'
+import { FullCard, type FeedPost } from './FeedCard'
 import SuggestedUsers from '@/components/SuggestedUsers'
 
 interface Props {
@@ -14,16 +14,16 @@ interface Props {
 }
 
 export default function FeedGrid({ initialPosts, initialHasMore, initialCursor, tab, postType, tag = '' }: Props) {
-  const [posts, setPosts]       = useState<FeedPost[]>(initialPosts)
-  const [hasMore, setHasMore]   = useState(initialHasMore)
-  const [cursor, setCursor]     = useState<string | null>(initialCursor)
-  const [loading, setLoading]   = useState(false)
+  const [posts, setPosts]     = useState<FeedPost[]>(initialPosts)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [cursor, setCursor]   = useState<string | null>(initialCursor)
+  const [loading, setLoading] = useState(false)
 
   const loadMore = async () => {
     if (loading || !hasMore) return
     setLoading(true)
     const params = new URLSearchParams({ tab, type: postType, ...(tag ? { tag } : {}), ...(cursor ? { cursor } : {}) })
-    const res = await fetch(`/api/feed?${params}`)
+    const res  = await fetch(`/api/feed?${params}`)
     const data = await res.json()
     setPosts(p => [...p, ...data.posts])
     setHasMore(data.hasMore)
@@ -42,46 +42,21 @@ export default function FeedGrid({ initialPosts, initialHasMore, initialCursor, 
     )
   }
 
-  // Split: first 3 featured, rest in grid
-  const featured = posts.slice(0, 3)
-  const rest      = posts.slice(3)
-  const [hero, ...mediums] = featured
-
   return (
     <div>
-      {/* Featured section */}
-      {hero && (
-        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', alignItems: 'stretch' }}>
-          {/* Hero card */}
-          <div style={{ flex: '0 0 58%' }}>
-            <FeaturedCard post={hero} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+        {posts.map((post, i) => (
+          <div key={post.id}>
+            {i > 0 && i % 6 === 0 && (
+              <div style={{ margin: '0.5rem 0 1rem' }}>
+                <SuggestedUsers compact />
+              </div>
+            )}
+            <FullCard post={post} />
           </div>
-          {/* Medium cards */}
-          {mediums.length > 0 && (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {mediums.map(p => <MediumCard key={p.id} post={p} />)}
-            </div>
-          )}
-        </div>
-      )}
+        ))}
+      </div>
 
-      {/* X-style list */}
-      {rest.length > 0 && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          {rest.map((post, i) => (
-            <div key={post.id}>
-              {i > 0 && i % 6 === 0 && (
-                <div style={{ margin: '0.75rem 0' }}>
-                  <SuggestedUsers compact />
-                </div>
-              )}
-              <ListCard post={post} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Load more */}
       {hasMore && (
         <div style={{ textAlign: 'center', paddingBottom: '2rem' }}>
           <button

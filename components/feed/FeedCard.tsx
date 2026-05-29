@@ -27,7 +27,7 @@ function Avatar({ author, size = 24 }: { author: FeedPost['author']; size?: numb
     <div style={{
       width: size, height: size, borderRadius: '6px', flexShrink: 0,
       background: '#f0ede8', border: '1px solid #e5e0d8',
-      overflow: 'hidden', position: 'relative',
+      overflow: 'hidden',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: `${size * 0.4}px`, fontWeight: 700, color: '#6e6a65',
     }}>
@@ -51,101 +51,115 @@ function PremiumBadge() {
   return <Badge bg="#fef3c7" color="#b45309">Premium</Badge>
 }
 
-function Meta({ post, light = false }: { post: FeedPost; light?: boolean }) {
-  const date = post.publishedAt ?? post.createdAt
-  const muted = light ? 'rgba(255,255,255,0.65)' : '#9c9690'
-  const name  = light ? 'rgba(255,255,255,0.9)'  : '#6e6a65'
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: muted, flexWrap: 'wrap' }}>
-      <Avatar author={post.author} size={20} />
-      <span style={{ color: name, fontWeight: 500 }}>{post.author.name ?? `@${post.author.username}`}</span>
-      <span style={{ opacity: 0.5 }}>·</span>
-      <span>{formatDate(date)}</span>
-      <span style={{ opacity: 0.5 }}>·</span>
-      <span>👁 {post.viewCount.toLocaleString()}</span>
-    </div>
-  )
-}
-
-// ─── Featured hero card ────────────────────────────────────────────────────
-export function FeaturedCard({ post }: { post: FeedPost }) {
+// ─── Full card (Instagram-style, one per screen) ──────────────────────────
+export function FullCard({ post }: { post: FeedPost }) {
   const [hovered, setHovered] = useState(false)
-  const isApp = post.type === 'html'
-  const fallbackGrad = isApp
+  const isApp  = post.type === 'html'
+  const date   = post.publishedAt ?? post.createdAt
+  const fallback = isApp
     ? 'linear-gradient(145deg, #1e3a5f 0%, #0f2340 100%)'
-    : 'linear-gradient(145deg, #3d1a0f 0%, #1e0d07 100%)'
+    : 'linear-gradient(145deg, #2d1b0e 0%, #1a0f07 100%)'
 
   return (
     <Link
       href={`/@${post.author.username}/${post.slug}`}
-      style={{ textDecoration: 'none', display: 'block', borderRadius: '16px', overflow: 'hidden', position: 'relative', height: '300px' }}
+      style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {post.coverImage
-        ? <img src={post.coverImage} alt={post.title} loading="eager" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.04)' : 'scale(1)', transition: 'transform 0.5s ease' }} />
-        : <div style={{ position: 'absolute', inset: 0, background: fallbackGrad }} />
-      }
-      {/* Vignette */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.12) 100%)' }} />
+      <article style={{
+        background: '#ffffff',
+        border: `1px solid ${hovered ? '#c8c0b4' : '#e5e0d8'}`,
+        borderRadius: '16px', overflow: 'hidden',
+        boxShadow: hovered ? '0 8px 32px rgba(0,0,0,0.09)' : '0 2px 8px rgba(0,0,0,0.04)',
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+        height: 'clamp(500px, calc(100svh - 88px), 760px)',
+        display: 'flex', flexDirection: 'column',
+      }}>
+        {/* Cover — fills remaining space */}
+        <div style={{ flex: '1 1 0', position: 'relative', overflow: 'hidden', minHeight: 0 }}>
+          {post.coverImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              loading="lazy"
+              decoding="async"
+              style={{
+                position: 'absolute', inset: 0,
+                width: '100%', height: '100%',
+                objectFit: 'cover', objectPosition: 'center',
+                transform: hovered ? 'scale(1.03)' : 'scale(1)',
+                transition: 'transform 0.5s ease',
+              }}
+            />
+          ) : (
+            <div style={{ position: 'absolute', inset: 0, background: fallback, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '3.5rem', opacity: 0.25 }}>{isApp ? '⬡' : '✦'}</span>
+            </div>
+          )}
 
-      {/* Content */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1.5rem' }}>
-        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', marginBottom: '0.625rem' }}>
-          <Badge bg={isApp ? '#065f46' : '#1e40af'} color="#fff">{isApp ? 'App' : 'Artikel'}</Badge>
-          {post.isPremium && <PremiumBadge />}
-          {post.category && <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>{post.category}</span>}
+          {/* Top badges */}
+          <div style={{ position: 'absolute', top: '0.875rem', left: '0.875rem', display: 'flex', gap: '0.35rem' }}>
+            <Badge bg={isApp ? '#065f46' : '#1e40af'} color="#fff">{isApp ? 'App' : 'Artikel'}</Badge>
+            {post.isPremium && <PremiumBadge />}
+          </div>
+
+          {/* Category */}
+          {post.category && (
+            <div style={{ position: 'absolute', top: '0.875rem', right: '0.875rem' }}>
+              <span style={{ fontSize: '0.7rem', background: 'rgba(0,0,0,0.45)', color: 'rgba(255,255,255,0.9)', padding: '0.2rem 0.625rem', borderRadius: '20px', backdropFilter: 'blur(4px)' }}>
+                {post.category}
+              </span>
+            </div>
+          )}
         </div>
-        <h2 style={{
-          fontSize: 'clamp(1.125rem, 2.5vw, 1.5rem)', fontWeight: 700,
-          color: '#ffffff', lineHeight: 1.3, marginBottom: '0.75rem',
-          fontFamily: 'Georgia, serif',
-          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden',
-        }}>
-          {post.title}
-        </h2>
-        <Meta post={post} light />
-      </div>
+
+        {/* Content area */}
+        <div style={{ flexShrink: 0, padding: '1.125rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {/* Title */}
+          <h2 style={{
+            fontSize: 'clamp(1.0625rem, 2.5vw, 1.3125rem)',
+            fontWeight: 700, color: '#1a1a1a',
+            lineHeight: 1.35, fontFamily: 'Georgia, serif',
+            letterSpacing: '-0.01em', margin: 0,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden',
+          }}>
+            {post.title}
+          </h2>
+
+          {/* Description / excerpt */}
+          {post.description && (
+            <p style={{
+              fontSize: '0.875rem', color: '#6e6a65',
+              lineHeight: 1.6, margin: 0,
+              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden',
+            }}>
+              {post.description}
+            </p>
+          )}
+
+          {/* Author + meta */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.125rem' }}>
+            <Avatar author={post.author} size={22} />
+            <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#1a1a1a' }}>
+              {post.author.name ?? `@${post.author.username}`}
+            </span>
+            <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>· {formatDate(date)}</span>
+            <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: '#9c9690' }}>
+              👁 {post.viewCount.toLocaleString()}
+            </span>
+            {post.likeCount > 0 && (
+              <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>· ♥ {post.likeCount.toLocaleString()}</span>
+            )}
+          </div>
+        </div>
+      </article>
     </Link>
   )
 }
 
-// ─── Medium card (featured row 2nd & 3rd) ─────────────────────────────────
-export function MediumCard({ post }: { post: FeedPost }) {
-  const [hovered, setHovered] = useState(false)
-  const isApp = post.type === 'html'
-  const fallbackGrad = isApp ? 'linear-gradient(145deg, #1e3a5f, #0f2340)' : 'linear-gradient(145deg, #3d1a0f, #1e0d07)'
-
-  return (
-    <Link
-      href={`/@${post.author.username}/${post.slug}`}
-      style={{ textDecoration: 'none', display: 'block', borderRadius: '12px', overflow: 'hidden', position: 'relative', flex: 1, minHeight: '140px' }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {post.coverImage
-        ? <img src={post.coverImage} alt={post.title} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.05)' : 'scale(1)', transition: 'transform 0.4s ease' }} />
-        : <div style={{ position: 'absolute', inset: 0, background: fallbackGrad }} />
-      }
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.15) 70%, transparent 100%)' }} />
-
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.875rem' }}>
-        <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '0.35rem' }}>
-          <Badge bg={isApp ? '#065f46' : '#1e40af'} color="#fff">{isApp ? 'App' : 'Artikel'}</Badge>
-          {post.isPremium && <PremiumBadge />}
-        </div>
-        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#fff', lineHeight: 1.35, fontFamily: 'Georgia, serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>
-          {post.title}
-        </div>
-        <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.375rem' }}>
-          {post.author.name ?? `@${post.author.username}`} · 👁 {post.viewCount.toLocaleString()}
-        </div>
-      </div>
-    </Link>
-  )
-}
-
-// ─── List card (X/Twitter-style row) ─────────────────────────────────────
+// ─── List card (kept for possible reuse) ─────────────────────────────────
 export function ListCard({ post }: { post: FeedPost }) {
   const [hovered, setHovered] = useState(false)
   const isApp = post.type === 'html'
@@ -188,7 +202,14 @@ export function ListCard({ post }: { post: FeedPost }) {
               {post.description}
             </p>
           )}
-          <Meta post={post} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#9c9690' }}>
+            <Avatar author={post.author} size={20} />
+            <span style={{ color: '#6e6a65', fontWeight: 500 }}>{post.author.name ?? `@${post.author.username}`}</span>
+            <span>·</span>
+            <span>{formatDate(post.publishedAt ?? post.createdAt)}</span>
+            <span>·</span>
+            <span>👁 {post.viewCount.toLocaleString()}</span>
+          </div>
         </div>
         {post.coverImage && (
           <div style={{ width: 80, height: 80, borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
@@ -201,7 +222,80 @@ export function ListCard({ post }: { post: FeedPost }) {
   )
 }
 
-// ─── Article card (horizontal) ────────────────────────────────────────────
+// ─── Featured hero card ────────────────────────────────────────────────────
+export function FeaturedCard({ post }: { post: FeedPost }) {
+  const [hovered, setHovered] = useState(false)
+  const isApp = post.type === 'html'
+  const fallbackGrad = isApp
+    ? 'linear-gradient(145deg, #1e3a5f 0%, #0f2340 100%)'
+    : 'linear-gradient(145deg, #3d1a0f 0%, #1e0d07 100%)'
+
+  return (
+    <Link
+      href={`/@${post.author.username}/${post.slug}`}
+      style={{ textDecoration: 'none', display: 'block', borderRadius: '16px', overflow: 'hidden', position: 'relative', height: '300px' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {post.coverImage
+        ? <img src={post.coverImage} alt={post.title} loading="eager" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.04)' : 'scale(1)', transition: 'transform 0.5s ease' }} />
+        : <div style={{ position: 'absolute', inset: 0, background: fallbackGrad }} />
+      }
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.12) 100%)' }} />
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', marginBottom: '0.625rem' }}>
+          <Badge bg={isApp ? '#065f46' : '#1e40af'} color="#fff">{isApp ? 'App' : 'Artikel'}</Badge>
+          {post.isPremium && <PremiumBadge />}
+        </div>
+        <h2 style={{ fontSize: 'clamp(1.125rem, 2.5vw, 1.5rem)', fontWeight: 700, color: '#ffffff', lineHeight: 1.3, marginBottom: '0.75rem', fontFamily: 'Georgia, serif', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>
+          {post.title}
+        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.65)', flexWrap: 'wrap' }}>
+          <Avatar author={post.author} size={20} />
+          <span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>{post.author.name ?? `@${post.author.username}`}</span>
+          <span>·</span>
+          <span>{formatDate(post.publishedAt ?? post.createdAt)}</span>
+          <span>·</span>
+          <span>👁 {post.viewCount.toLocaleString()}</span>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+// ─── Medium card ──────────────────────────────────────────────────────────
+export function MediumCard({ post }: { post: FeedPost }) {
+  const [hovered, setHovered] = useState(false)
+  const isApp = post.type === 'html'
+  const fallbackGrad = isApp ? 'linear-gradient(145deg, #1e3a5f, #0f2340)' : 'linear-gradient(145deg, #3d1a0f, #1e0d07)'
+
+  return (
+    <Link href={`/@${post.author.username}/${post.slug}`}
+      style={{ textDecoration: 'none', display: 'block', borderRadius: '12px', overflow: 'hidden', position: 'relative', flex: 1, minHeight: '140px' }}
+      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+    >
+      {post.coverImage
+        ? <img src={post.coverImage} alt={post.title} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.05)' : 'scale(1)', transition: 'transform 0.4s ease' }} />
+        : <div style={{ position: 'absolute', inset: 0, background: fallbackGrad }} />
+      }
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.15) 70%, transparent 100%)' }} />
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.875rem' }}>
+        <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '0.35rem' }}>
+          <Badge bg={isApp ? '#065f46' : '#1e40af'} color="#fff">{isApp ? 'App' : 'Artikel'}</Badge>
+          {post.isPremium && <PremiumBadge />}
+        </div>
+        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#fff', lineHeight: 1.35, fontFamily: 'Georgia, serif', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>
+          {post.title}
+        </div>
+        <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.375rem' }}>
+          {post.author.name ?? `@${post.author.username}`} · 👁 {post.viewCount.toLocaleString()}
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+// ─── Article card ─────────────────────────────────────────────────────────
 export function ArticleCard({ post }: { post: FeedPost }) {
   const [hovered, setHovered] = useState(false)
 
@@ -215,7 +309,6 @@ export function ArticleCard({ post }: { post: FeedPost }) {
         transition: 'border-color 0.2s, box-shadow 0.2s',
         display: 'flex', flexDirection: 'column', gap: '0.625rem', height: '100%',
       }}>
-        {/* Cover image — square */}
         {post.coverImage ? (
           <div style={{ aspectRatio: '1/1', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
             <img src={post.coverImage} alt={post.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -223,18 +316,12 @@ export function ArticleCard({ post }: { post: FeedPost }) {
         ) : (
           <div style={{ height: 4, borderRadius: '4px', background: 'linear-gradient(to right, #3b5bdb, #7048e8)', flexShrink: 0 }} />
         )}
-
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
           <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
             <Badge bg="#eff6ff" color="#1d4ed8">Artikel</Badge>
             {post.isPremium && <PremiumBadge />}
-            {post.category && <span style={{ fontSize: '0.7rem', color: '#9c9690' }}>{post.category}</span>}
           </div>
-          <h3 style={{
-            fontSize: '0.9375rem', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.4,
-            fontFamily: 'Georgia, serif',
-            display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden',
-          }}>
+          <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.4, fontFamily: 'Georgia, serif', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>
             {post.title}
           </h3>
           {post.description && (
@@ -243,13 +330,20 @@ export function ArticleCard({ post }: { post: FeedPost }) {
             </p>
           )}
         </div>
-        <Meta post={post} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#9c9690', flexWrap: 'wrap' }}>
+          <Avatar author={post.author} size={20} />
+          <span style={{ color: '#6e6a65', fontWeight: 500 }}>{post.author.name ?? `@${post.author.username}`}</span>
+          <span>·</span>
+          <span>{formatDate(post.publishedAt ?? post.createdAt)}</span>
+          <span>·</span>
+          <span>👁 {post.viewCount.toLocaleString()}</span>
+        </div>
       </article>
     </Link>
   )
 }
 
-// ─── App card (visual) ────────────────────────────────────────────────────
+// ─── App card ─────────────────────────────────────────────────────────────
 export function AppCard({ post }: { post: FeedPost }) {
   const [hovered, setHovered] = useState(false)
   const fallbackGrad = 'linear-gradient(145deg, #1e3a5f 0%, #0f2340 100%)'
@@ -265,7 +359,7 @@ export function AppCard({ post }: { post: FeedPost }) {
       }}>
         <div style={{ aspectRatio: '1/1', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           {post.coverImage
-            ? <img src={post.coverImage} alt={post.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.04)' : 'scale(1)', transition: 'transform 0.4s ease' }} />
+            ? <img src={post.coverImage} alt={post.title} loading="lazy" decoding="async" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: hovered ? 'scale(1.04)' : 'scale(1)', transition: 'transform 0.4s ease' }} />
             : <div style={{ width: '100%', height: '100%', background: fallbackGrad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>🔗</div>
           }
           <div style={{ position: 'absolute', top: '0.625rem', left: '0.625rem', display: 'flex', gap: '0.35rem' }}>
@@ -282,8 +376,11 @@ export function AppCard({ post }: { post: FeedPost }) {
               {post.description}
             </p>
           )}
-          <div style={{ marginTop: 'auto', paddingTop: '0.375rem' }}>
-            <Meta post={post} />
+          <div style={{ marginTop: 'auto', paddingTop: '0.375rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#9c9690', flexWrap: 'wrap' }}>
+            <Avatar author={post.author} size={20} />
+            <span style={{ color: '#6e6a65', fontWeight: 500 }}>{post.author.name ?? `@${post.author.username}`}</span>
+            <span>·</span>
+            <span>👁 {post.viewCount.toLocaleString()}</span>
           </div>
         </div>
       </article>
