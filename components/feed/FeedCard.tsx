@@ -51,6 +51,88 @@ function PremiumBadge() {
   return <Badge bg="#fef3c7" color="#b45309">Premium</Badge>
 }
 
+// ─── Discover card (Gumroad-style) ───────────────────────────────────────
+export function DiscoverCard({ post }: { post: FeedPost }) {
+  const [hovered, setHovered] = useState(false)
+  const isApp = post.type === 'html'
+  const fallback = isApp
+    ? 'linear-gradient(145deg, #1e3a5f, #0f2340)'
+    : 'linear-gradient(145deg, #2d1b0e, #1a0f07)'
+  const authorName = post.author.name ?? `@${post.author.username}`
+
+  return (
+    <Link href={`/@${post.author.username}/${post.slug}`}
+      style={{ textDecoration: 'none', display: 'block' }}
+      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+    >
+      <article style={{
+        background: '#ffffff',
+        border: `1px solid ${hovered ? '#c8c0b4' : '#e5e0d8'}`,
+        borderRadius: '10px', overflow: 'hidden',
+        boxShadow: hovered ? '0 8px 24px rgba(0,0,0,0.10)' : 'none',
+        transition: 'border-color 0.18s, box-shadow 0.18s',
+        transform: hovered ? 'translateY(-2px)' : 'none',
+      }}>
+        {/* Cover 4:3 */}
+        <div style={{ aspectRatio: '4/3', position: 'relative', overflow: 'hidden', background: fallback }}>
+          {post.coverImage && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={post.coverImage} alt={post.title} loading="lazy" decoding="async"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+                transform: hovered ? 'scale(1.04)' : 'scale(1)', transition: 'transform 0.4s ease' }} />
+          )}
+          {!post.coverImage && (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '2.5rem', opacity: 0.18 }}>{isApp ? '⬡' : '✦'}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '0.875rem 0.875rem 0.75rem' }}>
+          <h3 style={{
+            fontSize: '0.9375rem', fontWeight: 700, color: '#1a1a1a',
+            lineHeight: 1.4, margin: '0 0 0.5rem',
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden',
+          }}>
+            {post.title}
+          </h3>
+
+          {/* Creator row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.625rem' }}>
+            <Avatar author={post.author} size={18} />
+            <span style={{ fontSize: '0.75rem', color: '#6e6a65', fontWeight: 500,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {authorName}
+            </span>
+          </div>
+
+          {/* Price + type row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{
+              fontSize: '0.8125rem', fontWeight: 700,
+              color: post.isPremium ? '#1a1a1a' : '#059669',
+            }}>
+              {post.isPremium
+                ? post.price ? `Rp ${post.price.toLocaleString('id-ID')}` : 'Premium'
+                : 'Gratis'}
+            </span>
+            <span style={{
+              fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: isApp ? '#059669' : '#2563eb',
+              background: isApp ? '#ecfdf5' : '#eff6ff',
+              padding: '0.15rem 0.5rem', borderRadius: '4px',
+            }}>
+              {isApp ? 'App' : 'Artikel'}
+            </span>
+          </div>
+        </div>
+      </article>
+    </Link>
+  )
+}
+
 // ─── Grid card (2-column, 16:9 cover) ────────────────────────────────────
 export function GridCard({ post }: { post: FeedPost }) {
   const [hovered, setHovered] = useState(false)

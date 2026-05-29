@@ -1,11 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { GridCard, type FeedPost } from './FeedCard'
-import HeroCarousel from './HeroCarousel'
+import { DiscoverCard, type FeedPost } from './FeedCard'
 import SuggestedUsers from '@/components/SuggestedUsers'
-
-const HERO_COUNT = 5
 
 interface Props {
   initialPosts: FeedPost[]
@@ -36,43 +33,46 @@ export default function FeedGrid({ initialPosts, initialHasMore, initialCursor, 
 
   if (posts.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '4rem 0', color: '#6e6a65' }}>
-        <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>
+      <div style={{ textAlign: 'center', padding: '5rem 0', color: '#9c9690' }}>
+        <p style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>
           {tab === 'diikuti' ? '👥' : '📝'}
         </p>
-        <p>{tab === 'diikuti' ? 'Belum ada post dari creator yang kamu ikuti.' : 'Belum ada konten.'}</p>
+        <p style={{ fontSize: '0.9375rem' }}>
+          {tab === 'diikuti' ? 'Belum ada post dari kreator yang kamu ikuti.' : 'Belum ada konten.'}
+        </p>
       </div>
     )
   }
 
-  const heroPosts = posts.slice(0, HERO_COUNT)
-  const gridPosts = posts.slice(HERO_COUNT)
-
   return (
     <div>
-      {/* Hero carousel */}
-      <HeroCarousel posts={heroPosts} />
-
-      {/* 2-column grid */}
-      {gridPosts.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem', marginTop: '0.25rem', marginBottom: '1.5rem' }}>
-          {gridPosts.map((post, i) => (
-            <div key={post.id}>
-              {i > 0 && i % 8 === 0 && (
-                <div style={{ gridColumn: '1 / -1', margin: '0.5rem 0' }}>
-                  <SuggestedUsers compact />
-                </div>
-              )}
-              <GridCard post={post} />
-            </div>
-          ))}
-        </div>
-      )}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '1.25rem',
+      }}>
+        {posts.map((post, i) => (
+          <div key={post.id}>
+            {i > 0 && i % 16 === 0 && (
+              <div style={{ gridColumn: '1 / -1', margin: '0.5rem 0' }}>
+                <SuggestedUsers compact />
+              </div>
+            )}
+            <DiscoverCard post={post} />
+          </div>
+        ))}
+      </div>
 
       {hasMore && (
-        <div style={{ textAlign: 'center', paddingBottom: '2rem' }}>
+        <div style={{ textAlign: 'center', paddingTop: '2.5rem', paddingBottom: '1rem' }}>
           <button onClick={loadMore} disabled={loading}
-            style={{ padding: '0.625rem 2rem', borderRadius: '8px', border: '1px solid #e5e0d8', background: '#ffffff', color: '#1a1a1a', fontSize: '0.875rem', fontWeight: 500, cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.6 : 1 }}>
+            style={{
+              padding: '0.625rem 2.5rem', borderRadius: '8px',
+              border: '1px solid #1a1a1a', background: loading ? '#f7f5f2' : '#1a1a1a',
+              color: loading ? '#9c9690' : '#ffffff',
+              fontSize: '0.875rem', fontWeight: 600, cursor: loading ? 'default' : 'pointer',
+              transition: 'all 0.15s',
+            }}>
             {loading ? 'Memuat...' : 'Tampilkan lebih banyak'}
           </button>
         </div>

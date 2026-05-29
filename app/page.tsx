@@ -146,21 +146,56 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       </div>
 
-      <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '1.25rem 1.5rem 3rem' }}>
-        {!session && (
-          <div style={{ textAlign: 'center', padding: '2.25rem 0 2rem', borderBottom: '1px solid #e5e0d8', marginBottom: '1.5rem' }}>
-            <h1 style={{ fontSize: 'clamp(1.875rem, 5vw, 2.75rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#1a1a1a', marginBottom: '0.75rem', fontFamily: 'Georgia, serif' }}>
-              Publish. Share. Earn.
+      {/* Hero — only for logged-out users */}
+      {!session && (
+        <div style={{ borderBottom: '1px solid #e5e0d8', background: '#ffffff' }}>
+          <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '4rem 1.5rem 4.5rem', textAlign: 'center' }}>
+            <h1 style={{
+              fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 800,
+              letterSpacing: '-0.04em', color: '#1a1a1a', lineHeight: 1.1,
+              marginBottom: '1.25rem',
+            }}>
+              Karya kamu layak<br />menghasilkan uang.
             </h1>
-            <p style={{ color: '#6e6a65', fontSize: '1rem', lineHeight: 1.7, marginBottom: '1.5rem', maxWidth: '480px', margin: '0 auto 1.5rem' }}>
-              Platform untuk kreator Indonesia — tulis artikel, bangun audiens, monetisasi karya.
+            <p style={{
+              color: '#6e6a65', fontSize: 'clamp(1rem, 2vw, 1.1875rem)',
+              lineHeight: 1.65, maxWidth: '500px', margin: '0 auto 2rem',
+            }}>
+              Platform untuk kreator Indonesia — tulis artikel, publish tools, dan monetisasi karya langsung dari satu tempat.
             </p>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-              <Link href="/register" style={{ background: '#1a1a1a', color: '#f7f5f2', padding: '0.625rem 1.5rem', borderRadius: '8px', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 600 }}>Mulai gratis</Link>
-              <Link href="/login" style={{ background: '#ffffff', color: '#1a1a1a', padding: '0.625rem 1.5rem', borderRadius: '8px', border: '1px solid #e5e0d8', textDecoration: 'none', fontSize: '0.9375rem' }}>Masuk</Link>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href="/register" style={{
+                background: '#1a1a1a', color: '#ffffff',
+                padding: '0.75rem 2rem', borderRadius: '8px',
+                textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 700,
+                letterSpacing: '-0.01em',
+              }}>
+                Mulai gratis
+              </Link>
+              <Link href="/login" style={{
+                background: '#ffffff', color: '#1a1a1a',
+                padding: '0.75rem 2rem', borderRadius: '8px',
+                border: '1px solid #e5e0d8',
+                textDecoration: 'none', fontSize: '0.9375rem',
+              }}>
+                Masuk
+              </Link>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
+      <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '1.75rem 1.5rem 4rem' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+            {tab === 'trending' ? 'Trending' : tab === 'diikuti' ? 'Diikuti' : 'Jelajahi'}
+          </h2>
+          {posts.length > 0 && (
+            <span style={{ fontSize: '0.8125rem', color: '#9c9690' }}>
+              {posts.length}+ konten
+            </span>
+          )}
+        </div>
 
         <FeedGrid
           key={`${tab}-${type}-${tag}`}
