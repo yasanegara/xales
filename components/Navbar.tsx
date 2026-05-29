@@ -35,15 +35,29 @@ export default function Navbar() {
         <Link
           href="/"
           style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            textDecoration: 'none',
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/tweak-icon.svg"
+            alt="tweak icon"
+            width={28}
+            height={28}
+            style={{ display: 'block', borderRadius: '6px' }}
+          />
+          <span style={{
             fontSize: '1.25rem',
             fontWeight: 700,
             color: '#1a1a1a',
-            textDecoration: 'none',
             letterSpacing: '-0.01em',
             fontFamily: 'var(--font-brand, system-ui, sans-serif)',
-          }}
-        >
-          tweak
+          }}>
+            tweak
+          </span>
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -54,14 +68,16 @@ export default function Navbar() {
                 style={{
                   background: '#1a1a1a',
                   color: '#f7f5f2',
-                  padding: '0.375rem 1rem',
+                  padding: '0.375rem 0.875rem',
                   borderRadius: '6px',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
+                  fontSize: '0.9375rem',
+                  fontWeight: 700,
                   textDecoration: 'none',
+                  letterSpacing: '-0.01em',
+                  fontFamily: 'var(--font-brand, system-ui, sans-serif)',
                 }}
               >
-                + New Post
+                + t
               </Link>
 
               <div style={{ position: 'relative' }}>
