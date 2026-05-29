@@ -10,9 +10,10 @@ interface Props {
   initialCursor: string | null
   tab: string
   postType: string
+  tag?: string
 }
 
-export default function FeedGrid({ initialPosts, initialHasMore, initialCursor, tab, postType }: Props) {
+export default function FeedGrid({ initialPosts, initialHasMore, initialCursor, tab, postType, tag = '' }: Props) {
   const [posts, setPosts]       = useState<FeedPost[]>(initialPosts)
   const [hasMore, setHasMore]   = useState(initialHasMore)
   const [cursor, setCursor]     = useState<string | null>(initialCursor)
@@ -21,7 +22,7 @@ export default function FeedGrid({ initialPosts, initialHasMore, initialCursor, 
   const loadMore = async () => {
     if (loading || !hasMore) return
     setLoading(true)
-    const params = new URLSearchParams({ tab, type: postType, ...(cursor ? { cursor } : {}) })
+    const params = new URLSearchParams({ tab, type: postType, ...(tag ? { tag } : {}), ...(cursor ? { cursor } : {}) })
     const res = await fetch(`/api/feed?${params}`)
     const data = await res.json()
     setPosts(p => [...p, ...data.posts])

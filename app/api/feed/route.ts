@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const tab    = searchParams.get('tab') ?? 'terbaru'
   const type   = searchParams.get('type') ?? 'all'
+  const tag    = searchParams.get('tag') ?? ''
   const cursor = searchParams.get('cursor') ?? undefined
   const session = await getServerSession(authOptions)
 
@@ -16,6 +17,7 @@ export async function GET(req: NextRequest) {
     published: true,
     isPrivate: false,
     ...(type !== 'all' ? { type } : {}),
+    ...(tag ? { tags: { has: tag } } : {}),
   }
 
   let where = baseWhere as Record<string, unknown>

@@ -5,24 +5,25 @@ import { authOptions } from '@/lib/auth'
 import FeedGrid from '@/components/feed/FeedGrid'
 import Link from 'next/link'
 
-interface SearchParams { tab?: string; type?: string }
+interface SearchParams { tab?: string; type?: string; tag?: string }
 
 const TAKE = 12
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp      = await searchParams
-  const tab     = sp.tab ?? 'terbaru'
+  const tab     = sp.tab  ?? 'terbaru'
   const type    = sp.type ?? 'all'
+  const tag     = sp.tag  ?? ''
   const session = await getServerSession(authOptions)
 
   const baseWhere = {
     published: true,
     isPrivate: false,
     ...(type !== 'all' ? { type } : {}),
+    ...(tag ? { tags: { has: tag } } : {}),
   }
 
   let where = baseWhere as Record<string, unknown>
-
   if (tab === 'diikuti' && session) {
     where = { ...baseWhere, author: { followers: { some: { followerId: session.user.id } } } }
   }
@@ -31,19 +32,38 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     ? [{ viewCount: 'desc' as const }, { likeCount: 'desc' as const }]
     : { publishedAt: 'desc' as const }
 
-  const rawPosts = await db.post.findMany({
-    where, orderBy,
-    take: TAKE + 1,
-    select: {
-      id: true, slug: true, title: true, description: true, type: true,
-      category: true, coverImage: true, isPremium: true, price: true,
-      viewCount: true, likeCount: true, publishedAt: true, createdAt: true,
-      author: { select: { username: true, name: true, profilePic: true } },
-    },
-  })
+  // Fetch posts + available tags in parallel
+  const [rawPosts, tagRows] = await Promise.all([
+    db.post.findMany({
+      where, orderBy,
+      take: TAKE + 1,
+      select: {
+        id: true, slug: true, title: true, description: true, type: true,
+        category: true, coverImage: true, isPremium: true, price: true,
+        viewCount: true, likeCount: true, publishedAt: true, createdAt: true,
+        author: { select: { username: true, name: true, profilePic: true } },
+      },
+    }),
+    db.post.findMany({
+      where: { published: true, isPrivate: false, ...(type !== 'all' ? { type } : {}) },
+      select: { tags: true },
+    }),
+  ])
 
-  const hasMore = rawPosts.length > TAKE
-  const posts   = hasMore ? rawPosts.slice(0, TAKE) : rawPosts
+  // Collect + count tags, sort by frequency
+  const tagCount: Record<string, number> = {}
+  for (const p of tagRows) {
+    for (const t of p.tags) {
+      if (t) tagCount[t] = (tagCount[t] ?? 0) + 1
+    }
+  }
+  const topTags = Object.entries(tagCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 16)
+    .map(([t]) => t)
+
+  const hasMore    = rawPosts.length > TAKE
+  const posts      = hasMore ? rawPosts.slice(0, TAKE) : rawPosts
   const nextCursor = posts[posts.length - 1]?.id ?? null
 
   const tabs = [
@@ -51,12 +71,16 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     { key: 'trending', label: 'Trending' },
     { key: 'diikuti',  label: 'Diikuti', needsAuth: true },
   ]
-
   const typeLinks = [
     { value: 'all',      label: 'Semua' },
     { value: 'markdown', label: 'Artikel' },
     { value: 'html',     label: 'App' },
   ]
+
+  const makeHref = (overrides: Record<string, string>) => {
+    const p = { tab, type, ...(tag ? { tag } : {}), ...overrides }
+    return '/?' + new URLSearchParams(p).toString()
+  }
 
   return (
     <>
@@ -65,62 +89,74 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       {/* Sticky filter bar */}
       <div style={{
         position: 'sticky', top: '56px', zIndex: 40,
-        background: 'rgba(247,245,242,0.92)', backdropFilter: 'blur(8px)',
+        background: 'rgba(247,245,242,0.95)', backdropFilter: 'blur(8px)',
         borderBottom: '1px solid #e5e0d8',
       }}>
-        <div style={{ maxWidth: '860px', margin: '0 auto', padding: '0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', height: '44px' }}>
-          {/* Tabs */}
-          <div style={{ display: 'flex', gap: '0.25rem' }}>
-            {tabs.map(t => {
-              if (t.needsAuth && !session) return null
-              const active = tab === t.key
-              return (
-                <Link
-                  key={t.key}
-                  href={`/?tab=${t.key}&type=${type}`}
-                  style={{
-                    padding: '0.3rem 0.875rem', borderRadius: '20px',
-                    fontSize: '0.875rem', fontWeight: active ? 600 : 400,
-                    textDecoration: 'none',
-                    background: active ? '#1a1a1a' : 'transparent',
-                    color: active ? '#f7f5f2' : '#6e6a65',
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  {t.label}
-                </Link>
-              )
-            })}
+        <div style={{ maxWidth: '860px', margin: '0 auto', padding: '0 1rem' }}>
+          {/* Row 1: tabs + type */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', height: '44px' }}>
+            <div style={{ display: 'flex', gap: '0.25rem' }}>
+              {tabs.map(t => {
+                if (t.needsAuth && !session) return null
+                const active = tab === t.key
+                return (
+                  <Link key={t.key} href={makeHref({ tab: t.key })}
+                    style={{ padding: '0.3rem 0.875rem', borderRadius: '20px', fontSize: '0.875rem', fontWeight: active ? 600 : 400, textDecoration: 'none', background: active ? '#1a1a1a' : 'transparent', color: active ? '#f7f5f2' : '#6e6a65', transition: 'all 0.15s' }}>
+                    {t.label}
+                  </Link>
+                )
+              })}
+            </div>
+            <div style={{ display: 'flex', gap: '0.25rem' }}>
+              {typeLinks.map(t => {
+                const active = type === t.value
+                return (
+                  <Link key={t.value} href={makeHref({ type: t.value, tag: '' })}
+                    style={{ padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: active ? 600 : 400, textDecoration: 'none', background: active ? '#f0ede8' : 'transparent', color: active ? '#1a1a1a' : '#9c9690', border: active ? '1px solid #d5c9b0' : '1px solid transparent' }}>
+                    {t.label}
+                  </Link>
+                )
+              })}
+            </div>
           </div>
 
-          {/* Type filter */}
-          <div style={{ display: 'flex', gap: '0.25rem' }}>
-            {typeLinks.map(t => {
-              const active = type === t.value
-              return (
-                <Link
-                  key={t.value}
-                  href={`/?tab=${tab}&type=${t.value}`}
-                  style={{
-                    padding: '0.25rem 0.75rem', borderRadius: '20px',
-                    fontSize: '0.8125rem', fontWeight: active ? 600 : 400,
-                    textDecoration: 'none',
-                    background: active ? '#f0ede8' : 'transparent',
-                    color: active ? '#1a1a1a' : '#9c9690',
-                    border: active ? '1px solid #d5c9b0' : '1px solid transparent',
-                  }}
-                >
-                  {t.label}
-                </Link>
-              )
-            })}
-          </div>
+          {/* Row 2: tag chips — only if tags exist */}
+          {topTags.length > 0 && (
+            <div style={{
+              display: 'flex', gap: '0.375rem', paddingBottom: '0.625rem',
+              overflowX: 'auto', scrollbarWidth: 'none',
+            }}>
+              <Link href={makeHref({ tag: '' })}
+                style={{
+                  flexShrink: 0, padding: '0.2rem 0.75rem', borderRadius: '20px',
+                  fontSize: '0.8rem', fontWeight: !tag ? 600 : 400, textDecoration: 'none',
+                  background: !tag ? '#1a1a1a' : '#f0ede8',
+                  color: !tag ? '#f7f5f2' : '#6e6a65',
+                  border: '1px solid transparent', whiteSpace: 'nowrap',
+                }}>
+                Semua
+              </Link>
+              {topTags.map(t => {
+                const active = tag === t
+                return (
+                  <Link key={t} href={makeHref({ tag: t })}
+                    style={{
+                      flexShrink: 0, padding: '0.2rem 0.75rem', borderRadius: '20px',
+                      fontSize: '0.8rem', fontWeight: active ? 600 : 400, textDecoration: 'none',
+                      background: active ? '#1a1a1a' : '#f0ede8',
+                      color: active ? '#f7f5f2' : '#6e6a65',
+                      border: '1px solid transparent', whiteSpace: 'nowrap',
+                    }}>
+                    #{t}
+                  </Link>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
 
       <main style={{ maxWidth: '860px', margin: '0 auto', padding: '1.25rem 1rem 3rem' }}>
-
-        {/* Hero — only for guests */}
         {!session && (
           <div style={{ textAlign: 'center', padding: '2rem 0 1.75rem', borderBottom: '1px solid #e5e0d8', marginBottom: '1.5rem' }}>
             <h1 style={{ fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#1a1a1a', marginBottom: '0.625rem' }}>
@@ -137,12 +173,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         )}
 
         <FeedGrid
-          key={`${tab}-${type}`}
+          key={`${tab}-${type}-${tag}`}
           initialPosts={posts as Parameters<typeof FeedGrid>[0]['initialPosts']}
           initialHasMore={hasMore}
           initialCursor={nextCursor}
           tab={tab}
           postType={type}
+          tag={tag}
         />
       </main>
     </>
