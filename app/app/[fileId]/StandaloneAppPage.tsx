@@ -215,7 +215,7 @@ export default function StandaloneAppPage({ fileId, slug, name, intro, price, di
         </div>
 
         <p style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.75rem', color: '#9c9690' }}>
-          Dijual melalui <a href="/" style={{ color: '#6e6a65', textDecoration: 'none', fontWeight: 500 }}>tweak</a>
+          Dijual melalui <a href="/" style={{ color: '#6e6a65', textDecoration: 'none', fontWeight: 500 }}>Tweak</a>
         </p>
       </div>
     </div>

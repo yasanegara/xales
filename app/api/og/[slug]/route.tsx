@@ -52,7 +52,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
             <span style={{ fontSize: '22px', fontWeight: 800, color: '#9c9690', letterSpacing: '-0.02em' }}>
-              tweak
+              Tweak
             </span>
             <span style={{ fontSize: '14px', color: '#c8c2b8' }}>·</span>
             <span

@@ -73,7 +73,7 @@ export default function LoginPage() {
       <div style={{ width: '100%', maxWidth: '400px' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <Link href="/" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a', textDecoration: 'none', letterSpacing: '-0.01em', fontFamily: 'var(--font-brand, system-ui, sans-serif)' }}>
-            tweak
+            Tweak
           </Link>
           <p style={{ color: '#6e6a65', marginTop: '0.5rem', fontSize: '0.9375rem' }}>Masuk ke akunmu</p>
           {from !== '/dashboard' && (

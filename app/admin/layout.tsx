@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.5rem', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
             <span style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#f0ede8', letterSpacing: '0.05em' }}>
-              tweak <span style={{ color: '#d97706', fontSize: '0.7rem', fontWeight: 600, background: 'rgba(217,119,6,0.15)', padding: '0.15rem 0.5rem', borderRadius: '4px', letterSpacing: '0.08em' }}>ADMIN</span>
+              Tweak <span style={{ color: '#d97706', fontSize: '0.7rem', fontWeight: 600, background: 'rgba(217,119,6,0.15)', padding: '0.15rem 0.5rem', borderRadius: '4px', letterSpacing: '0.08em' }}>ADMIN</span>
             </span>
             <div style={{ display: 'flex', gap: '0.25rem' }}>
               {navItems.map((item) => (

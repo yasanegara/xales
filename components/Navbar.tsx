@@ -43,7 +43,7 @@ export default function Navbar() {
             fontFamily: 'var(--font-brand, system-ui, sans-serif)',
           }}
         >
-          tweak
+          Tweak
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

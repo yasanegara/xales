@@ -81,10 +81,10 @@ function generatePosterOnCanvas(
   // XALES wordmark
   ctx.font = `bold 48px ${F}`
   ctx.fillStyle = '#f0ede8'
-  ctx.fillText('tweak', PAD, 120)
+  ctx.fillText('Tweak', PAD, 120)
 
   // Dot separator after wordmark
-  const wMeasure = ctx.measureText('tweak').width
+  const wMeasure = ctx.measureText('Tweak').width
   ctx.beginPath()
   ctx.arc(PAD + wMeasure + 28, 110, 5, 0, Math.PI * 2)
   ctx.fillStyle = '#6e6a65'

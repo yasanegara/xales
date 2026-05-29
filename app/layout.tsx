@@ -10,7 +10,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['600', 
 const caveat = Caveat({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-hand' })
 
 export const metadata: Metadata = {
-  title: { default: 'tweak — Creator Publishing Platform', template: '%s | tweak' },
+  title: { default: 'Tweak — Creator Publishing Platform', template: '%s | Tweak' },
   description: 'Publish articles and web apps. Monetize your creativity.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://tweak.id'),
 }
