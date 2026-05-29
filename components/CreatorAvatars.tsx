@@ -11,27 +11,32 @@ interface Creator {
 }
 
 // Base positions relative to container center (reference width 560px)
-// depth = parallax sensitivity, freq/amp = idle float params
+// Each avatar orbits its base position in an ellipse — phases distributed evenly
+// so the cluster always stays filled, never all converge/diverge at once.
 const CFGS = [
-  { bx:-190, by:-55, sz:76, d:0.050, fx:0.40, fy:0.35, px:0.0, py:1.2, ax:8,  ay:10 },
-  { bx:-112, by:-82, sz:58, d:0.080, fx:0.50, fy:0.45, px:2.1, py:0.7, ax:7,  ay:12 },
-  { bx: -44, by:-70, sz:52, d:0.100, fx:0.30, fy:0.55, px:1.0, py:2.5, ax:6,  ay: 8 },
-  { bx:  28, by:-78, sz:82, d:0.040, fx:0.45, fy:0.40, px:3.2, py:0.3, ax:9,  ay:11 },
-  { bx: 100, by:-62, sz:64, d:0.070, fx:0.35, fy:0.50, px:0.8, py:1.8, ax:7,  ay: 9 },
-  { bx: 170, by:-48, sz:70, d:0.060, fx:0.55, fy:0.30, px:1.5, py:0.9, ax:8,  ay:13 },
-  { bx:-200, by: 14, sz:52, d:0.090, fx:0.42, fy:0.48, px:2.7, py:1.4, ax:6,  ay: 8 },
-  { bx:-128, by: 42, sz:82, d:0.040, fx:0.38, fy:0.42, px:0.5, py:2.1, ax:10, ay:12 },
-  { bx: -54, by: 66, sz:64, d:0.070, fx:0.52, fy:0.36, px:1.9, py:0.6, ax:7,  ay:10 },
-  { bx:  18, by: 56, sz:52, d:0.090, fx:0.31, fy:0.53, px:2.3, py:1.7, ax:6,  ay: 9 },
-  { bx:  90, by: 72, sz:76, d:0.050, fx:0.47, fy:0.38, px:0.2, py:2.8, ax:8,  ay:11 },
-  { bx: 162, by: 48, sz:58, d:0.080, fx:0.36, fy:0.44, px:3.0, py:1.0, ax:7,  ay:10 },
-  { bx:-174, by:-18, sz:64, d:0.060, fx:0.44, fy:0.52, px:1.2, py:2.3, ax:8,  ay: 9 },
-  { bx: 196, by: 16, sz:52, d:0.090, fx:0.33, fy:0.41, px:2.6, py:0.4, ax:6,  ay:11 },
-  { bx: -90, by: -8, sz:70, d:0.050, fx:0.49, fy:0.46, px:0.9, py:1.5, ax:9,  ay:12 },
-  { bx:  56, by:-20, sz:58, d:0.070, fx:0.41, fy:0.34, px:1.7, py:2.6, ax:7,  ay: 8 },
-  { bx: -18, by: 24, sz:76, d:0.040, fx:0.37, fy:0.51, px:3.1, py:0.8, ax:8,  ay:10 },
-  { bx: 124, by: 20, sz:52, d:0.100, fx:0.53, fy:0.39, px:0.4, py:1.9, ax:6,  ay: 9 },
+  { bx:-190, by:-55, sz:76, d:0.050, f:0.38, rx:10, ry: 8 },
+  { bx:-112, by:-82, sz:58, d:0.080, f:0.43, rx: 8, ry:11 },
+  { bx: -44, by:-70, sz:52, d:0.100, f:0.50, rx: 7, ry: 9 },
+  { bx:  28, by:-78, sz:82, d:0.040, f:0.36, rx:11, ry: 9 },
+  { bx: 100, by:-62, sz:64, d:0.070, f:0.46, rx: 9, ry: 8 },
+  { bx: 170, by:-48, sz:70, d:0.060, f:0.41, rx: 8, ry:12 },
+  { bx:-200, by: 14, sz:52, d:0.090, f:0.53, rx: 7, ry: 8 },
+  { bx:-128, by: 42, sz:82, d:0.040, f:0.35, rx:12, ry:10 },
+  { bx: -54, by: 66, sz:64, d:0.070, f:0.48, rx: 9, ry: 9 },
+  { bx:  18, by: 56, sz:52, d:0.090, f:0.44, rx: 7, ry:10 },
+  { bx:  90, by: 72, sz:76, d:0.050, f:0.39, rx:10, ry: 8 },
+  { bx: 162, by: 48, sz:58, d:0.080, f:0.52, rx: 8, ry:10 },
+  { bx:-174, by:-18, sz:64, d:0.060, f:0.45, rx: 9, ry: 8 },
+  { bx: 196, by: 16, sz:52, d:0.090, f:0.37, rx: 7, ry:11 },
+  { bx: -90, by: -8, sz:70, d:0.050, f:0.42, rx:10, ry: 9 },
+  { bx:  56, by:-20, sz:58, d:0.070, f:0.49, rx: 8, ry: 8 },
+  { bx: -18, by: 24, sz:76, d:0.040, f:0.40, rx:10, ry: 9 },
+  { bx: 124, by: 20, sz:52, d:0.100, f:0.55, rx: 7, ry: 9 },
 ]
+
+// Evenly-distributed starting phase for each avatar (in radians)
+// This guarantees opposing movement: avatar i and i+N/2 always move opposite
+const PHASES = CFGS.map((_, i) => (i / CFGS.length) * Math.PI * 2)
 
 export default function CreatorAvatars({
   creators,
@@ -80,10 +85,13 @@ export default function CreatorAvatars({
           pos.x += (tx - pos.x) * 0.09
           pos.y += (ty - pos.y) * 0.09
         } else {
-          tx = Math.sin(t * c.fx + c.px) * c.ax
-          ty = Math.sin(t * c.fy + c.py) * c.ay
-          pos.x += (tx - pos.x) * 0.022
-          pos.y += (ty - pos.y) * 0.022
+          // Orbital: cos for X, sin for Y → each avatar traces an ellipse
+          // Phase distributed evenly across all avatars → always opposing movement
+          const phase = PHASES[i]
+          tx = Math.cos(t * c.f + phase) * c.rx
+          ty = Math.sin(t * c.f + phase) * c.ry
+          pos.x += (tx - pos.x) * 0.028
+          pos.y += (ty - pos.y) * 0.028
         }
         el.style.transform = `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px))`
       })
