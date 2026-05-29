@@ -38,6 +38,7 @@ export default function Footer() {
             </div>
             {[
               { href: '/', label: 'Jelajahi' },
+              { href: '/produk', label: 'Katalog Produk' },
               { href: '/register', label: 'Daftar' },
               { href: '/login', label: 'Masuk' },
             ].map(l => (
