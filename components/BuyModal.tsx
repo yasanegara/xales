@@ -16,6 +16,7 @@ interface Props {
   slug: string
   title: string
   price: number
+  postType: string
   authorName: string
   authorWaNumber?: string | null
   authorWaMessage?: string | null
@@ -27,7 +28,7 @@ function formatIDR(n: number) {
   return new Intl.NumberFormat('id-ID').format(n)
 }
 
-export default function BuyModal({ slug, title, price, authorName, authorWaNumber, authorWaMessage, refCode, onSuccess }: Props) {
+export default function BuyModal({ slug, title, price, postType, authorName, authorWaNumber, authorWaMessage, refCode, onSuccess }: Props) {
   const { data: session } = useSession()
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -41,6 +42,7 @@ export default function BuyModal({ slug, title, price, authorName, authorWaNumbe
   const [buying, setBuying] = useState(false)
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null)
   const [orderId, setOrderId] = useState('')
+  const [serviceFee, setServiceFee] = useState(0)
   const [finalAmount, setFinalAmount] = useState(price)
   const [error, setError] = useState('')
 
@@ -80,6 +82,7 @@ export default function BuyModal({ slug, title, price, authorName, authorWaNumbe
     if (data.alreadyOwned) { setOpen(false); onSuccess(); return }
     setPaymentInfo(data.paymentInfo)
     setOrderId(data.orderId)
+    setServiceFee(data.serviceFee ?? 0)
     setFinalAmount(data.amount ?? price)
     setStep('payment')
   }
@@ -119,11 +122,22 @@ export default function BuyModal({ slug, title, price, authorName, authorWaNumbe
               <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.375rem', cursor: 'pointer', color: '#6e6a65' }}>×</button>
             </div>
 
-            {/* Article title + price */}
-            <div style={{ background: '#f7f5f2', borderRadius: '8px', padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.4, flex: 1 }}>{title}</div>
-              <div style={{ fontWeight: 700, fontSize: '1.0625rem', color: '#1a1a1a', marginLeft: '1rem', whiteSpace: 'nowrap' }}>
-                Rp {formatIDR(step === 'payment' ? finalAmount : price)}
+            {/* Price breakdown */}
+            <div style={{ background: '#f7f5f2', borderRadius: '8px', padding: '0.875rem 1rem', marginBottom: '1.5rem' }}>
+              <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.4, marginBottom: '0.75rem' }}>{title}</div>
+              <div style={{ borderTop: '1px solid #e5e0d8', paddingTop: '0.625rem', display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#6e6a65' }}>
+                  <span>Harga {postType === 'html' ? 'App' : 'Artikel'}</span>
+                  <span>Rp {formatIDR(step === 'payment' ? finalAmount - serviceFee : price)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#6e6a65' }}>
+                  <span>Biaya layanan</span>
+                  <span>Rp {formatIDR(step === 'payment' ? serviceFee : 1000)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 700, color: '#1a1a1a', paddingTop: '0.375rem', borderTop: '1px solid #e5e0d8', marginTop: '0.125rem' }}>
+                  <span>Total</span>
+                  <span>Rp {formatIDR(step === 'payment' ? finalAmount : price + 1000)}</span>
+                </div>
               </div>
             </div>
 

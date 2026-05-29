@@ -114,6 +114,7 @@ model Purchase {
   post       Post     @relation(fields: [postId], references: [id])
   postId     String
   amount     Int
+  serviceFee Int      @default(0)
   status     String   @default("pending")
   orderId    String   @unique
   refCode    String?

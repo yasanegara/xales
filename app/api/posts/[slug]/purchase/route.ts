@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/prisma'
 import { randomUUID } from 'crypto'
+import { getServiceFee } from '@/lib/fees'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   const post = await db.post.findUnique({
     where: { slug },
     select: {
-      id: true, isPremium: true, price: true, discount: true, authorId: true,
+      id: true, isPremium: true, price: true, discount: true, authorId: true, type: true,
       author: { select: { bankName: true, bankAccount: true, bankHolder: true, qrisImage: true, waNumber: true } },
     },
   })
@@ -86,11 +87,15 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
   }
 
+  const serviceFee = getServiceFee(post.type)
+  const totalAmount = finalAmount + serviceFee
+
   const purchase = await db.purchase.create({
     data: {
       userId: session.user.id,
       postId: post.id,
-      amount: finalAmount,
+      amount: totalAmount,
+      serviceFee,
       status: 'pending',
       orderId: randomUUID(),
       refCode: refCode ?? null,
@@ -109,7 +114,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   return NextResponse.json({
     pending: true,
     orderId: purchase.orderId,
-    amount: finalAmount,
+    amount: totalAmount,
+    serviceFee,
     paymentInfo: {
       bankName: post.author.bankName,
       bankAccount: post.author.bankAccount,

@@ -154,6 +154,7 @@ export default function Paywall({ slug, title, price, authorName, authorWaNumber
             slug={slug}
             title={title}
             price={price}
+            postType={postType ?? 'markdown'}
             authorName={authorName}
             authorWaNumber={authorWaNumber}
             authorWaMessage={authorWaMessage}
