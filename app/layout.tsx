@@ -13,7 +13,7 @@ const caveat = Caveat({ subsets: ['latin'], weight: ['400', '600', '700'], varia
 export const metadata: Metadata = {
   title: { default: 'Tweak — Creator Publishing Platform', template: '%s | Tweak' },
   description: 'Publish articles and web apps. Monetize your creativity.',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://tweak.id'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? 'https://xales.id'),
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

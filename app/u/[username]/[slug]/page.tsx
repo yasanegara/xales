@@ -34,24 +34,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const authorName = post.author.name ?? `@${post.author.username}`
   const description = post.description ?? undefined
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? 'https://xales.id'
 
-  // Use cover image directly if it's a URL; fall back to generated OG card
+  // Use cover image directly if it's a public URL; generated OG card otherwise
   const isUrl = post.coverImage?.startsWith('http')
-  const ogImageUrl = isUrl ? post.coverImage! : `/api/og/${slug}`
-  const ogImageDims = isUrl
-    ? { width: 1200, height: 630 }
-    : { width: 1200, height: 630 }
+  const ogImageUrl = isUrl
+    ? post.coverImage!
+    : `${baseUrl}/api/og/${slug}`
 
   return {
     title: post.title,
     description: description ?? post.title,
+    metadataBase: new URL(baseUrl),
     openGraph: {
       title: post.title,
       description,
       type: 'article',
-      url: `/@${post.author.username}/${slug}`,
+      url: `${baseUrl}/@${post.author.username}/${slug}`,
       authors: [authorName],
-      images: [{ url: ogImageUrl, ...ogImageDims, alt: post.title }],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
     },
     twitter: {
       card: 'summary_large_image',
