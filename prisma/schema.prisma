@@ -28,6 +28,9 @@ model User {
   // WhatsApp Responder
   waNumber      String?
   waMessage     String?  // auto-reply template after purchase
+  // Gift system
+  giftBalance   Int      @default(0)   // IDR kredit gift pembaca (beli di platform)
+  giftRedeemed  Int      @default(0)   // total gift earnings kreator yang sudah dicairkan
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -39,16 +42,17 @@ model User {
   bundlePurchases BundlePurchase[]
   discounts       Discount[]
   bundles         Bundle[]
-  followers       Follow[]     @relation("following")
-  following       Follow[]     @relation("follower")
+  followers       Follow[]        @relation("following")
+  following       Follow[]        @relation("follower")
   images          Image[]
   sessions        Session[]
   accounts        Account[]
   withdrawals     Withdrawal[]
   comments        Comment[]
   ratings         Rating[]
-  sentGifts       SentGift[]   @relation("giftSender")
-  receivedGifts   SentGift[]   @relation("giftReceiver")
+  sentGifts       SentGift[]      @relation("giftSender")
+  receivedGifts   SentGift[]      @relation("giftReceiver")
+  giftRedemptions GiftRedemption[]
 }
 
 model Post {
@@ -344,6 +348,17 @@ model SentGift {
   postId     String
   giftItem   GiftItem @relation(fields: [giftItemId], references: [id])
   giftItemId String
+}
+
+model GiftRedemption {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  amount    Int      // IDR yang dicairkan
+  status    String   @default("pending") // pending | approved | paid | rejected
+  adminNote String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model VerificationToken {

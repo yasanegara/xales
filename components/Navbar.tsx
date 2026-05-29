@@ -136,6 +136,8 @@ export default function Navbar() {
                       { href: `/@${session.user.username}`, label: 'Profile' },
                       { href: '/dashboard', label: 'Dashboard' },
                       { href: '/dashboard/earnings', label: '💰 Saldo & Penghasilan' },
+                      { href: '/dashboard/gifts', label: '🎁 Gift Diterima' },
+                      { href: '/dashboard/gift-wallet', label: '💳 Gift Wallet' },
                       { href: '/dashboard/orders', label: '📦 Pesanan' },
                       { href: '/dashboard/bundles', label: '🎁 Bundle' },
                       { href: '/dashboard/library', label: '★ Library' },
