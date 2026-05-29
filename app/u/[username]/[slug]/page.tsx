@@ -15,6 +15,7 @@ import RatingWidget from '@/components/RatingWidget'
 import GiftPanel from '@/components/GiftPanel'
 import CommentSection from '@/components/CommentSection'
 import ViewTracker from './ViewTracker'
+import AppShareButton from '@/components/AppShareButton'
 import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -155,9 +156,13 @@ export default async function PostPage({ params, searchParams }: Props) {
           <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {post.title}
           </span>
-          <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: '#9c9690' }}>
-            by {authorName}
-          </span>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>by {authorName}</span>
+            <AppShareButton
+              title={post.title}
+              url={`${process.env.NEXT_PUBLIC_APP_URL ?? 'https://tweak.id'}/@${post.author.username}/${post.slug}`}
+            />
+          </div>
         </div>
         <div style={{ paddingTop: '37px' }}>
           <PostViewer type={post.type} content={post.content} title={post.title} />
