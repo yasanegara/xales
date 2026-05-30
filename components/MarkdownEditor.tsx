@@ -8,18 +8,106 @@ const td = new TurndownService({
   headingStyle: 'atx',
   bulletListMarker: '-',
   codeBlockStyle: 'fenced',
+  hr: '---',
+  strongDelimiter: '**',
+  emDelimiter: '*',
 })
-// Keep images as markdown
-td.keep(['figure'])
-// Convert <b> and <strong> to **
+
+// Strip noise elements completely
+td.remove(['script', 'style', 'nav', 'header', 'footer', 'aside', 'iframe', 'noscript'])
+
+// Headings — handle Google Docs style divs with role="heading"
+td.addRule('googleHeadings', {
+  filter: (node) => {
+    const el = node as Element
+    return el.nodeName === 'DIV' && (el.getAttribute('role') === 'heading' || /^h[1-6]$/i.test(el.getAttribute('aria-level') ?? ''))
+  },
+  replacement: (content) => `\n\n## ${content.trim()}\n\n`,
+})
+
+// Bold — b, strong, and inline spans with bold style
 td.addRule('bold', {
-  filter: ['b', 'strong'],
-  replacement: (content) => `**${content}**`,
+  filter: (node) => {
+    const el = node as HTMLElement
+    if (['B', 'STRONG'].includes(el.nodeName)) return true
+    const s = el.style?.fontWeight
+    return el.nodeName === 'SPAN' && (s === 'bold' || s === '700' || parseInt(s) >= 700)
+  },
+  replacement: (content) => content.trim() ? `**${content.trim()}**` : '',
 })
-// Strip span/div wrappers cleanly
-td.addRule('stripStyle', {
-  filter: (node) => node.nodeName === 'SPAN' && !(node as Element).getAttribute('style')?.includes('font-weight: bold'),
+
+// Italic
+td.addRule('italic', {
+  filter: (node) => {
+    const el = node as HTMLElement
+    if (['I', 'EM'].includes(el.nodeName)) return true
+    return el.nodeName === 'SPAN' && (el.style?.fontStyle === 'italic')
+  },
+  replacement: (content) => content.trim() ? `*${content.trim()}*` : '',
+})
+
+// Underline → ignore (no MD equivalent, just keep content)
+td.addRule('underline', {
+  filter: ['u'],
   replacement: (content) => content,
+})
+
+// Divs and paragraphs from Google Docs / Word — treat as paragraph breaks
+td.addRule('divParagraph', {
+  filter: (node) => {
+    const el = node as Element
+    return el.nodeName === 'DIV' && !el.getAttribute('role')
+  },
+  replacement: (content) => {
+    const trimmed = content.trim()
+    return trimmed ? `\n\n${trimmed}\n\n` : '\n'
+  },
+})
+
+// Strip span wrappers (keep content)
+td.addRule('stripSpan', {
+  filter: (node) => {
+    const el = node as HTMLElement
+    if (el.nodeName !== 'SPAN') return false
+    const s = el.style?.fontWeight
+    const isBold = s === 'bold' || s === '700' || parseInt(s) >= 700
+    const isItalic = el.style?.fontStyle === 'italic'
+    return !isBold && !isItalic
+  },
+  replacement: (content) => content,
+})
+
+// Images — inline markdown
+td.addRule('images', {
+  filter: 'img',
+  replacement: (_, node) => {
+    const el = node as HTMLImageElement
+    const alt = el.getAttribute('alt') || ''
+    const src = el.getAttribute('src') || ''
+    if (!src || src.startsWith('data:')) return '' // skip base64
+    return `![${alt}](${src})`
+  },
+})
+
+// Tables — basic support
+td.addRule('table', {
+  filter: 'table',
+  replacement: (_, node) => {
+    const rows = Array.from((node as HTMLElement).querySelectorAll('tr'))
+    if (!rows.length) return ''
+    const toRow = (r: Element) =>
+      '| ' + Array.from(r.querySelectorAll('td, th')).map(c => c.textContent?.trim() ?? '').join(' | ') + ' |'
+    const header = toRow(rows[0])
+    const sep = '| ' + Array.from(rows[0].querySelectorAll('td, th')).map(() => '---').join(' | ') + ' |'
+    const body = rows.slice(1).map(toRow).join('\n')
+    return `\n\n${header}\n${sep}\n${body}\n\n`
+  },
+})
+
+// Horizontal rule
+td.addRule('hr', {
+  filter: 'hr',
+  replacement: () => '\n\n---\n\n',
 })
 
 interface Props {
@@ -244,18 +332,29 @@ export default function MarkdownEditor({ value, onChange }: Props) {
         onKeyDown={handleKeyDown}
         onPaste={(e) => {
           const html = e.clipboardData.getData('text/html')
-          if (!html) return // plain text paste — default behaviour
-          const md = td.turndown(html).trim()
+          if (!html) return // plain text — default browser behaviour
+          let md: string
+          try {
+            md = td.turndown(html)
+              .replace(/\n{3,}/g, '\n\n') // collapse 3+ blank lines → 2
+              .replace(/^\n+/, '')         // strip leading newlines
+              .trim()
+          } catch {
+            return // conversion failed — fall back to default paste
+          }
           if (!md) return
           e.preventDefault()
           const ta = taRef.current
           const start = ta?.selectionStart ?? value.length
-          const end = ta?.selectionEnd ?? value.length
-          const next = value.slice(0, start) + md + value.slice(end)
+          const end   = ta?.selectionEnd   ?? value.length
+          // Add blank line separator if pasting mid-content
+          const before = value.slice(0, start)
+          const sep = before.length > 0 && !before.endsWith('\n\n') ? '\n\n' : ''
+          const inserted = sep + md
+          const next = before + inserted + value.slice(end)
           onChange(next)
-          // Move cursor to end of pasted content
           requestAnimationFrame(() => {
-            if (ta) { ta.selectionStart = ta.selectionEnd = start + md.length }
+            if (ta) { ta.selectionStart = ta.selectionEnd = start + inserted.length }
           })
         }}
         placeholder={'Mulai menulis...\n\nGunakan toolbar di atas atau ketik langsung syntax Markdown.\nContoh: **tebal**, *miring*, # Judul'}
