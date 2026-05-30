@@ -10,13 +10,41 @@ type Props = { params: Promise<{ username: string }> }
 
 function formatIDR(n: number) { return new Intl.NumberFormat('id-ID').format(n) }
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://xales.id'
+
+export const revalidate = 120
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params
-  const user = await db.user.findUnique({ where: { username } })
+  const user = await db.user.findUnique({
+    where: { username },
+    select: { name: true, bio: true, profilePic: true, _count: { select: { posts: true } } },
+  })
   if (!user) return { title: 'User not found' }
+
+  const displayName = user.name ?? `@${username}`
+  const description = user.bio ?? `Konten dari ${displayName} di Tweak — platform kreator Indonesia`
+  const canonical   = `${BASE_URL}/@${username}`
+  const avatar      = user.profilePic?.startsWith('http') ? user.profilePic : undefined
+
   return {
-    title: user.name ?? `@${username}`,
-    description: user.bio ?? `Posts by @${username} on Tweak`,
+    title: `${displayName} — Tweak`,
+    description,
+    metadataBase: new URL(BASE_URL),
+    alternates: { canonical },
+    openGraph: {
+      title: displayName,
+      description,
+      type: 'profile',
+      url: canonical,
+      ...(avatar ? { images: [{ url: avatar, width: 400, height: 400, alt: displayName }] } : {}),
+    },
+    twitter: {
+      card: avatar ? 'summary' : 'summary',
+      title: displayName,
+      description,
+      ...(avatar ? { images: [avatar] } : {}),
+    },
   }
 }
 

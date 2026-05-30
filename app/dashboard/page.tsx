@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-  const [allPosts, recentPosts, recentPurchases, affiliateReferrals, allPurchases] = await Promise.all([
+  const [allPosts, recentPosts, recentPurchases, affiliateReferrals, allPurchases, userProfile] = await Promise.all([
     db.post.findMany({
       where: { authorId: userId },
       select: { viewCount: true, likeCount: true, published: true },
@@ -41,6 +41,10 @@ export default async function DashboardPage() {
       where: { post: { authorId: userId }, status: 'paid', createdAt: { gte: thirtyDaysAgo } },
       select: { amount: true, createdAt: true },
       orderBy: { createdAt: 'asc' },
+    }),
+    db.user.findUnique({
+      where: { id: userId },
+      select: { name: true, bio: true, bankAccount: true, qrisImage: true },
     }),
   ])
 
@@ -70,9 +74,21 @@ export default async function DashboardPage() {
 
   const maxPostViews = Math.max(...recentPosts.map(p => p.viewCount), 1)
 
+  // Onboarding: calculate incomplete steps
+  const onboardingSteps = [
+    { done: !!(userProfile?.name && userProfile.name.trim()), label: 'Lengkapi nama profil', href: '/dashboard/settings' },
+    { done: !!(userProfile?.bio && userProfile.bio.trim()), label: 'Tambahkan bio singkat', href: '/dashboard/settings' },
+    { done: allPosts.length > 0, label: 'Buat konten pertamamu', href: '/dashboard/new' },
+    { done: allPosts.some(p => p.published), label: 'Publish artikel atau app', href: '/dashboard/new' },
+    { done: !!(userProfile?.bankAccount || userProfile?.qrisImage), label: 'Setup metode pembayaran', href: '/dashboard/settings#payment' },
+  ]
+  const doneCount = onboardingSteps.filter(s => s.done).length
+  const showOnboarding = doneCount < onboardingSteps.length
+
   return (
     <DashboardStats
       user={{ name: session!.user.name, username: session!.user.username }}
+      onboarding={showOnboarding ? { steps: onboardingSteps, doneCount } : null}
       stats={{ totalViews, totalLikes, published, totalPosts: allPosts.length, totalRevenue, affiliateEarnings }}
       daily30={daily30}
       recentPurchases={recentPurchases.map(p => ({

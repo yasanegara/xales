@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic'
+export const revalidate = 60 // ISR: revalidate every 60s
 
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
@@ -18,58 +18,63 @@ import GiftPanel from '@/components/GiftPanel'
 import CommentSection from '@/components/CommentSection'
 import ViewTracker from './ViewTracker'
 import AppShareButton from '@/components/AppShareButton'
-import { headers } from 'next/headers'
 import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { extractHeadings } from '@/lib/headings'
 import { formatDate, readingTime } from '@/lib/utils'
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://xales.id'
+
+// Pre-render top 100 articles at build time
+export async function generateStaticParams() {
+  const posts = await db.post.findMany({
+    where: { published: true, isPrivate: false },
+    orderBy: { viewCount: 'desc' },
+    take: 100,
+    select: { slug: true, author: { select: { username: true } } },
+  })
+  return posts.map(p => ({ username: p.author.username, slug: p.slug }))
+}
+
 type Props = { params: Promise<{ username: string; slug: string }>; searchParams: Promise<{ ref?: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
+  const { username, slug } = await params
   const post = await db.post.findUnique({
     where: { slug },
-    select: { title: true, description: true, coverImage: true, author: { select: { name: true, username: true } } },
+    select: { title: true, description: true, coverImage: true, tags: true, publishedAt: true, author: { select: { name: true, username: true } } },
   })
   if (!post) return { title: 'Post not found' }
 
   const authorName = post.author.name ?? `@${post.author.username}`
   const description = post.description ?? undefined
-
-  // Derive base URL — prefer forwarded host (Railway proxy sets this)
-  const headersList = await headers()
-  const fwdHost  = headersList.get('x-forwarded-host')
-  const fwdProto = headersList.get('x-forwarded-proto') ?? 'https'
-  const rawHost  = headersList.get('host') ?? ''
-  const host     = (fwdHost ?? (rawHost.includes('localhost') ? 'xales.id' : rawHost)) || 'xales.id'
-  const proto    = fwdHost ? fwdProto : 'https'
-  const baseUrl  = `${proto}://${host}`
-
-  // Use cover image directly if it's a public URL; generated OG card otherwise
   const isUrl = post.coverImage?.startsWith('http')
-  const ogImageUrl = isUrl
-    ? post.coverImage!
-    : `${baseUrl}/api/og/${slug}`
+  const ogImage = isUrl ? post.coverImage! : `${BASE_URL}/api/og/${slug}`
+  const canonical = `${BASE_URL}/@${username}/${slug}`
 
   return {
     title: post.title,
     description: description ?? post.title,
-    metadataBase: new URL(baseUrl),
+    metadataBase: new URL(BASE_URL),
+    alternates: { canonical },
+    keywords: post.tags,
+    authors: [{ name: authorName }],
     openGraph: {
       title: post.title,
       description,
       type: 'article',
-      url: `${baseUrl}/@${post.author.username}/${slug}`,
+      url: canonical,
       authors: [authorName],
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
+      publishedTime: post.publishedAt?.toISOString(),
+      tags: post.tags,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: post.title }],
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
       description,
-      images: [ogImageUrl],
+      images: [ogImage],
     },
   }
 }
@@ -111,12 +116,24 @@ export default async function PostPage({ params, searchParams }: Props) {
 
   const canRead = !post.isPremium || isAuthor || isPurchased
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': post.type === 'html' ? 'SoftwareApplication' : 'Article',
+    headline: post.title,
+    description: post.description ?? post.title,
+    author: { '@type': 'Person', name: post.author.name ?? post.author.username, url: `${BASE_URL}/@${post.author.username}` },
+    publisher: { '@type': 'Organization', name: 'Tweak', url: BASE_URL },
+    url: `${BASE_URL}/@${post.author.username}/${slug}`,
+    ...(post.coverImage?.startsWith('http') ? { image: post.coverImage } : {}),
+  }
+
   // Login gate — all content requires login (author exempt)
   if (!session && !isAuthor) {
     const postUrl = `/@${post.author.username}/${slug}`
     return (
       <>
         <Navbar />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <div className="article-container">
           {/* Post header teaser */}
           <div style={{ marginBottom: '2rem' }}>

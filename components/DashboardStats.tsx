@@ -11,6 +11,8 @@ function fmtDateShort(iso: string) {
   return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
 }
 
+interface OnboardingStep { done: boolean; label: string; href: string }
+
 interface Props {
   user: { name?: string | null; username: string }
   stats: {
@@ -27,6 +29,7 @@ interface Props {
     viewCount: number; likeCount: number; isPremium: boolean; price?: number | null
     updatedAt: string; barPct: number
   }[]
+  onboarding: { steps: OnboardingStep[]; doneCount: number } | null
 }
 
 // ── Mini sparkline SVG ────────────────────────────────────────────────
@@ -94,8 +97,9 @@ function KpiCard({ label, value, sub, sparkData, color, icon }: {
 }
 
 // ── Main Component ────────────────────────────────────────────────────
-export default function DashboardStats({ user, stats, daily30, recentPurchases, topPosts }: Props) {
+export default function DashboardStats({ user, stats, daily30, recentPurchases, topPosts, onboarding }: Props) {
   const [activeTab, setActiveTab] = useState<'posts' | 'activity'>('posts')
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false)
 
   const sparkAmounts = daily30.map(d => d.amount)
   const activeDays   = daily30.filter(d => d.amount > 0).length
@@ -140,6 +144,49 @@ export default function DashboardStats({ user, stats, daily30, recentPurchases, 
           + Buat Konten
         </Link>
       </div>
+
+      {/* ── Onboarding checklist ───────────────────────────────── */}
+      {onboarding && !onboardingDismissed && (
+        <div style={{
+          background: 'linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)',
+          border: '1px solid #bfdbfe', borderRadius: '18px',
+          padding: '1.25rem 1.5rem', marginBottom: '1.75rem',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem', gap: '1rem' }}>
+            <div>
+              <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1e40af', marginBottom: '0.25rem' }}>
+                🚀 Setup akunmu — {onboarding.doneCount}/{onboarding.steps.length} selesai
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#3b82f6' }}>Selesaikan langkah ini agar profilmu siap menerima pembeli</div>
+            </div>
+            <button onClick={() => setOnboardingDismissed(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#93c5fd', fontSize: '1.25rem', lineHeight: 1, padding: 0, flexShrink: 0 }}>×</button>
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ height: '4px', background: '#bfdbfe', borderRadius: '2px', marginBottom: '1rem', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${(onboarding.doneCount / onboarding.steps.length) * 100}%`, background: 'linear-gradient(90deg, #3b82f6, #6366f1)', borderRadius: '2px', transition: 'width 0.5s ease' }} />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem' }}>
+            {onboarding.steps.map((step, i) => (
+              <Link key={i} href={step.href} style={{
+                display: 'flex', alignItems: 'center', gap: '0.625rem',
+                padding: '0.5rem 0.75rem', borderRadius: '10px', textDecoration: 'none',
+                background: step.done ? 'rgba(255,255,255,0.5)' : '#fff',
+                border: `1px solid ${step.done ? '#bfdbfe' : '#93c5fd'}`,
+                opacity: step.done ? 0.6 : 1,
+              }}>
+                <span style={{ width: '20px', height: '20px', borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', background: step.done ? '#3b82f6' : '#e0e7ff', color: step.done ? '#fff' : '#3b82f6', fontWeight: 700 }}>
+                  {step.done ? '✓' : i + 1}
+                </span>
+                <span style={{ fontSize: '0.8125rem', color: '#1e40af', fontWeight: step.done ? 400 : 600, textDecoration: step.done ? 'line-through' : 'none' }}>
+                  {step.label}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── KPI Cards ──────────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.75rem' }}>
