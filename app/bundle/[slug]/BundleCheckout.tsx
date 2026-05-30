@@ -61,7 +61,7 @@ export default function BundleCheckout({ slug, title, description, price, discou
   const inputStyle = { width: '100%', background: '#fafaf8', border: '1px solid #e5e0d8', borderRadius: '8px', padding: '0.625rem 0.875rem', fontSize: '0.9375rem', color: '#1a1a1a', outline: 'none', boxSizing: 'border-box' as const }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '2rem', alignItems: 'start' }}>
+    <div className="grid-chart-sidebar" style={{ gap: '2rem' }}>
       {/* Left: bundle info */}
       <div>
         <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6e6a65', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>

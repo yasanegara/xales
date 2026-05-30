@@ -109,7 +109,7 @@ export default function BuyModal({ slug, title, price, postType, authorName, aut
       {open && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div onClick={() => !buying && setOpen(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(26,26,26,0.5)', backdropFilter: 'blur(4px)' }} />
-          <div style={{ position: 'relative', background: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '440px', padding: '2rem', boxShadow: '0 32px 80px rgba(0,0,0,0.18)', zIndex: 1, maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="modal-box">
 
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>

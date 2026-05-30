@@ -117,7 +117,7 @@ export default async function PostPage({ params, searchParams }: Props) {
     return (
       <>
         <Navbar />
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '2rem 1.5rem 4rem' }}>
+        <div className="article-container">
           {/* Post header teaser */}
           <div style={{ marginBottom: '2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
@@ -250,7 +250,7 @@ export default async function PostPage({ params, searchParams }: Props) {
     return (
       <>
         <Navbar />
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+        <div className="article-container">
           <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', fontWeight: 700, letterSpacing: '-0.02em', color: '#1a1a1a', marginBottom: '1rem' }}>
             {post.title}
           </h1>

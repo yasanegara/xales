@@ -114,7 +114,7 @@ export default function GiftWalletPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '1.25rem', alignItems: 'start' }}>
+      <div className="grid-chart-sidebar">
 
         {/* Left: riwayat */}
         <div style={{ background: '#fff', border: '1px solid #e5e0d8', borderRadius: '12px', padding: '1.375rem' }}>

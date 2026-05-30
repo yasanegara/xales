@@ -100,15 +100,8 @@ export default function PostCard({ post }: PostCardProps) {
           </p>
         )}
 
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: '0.75rem',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="postcard-footer">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
             <div
               style={{
                 width: '22px',
@@ -137,14 +130,12 @@ export default function PostCard({ post }: PostCardProps) {
                 (post.author.name?.[0] ?? post.author.username[0]).toUpperCase()
               )}
             </div>
-            <span style={{ fontSize: '0.8rem', color: '#6e6a65' }}>
+            <span style={{ fontSize: '0.8rem', color: '#6e6a65', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {post.author.name ?? `@${post.author.username}`}
             </span>
-            <span style={{ color: '#d0c9b8' }}>·</span>
-            <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>{formatDate(displayDate)}</span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+          <div className="postcard-stats">
             <span style={{ fontSize: '0.75rem', color: '#9c9690' }}>
               👁 {post.viewCount.toLocaleString()}
             </span>

@@ -212,7 +212,7 @@ export default function EarningsPage() {
       </div>
 
       {/* ── Summary cards ────────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.875rem', marginBottom: '2rem' }}>
+      <div className="summary-cards">
         {[
           { label: 'Total Penjualan', value: formatIDR(data.totalRevenue), sub: 'semua transaksi lunas', accent: '#1a1a1a' },
           { label: 'Fee Transaksi', value: formatIDR(data.transactionFee), sub: `${data.transactionCount} transaksi × Rp 2.500`, accent: '#dc2626' },
@@ -228,7 +228,7 @@ export default function EarningsPage() {
       </div>
 
       {/* ── Chart + Source + Withdraw ─────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.25rem', marginBottom: '1.5rem', alignItems: 'start' }}>
+      <div className="grid-chart-sidebar">
 
         {/* Chart */}
         <div style={{ background: '#fff', border: '1px solid #e5e0d8', borderRadius: '12px', padding: '1.375rem' }}>

@@ -48,10 +48,11 @@ export default function ReadingWrapper({ children, isMarkdown }: Props) {
   const contentStyle: React.CSSProperties = {
     fontFamily: FONT_FAMILIES[fontFamily],
     fontSize: FONT_SIZES[fontSize],
-    ...(readMode
-      ? { background: '#faf7f0', borderRadius: '12px', padding: '2.5rem 3rem', color: '#2d2420', lineHeight: 1.85 }
-      : {}),
   }
 
-  return <div style={contentStyle}>{children}</div>
+  return (
+    <div style={contentStyle} className={readMode ? 'read-mode-content' : ''}>
+      {children}
+    </div>
+  )
 }

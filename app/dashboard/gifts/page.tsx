@@ -136,7 +136,7 @@ export default function DashboardGiftsPage() {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '1.25rem', alignItems: 'start' }}>
+      <div className="grid-chart-sidebar">
 
         {/* Left: chart + riwayat gift diterima */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
