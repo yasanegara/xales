@@ -26,15 +26,19 @@ import { formatDate, readingTime } from '@/lib/utils'
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://xales.id'
 
-// Pre-render top 100 articles at build time
+// Pre-render top 100 articles at build time (graceful fallback if DB unreachable)
 export async function generateStaticParams() {
-  const posts = await db.post.findMany({
-    where: { published: true, isPrivate: false },
-    orderBy: { viewCount: 'desc' },
-    take: 100,
-    select: { slug: true, author: { select: { username: true } } },
-  })
-  return posts.map(p => ({ username: p.author.username, slug: p.slug }))
+  try {
+    const posts = await db.post.findMany({
+      where: { published: true, isPrivate: false },
+      orderBy: { viewCount: 'desc' },
+      take: 100,
+      select: { slug: true, author: { select: { username: true } } },
+    })
+    return posts.map(p => ({ username: p.author.username, slug: p.slug }))
+  } catch {
+    return [] // DB unreachable at build time (Railway build phase) — pages generated on-demand via ISR
+  }
 }
 
 type Props = { params: Promise<{ username: string; slug: string }>; searchParams: Promise<{ ref?: string }> }

@@ -6,19 +6,26 @@ const BASE = 'https://xales.id'
 export const revalidate = 3600 // rebuild sitemap every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, users] = await Promise.all([
-    db.post.findMany({
-      where: { published: true, isPrivate: false },
-      select: { slug: true, author: { select: { username: true } }, updatedAt: true },
-      orderBy: { publishedAt: 'desc' },
-      take: 5000,
-    }),
-    db.user.findMany({
-      where: { posts: { some: { published: true, isPrivate: false } } },
-      select: { username: true, updatedAt: true },
-      take: 2000,
-    }),
-  ])
+  let posts: { slug: string; author: { username: string }; updatedAt: Date }[] = []
+  let users: { username: string; updatedAt: Date }[] = []
+
+  try {
+    ;[posts, users] = await Promise.all([
+      db.post.findMany({
+        where: { published: true, isPrivate: false },
+        select: { slug: true, author: { select: { username: true } }, updatedAt: true },
+        orderBy: { publishedAt: 'desc' },
+        take: 5000,
+      }),
+      db.user.findMany({
+        where: { posts: { some: { published: true, isPrivate: false } } },
+        select: { username: true, updatedAt: true },
+        take: 2000,
+      }),
+    ])
+  } catch {
+    // DB unreachable at build time — return static routes only
+  }
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: BASE, lastModified: new Date(), changeFrequency: 'hourly', priority: 1 },
