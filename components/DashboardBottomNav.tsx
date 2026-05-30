@@ -5,11 +5,11 @@ import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 const BOTTOM_NAV = [
-  { href: '/dashboard',           label: 'Home',      icon: '⊞' },
-  { href: '/dashboard/earnings',  label: 'Saldo',     icon: '💰' },
-  { href: '/dashboard/orders',    label: 'Pesanan',   icon: '📦' },
-  { href: '/dashboard/library',   label: 'Library',   icon: '★' },
-  { href: '/dashboard/settings',  label: 'Settings',  icon: '⚙' },
+  { href: '/dashboard',           label: 'Home',    icon: '⊞' },
+  { href: '/dashboard/posts',     label: 'Konten',  icon: '✍️' },
+  { href: '/dashboard/earnings',  label: 'Saldo',   icon: '💰' },
+  { href: '/dashboard/orders',    label: 'Pesanan', icon: '📦' },
+  { href: '/dashboard/settings',  label: 'Settings', icon: '⚙' },
 ]
 
 export default function DashboardBottomNav() {

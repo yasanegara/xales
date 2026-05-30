@@ -5,16 +5,17 @@ import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 const NAV = [
-  { href: '/dashboard',           label: 'Dashboard',        icon: '⊞' },
-  { href: '/dashboard/earnings',  label: 'Saldo & Penghasilan', icon: '💰' },
-  { href: '/dashboard/gifts',     label: 'Gift Diterima',    icon: '🎁' },
-  { href: '/dashboard/gift-wallet', label: 'Gift Wallet',   icon: '💳' },
-  { href: '/dashboard/orders',    label: 'Pesanan',          icon: '📦' },
-  { href: '/dashboard/bundles',   label: 'Bundle',           icon: '🗂' },
-  { href: '/dashboard/library',   label: 'Library',          icon: '★' },
-  { href: '/dashboard/discounts', label: 'Kode Diskon',      icon: '%' },
-  { href: '/dashboard/affiliate', label: 'Affiliate',        icon: '↗' },
-  { href: '/dashboard/settings',  label: 'Settings',         icon: '⚙' },
+  { href: '/dashboard',             label: 'Dashboard',          icon: '⊞' },
+  { href: '/dashboard/posts',       label: 'Konten Saya',        icon: '✍️' },
+  { href: '/dashboard/earnings',    label: 'Saldo & Penghasilan', icon: '💰' },
+  { href: '/dashboard/orders',      label: 'Pesanan',            icon: '📦' },
+  { href: '/dashboard/library',     label: 'Library',            icon: '★' },
+  { href: '/dashboard/gifts',       label: 'Gift Diterima',      icon: '🎁' },
+  { href: '/dashboard/gift-wallet', label: 'Gift Wallet',        icon: '💳' },
+  { href: '/dashboard/bundles',     label: 'Bundle',             icon: '🗂' },
+  { href: '/dashboard/discounts',   label: 'Kode Diskon',        icon: '%' },
+  { href: '/dashboard/affiliate',   label: 'Affiliate',          icon: '↗' },
+  { href: '/dashboard/settings',    label: 'Settings',           icon: '⚙' },
 ]
 
 const ADMIN_NAV = [
