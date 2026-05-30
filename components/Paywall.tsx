@@ -170,25 +170,30 @@ export default function Paywall({ slug, title, price, authorName, authorWaNumber
           <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#6e6a65', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>
             File Gratis
           </div>
-          {files.filter(f => f.isFree).map(file => (
-            <a
-              key={file.id}
-              href={`/api/files/${file.id}`}
-              download={file.name}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.75rem',
-                background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '8px',
-                padding: '0.75rem 1rem', textDecoration: 'none', marginBottom: '0.5rem',
-              }}
-            >
-              <span style={{ fontSize: '1.25rem' }}>📎</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#1a1a1a' }}>{file.name}</div>
-                <div style={{ fontSize: '0.75rem', color: '#9c9690' }}>{formatBytes(file.size)}</div>
-              </div>
-              <span style={{ fontSize: '0.8125rem', color: '#059669', fontWeight: 500 }}>↓ Unduh</span>
-            </a>
-          ))}
+          {files.filter(f => f.isFree).map(file => {
+            const isLink = file.url && (file.mimeType === 'url/link' || file.url.startsWith('http'))
+            return (
+              <a
+                key={file.id}
+                href={isLink ? file.url! : `/api/files/${file.id}`}
+                {...(isLink ? { target: '_blank', rel: 'noopener noreferrer' } : { download: file.name })}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.75rem',
+                  background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '8px',
+                  padding: '0.75rem 1rem', textDecoration: 'none', marginBottom: '0.5rem',
+                }}
+              >
+                <span style={{ fontSize: '1.25rem' }}>{isLink ? '🔗' : '📎'}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#1a1a1a' }}>{file.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#9c9690' }}>{isLink ? 'Akses eksternal' : formatBytes(file.size)}</div>
+                </div>
+                <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: isLink ? '#0070f3' : '#059669' }}>
+                  {isLink ? '↗ Buka' : '↓ Unduh'}
+                </span>
+              </a>
+            )
+          })}
         </div>
       )}
 
