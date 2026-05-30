@@ -1,4 +1,4 @@
-export const revalidate = 60 // ISR: revalidate every 60s
+export const dynamic = 'force-dynamic'
 
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'

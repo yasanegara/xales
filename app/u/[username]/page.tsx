@@ -12,7 +12,7 @@ function formatIDR(n: number) { return new Intl.NumberFormat('id-ID').format(n) 
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://xales.id'
 
-export const revalidate = 120
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params
