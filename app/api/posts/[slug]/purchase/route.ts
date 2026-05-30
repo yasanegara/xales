@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/prisma'
 import { randomUUID } from 'crypto'
 import { getServiceFee } from '@/lib/fees'
+import { rateLimit, getIp } from '@/lib/ratelimit'
+import { notifyCreatorNewOrder } from '@/lib/notify'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -22,6 +24,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
 }
 
 export async function POST(req: NextRequest, { params }: Params) {
+  const ip = getIp(req)
+  if (!rateLimit(`purchase:${ip}`, 10, 60_000))
+    return NextResponse.json({ error: 'Terlalu banyak permintaan. Coba lagi sebentar.' }, { status: 429 })
+
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Login terlebih dahulu' }, { status: 401 })
 
@@ -110,6 +116,20 @@ export async function POST(req: NextRequest, { params }: Params) {
       data: { usedCount: { increment: 1 } },
     })
   }
+
+  // Fire-and-forget WA notification to creator
+  const creatorFull = await db.user.findUnique({
+    where: { id: post.authorId },
+    select: { waNumber: true, name: true },
+  })
+  notifyCreatorNewOrder({
+    creatorWa: creatorFull?.waNumber,
+    creatorName: creatorFull?.name ?? 'Kreator',
+    buyerName: payerName ?? session.user.name ?? 'Pembeli',
+    contentTitle: (await db.post.findUnique({ where: { id: post.id }, select: { title: true } }))?.title ?? '',
+    amount: totalAmount,
+    orderId: purchase.orderId,
+  })
 
   return NextResponse.json({
     pending: true,

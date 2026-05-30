@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/prisma'
+import { rateLimit, getIp } from '@/lib/ratelimit'
 
 export async function GET(req: NextRequest) {
   const postId = req.nextUrl.searchParams.get('postId')
@@ -16,6 +17,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = getIp(req)
+  if (!rateLimit(`comment:${ip}`, 20, 60_000))
+    return NextResponse.json({ error: 'Terlalu banyak komentar. Tunggu sebentar.' }, { status: 429 })
+
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Login diperlukan' }, { status: 401 })
 

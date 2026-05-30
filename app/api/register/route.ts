@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { db } from '@/lib/prisma'
+import { rateLimit, getIp } from '@/lib/ratelimit'
 
 export async function POST(req: NextRequest) {
+  const ip = getIp(req)
+  if (!rateLimit(`register:${ip}`, 5, 60_000))
+    return NextResponse.json({ error: 'Terlalu banyak percobaan. Tunggu 1 menit.' }, { status: 429 })
+
   try {
     const { name, username, email, password } = await req.json()
 

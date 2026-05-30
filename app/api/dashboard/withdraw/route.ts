@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/prisma'
 import { TRANSACTION_FEE } from '@/lib/fees'
+import { notifyWithdrawalSubmitted } from '@/lib/notify'
 
 const MIN_WITHDRAW = 50_000
 
@@ -49,6 +50,13 @@ export async function POST(req: NextRequest) {
       bankAccount: user.bankAccount,
       bankHolder: user.bankHolder ?? '',
     },
+  })
+
+  const creator = await db.user.findUnique({ where: { id: userId }, select: { name: true, waNumber: true } })
+  notifyWithdrawalSubmitted({
+    creatorWa: creator?.waNumber,
+    creatorName: creator?.name ?? 'Kreator',
+    amount,
   })
 
   return NextResponse.json(withdrawal, { status: 201 })

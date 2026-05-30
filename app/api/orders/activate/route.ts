@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/prisma'
+import { notifyBuyerConfirmed } from '@/lib/notify'
+
+const BASE = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://xales.id'
 
 // POST /api/orders/activate — creator activates a pending purchase
 export async function POST(req: NextRequest) {
@@ -14,7 +17,10 @@ export async function POST(req: NextRequest) {
   if (type === 'article') {
     const purchase = await db.purchase.findUnique({
       where: { orderId },
-      include: { post: { select: { authorId: true } } },
+      include: {
+        post: { select: { authorId: true, slug: true, title: true, author: { select: { username: true } } } },
+        user: { select: { name: true, waNumber: true } },
+      },
     })
     if (!purchase) return NextResponse.json({ error: 'Order tidak ditemukan' }, { status: 404 })
     if (purchase.post.authorId !== session.user.id)
@@ -22,10 +28,15 @@ export async function POST(req: NextRequest) {
     if (purchase.status === 'paid')
       return NextResponse.json({ error: 'Sudah aktif' }, { status: 400 })
 
-    await db.purchase.update({
-      where: { orderId },
-      data: { status: 'paid' },
+    await db.purchase.update({ where: { orderId }, data: { status: 'paid' } })
+
+    notifyBuyerConfirmed({
+      buyerWa: purchase.payerWa ?? purchase.user?.waNumber,
+      buyerName: purchase.payerName ?? purchase.user?.name ?? 'Pembeli',
+      contentTitle: purchase.post.title,
+      contentUrl: `${BASE}/@${purchase.post.author.username}/${purchase.post.slug}`,
     })
+
     return NextResponse.json({ ok: true })
   }
 
