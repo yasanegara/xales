@@ -46,6 +46,9 @@ export default function Navbar() {
         >
           Tweak
         </Link>
+        <span style={{ fontSize: '0.6rem', fontWeight: 700, background: '#fef9c3', color: '#854d0e', padding: '0.1rem 0.4rem', borderRadius: '20px', letterSpacing: '0.04em', border: '1px solid #fde68a', marginLeft: '0.25rem', verticalAlign: 'middle' }}>
+          BETA
+        </span>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           {session ? (

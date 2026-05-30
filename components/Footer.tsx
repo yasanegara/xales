@@ -72,8 +72,11 @@ export default function Footer() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexWrap: 'wrap', gap: '0.5rem',
         }}>
-          <span style={{ fontSize: '0.75rem', color: '#b0a898' }}>
+          <span style={{ fontSize: '0.75rem', color: '#b0a898', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             © {new Date().getFullYear()} Tweak. Dibuat untuk kreator Indonesia.
+            <span style={{ background: '#fef9c3', color: '#854d0e', fontSize: '0.6875rem', fontWeight: 700, padding: '0.1rem 0.5rem', borderRadius: '20px', letterSpacing: '0.04em', border: '1px solid #fde68a' }}>
+              BETA v0.1.0
+            </span>
           </span>
           <div style={{ display: 'flex', gap: '1.25rem' }}>
             {[
