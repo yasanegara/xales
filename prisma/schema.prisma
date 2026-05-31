@@ -41,6 +41,8 @@ model User {
   filePurchases   FilePurchase[]
   bundlePurchases BundlePurchase[]
   collections     Collection[]
+  driveFolders    DriveFolder[]
+  driveFiles      DriveFile[]
   discounts       Discount[]
   bundles         Bundle[]
   followers       Follow[]        @relation("following")
@@ -402,4 +404,38 @@ model CollectionItem {
   addedAt      DateTime   @default(now())
 
   @@unique([collectionId, itemType, itemId])
+}
+
+// ── Drive (personal file manager) ───────────────────────────────────
+
+model DriveFolder {
+  id        String        @id @default(cuid())
+  user      User          @relation(fields: [userId], references: [id])
+  userId    String
+  parent    DriveFolder?  @relation("FolderTree", fields: [parentId], references: [id])
+  parentId  String?
+  children  DriveFolder[] @relation("FolderTree")
+  files     DriveFile[]
+  name      String
+  emoji     String        @default("📁")
+  color     String        @default("#f59e0b")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model DriveFile {
+  id         String       @id @default(cuid())
+  user       User         @relation(fields: [userId], references: [id])
+  userId     String
+  folder     DriveFolder? @relation(fields: [folderId], references: [id])
+  folderId   String?
+  name       String
+  mimeType   String       @default("application/octet-stream")
+  size       Int          @default(0)
+  data       String?      @db.Text  // base64 for small files
+  url        String?      @db.Text  // external URL or cloud URL
+  shareToken String?      @unique
+  isPublic   Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 }

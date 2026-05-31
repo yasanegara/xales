@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react'
 const NAV = [
   { href: '/dashboard',             label: 'Dashboard',          icon: '⊞' },
   { href: '/dashboard/posts',       label: 'Konten Saya',        icon: '✍️' },
+  { href: '/dashboard/drive',       label: 'Drive',              icon: '🗄' },
   { href: '/dashboard/earnings',    label: 'Saldo & Penghasilan', icon: '💰' },
   { href: '/dashboard/orders',      label: 'Pesanan',            icon: '📦' },
   { href: '/dashboard/library',     label: 'Library',            icon: '★' },
