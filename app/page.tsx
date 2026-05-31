@@ -106,7 +106,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       )}
 
       {/* Creator showcase */}
-      <div style={{ borderBottom: '1px solid #e5e0d8', background: '#ffffff' }}>
+      <div style={{ borderBottom: '1px solid #e5e0d8', background: '#ffffff', overflow: 'hidden' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }} className="home-showcase">
           <CreatorAvatars creators={recentCreators} totalUsers={totalUsers} session={!!session} />
         </div>

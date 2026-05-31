@@ -181,7 +181,7 @@ export default function CreatorAvatars({
             position: 'absolute', inset: 0,
             width: '100%', height: '100%',
             pointerEvents: 'none', zIndex: 0,
-            overflow: 'visible',
+            overflow: 'hidden',
           }}
         >
           {validConns.map(([, ], ci) => (

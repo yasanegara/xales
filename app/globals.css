@@ -26,6 +26,7 @@
 
 html {
   background: #f7f5f2;
+  overflow-x: hidden; /* prevent horizontal scroll from overflowing elements */
 }
 
 body {
@@ -34,6 +35,7 @@ body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Instant click feedback — makes every tap/click feel responsive */
