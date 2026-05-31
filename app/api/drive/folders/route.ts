@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const parentId = req.nextUrl.searchParams.get('parentId') ?? null
+  const parentId = req.nextUrl.searchParams.get('parentId') || null // '' → null for root
 
   const [folders, files] = await Promise.all([
     db.driveFolder.findMany({
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
         _count: { select: { children: true, files: true } } },
     }),
     db.driveFile.findMany({
-      where: { userId: session.user.id, folderId: parentId },
+      where: { userId: session.user.id, folderId: parentId ?? null },
       orderBy: { createdAt: 'desc' },
       select: { id: true, name: true, mimeType: true, size: true, url: true,
         isPublic: true, shareToken: true, createdAt: true, updatedAt: true },
