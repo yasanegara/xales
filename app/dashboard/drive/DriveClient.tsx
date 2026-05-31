@@ -240,18 +240,24 @@ export default function DriveClient({ initialFolders, initialFiles }: { initialF
           </div>
         ) : view === 'grid' ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.75rem', padding: '0.25rem' }}>
-            {/* Folders */}
+            {/* Folders — single click to open, ⋯ button for actions */}
             {folders.map(f => (
-              <div key={f.id}
-                onClick={() => setSelected(s => s?.id === f.id ? null : { type: 'folder', id: f.id })}
-                onDoubleClick={() => openFolder(f.id, [...breadcrumb, { id: f.id, name: f.name }])}
-                style={{ background: selected?.id === f.id ? '#f0ede8' : '#fff', border: `2px solid ${selected?.id === f.id ? '#1a1a1a' : '#f0ede8'}`, borderRadius: '12px', padding: '1rem 0.75rem', cursor: 'pointer', textAlign: 'center', transition: 'all 0.1s', userSelect: 'none' }}
-              >
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{f.emoji}</div>
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</div>
-                <div style={{ fontSize: '0.625rem', color: '#9c9690', marginTop: '2px' }}>
-                  {f._count.children + f._count.files} item
+              <div key={f.id} style={{ position: 'relative' }}>
+                <div
+                  onClick={() => openFolder(f.id, [...breadcrumb, { id: f.id, name: f.name }])}
+                  style={{ background: selected?.id === f.id ? '#f0ede8' : '#fff', border: `2px solid ${selected?.id === f.id ? '#1a1a1a' : '#f0ede8'}`, borderRadius: '12px', padding: '1rem 0.75rem', cursor: 'pointer', textAlign: 'center', transition: 'all 0.1s', userSelect: 'none' }}
+                >
+                  <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{f.emoji}</div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</div>
+                  <div style={{ fontSize: '0.625rem', color: '#9c9690', marginTop: '2px' }}>
+                    {f._count.children + f._count.files} item
+                  </div>
                 </div>
+                {/* Action button */}
+                <button
+                  onClick={e => { e.stopPropagation(); setSelected(s => s?.id === f.id ? null : { type: 'folder', id: f.id }) }}
+                  style={{ position: 'absolute', top: '6px', right: '6px', background: selected?.id === f.id ? '#1a1a1a' : 'rgba(0,0,0,0.06)', border: 'none', borderRadius: '6px', width: '22px', height: '22px', cursor: 'pointer', fontSize: '0.7rem', color: selected?.id === f.id ? '#fff' : '#6e6a65', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >⋯</button>
               </div>
             ))}
             {/* Files */}
@@ -272,8 +278,10 @@ export default function DriveClient({ initialFolders, initialFiles }: { initialF
           <div style={{ border: '1px solid #f0ede8', borderRadius: '12px', overflow: 'hidden' }}>
             {[...folders.map(f => ({ ...f, _type: 'folder' as const })), ...files.map(f => ({ ...f, _type: 'file' as const }))].map((item, i, arr) => (
               <div key={item.id}
-                onClick={() => setSelected(s => s?.id === item.id ? null : { type: item._type, id: item.id })}
-                onDoubleClick={() => item._type === 'folder' && openFolder(item.id, [...breadcrumb, { id: item.id, name: item.name }])}
+                onClick={() => item._type === 'folder'
+                  ? openFolder(item.id, [...breadcrumb, { id: item.id, name: item.name }])
+                  : setSelected(s => s?.id === item.id ? null : { type: item._type, id: item.id })
+                }
                 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: selected?.id === item.id ? '#f7f5f2' : '#fff', borderBottom: i < arr.length - 1 ? '1px solid #f7f5f2' : 'none', cursor: 'pointer', userSelect: 'none' }}
               >
                 <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>
