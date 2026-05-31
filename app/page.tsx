@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar'
 import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { unstable_cache } from 'next/cache'
 import FeedSection from '@/components/feed/FeedSection'
 import CreatorAvatars from '@/components/CreatorAvatars'
 import Link from 'next/link'
@@ -12,33 +13,62 @@ interface SearchParams { tab?: string; type?: string; tag?: string }
 
 const TAKE = 12
 
+// Cache static data for 5 minutes — tags, creators, counts rarely change
+const getCachedSiteData = unstable_cache(
+  async () => {
+    const [tagRows, recentCreators, totalUsers] = await Promise.all([
+      // Only fetch top 300 posts for tag counting — enough for accuracy
+      db.post.findMany({
+        where: { published: true, isPrivate: false },
+        select: { tags: true },
+        orderBy: { viewCount: 'desc' },
+        take: 300,
+      }),
+      db.user.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 18,
+        select: { username: true, name: true, profilePic: true,
+          _count: { select: { posts: { where: { published: true } } } } },
+      }),
+      db.user.count(),
+    ])
+
+    const tagCount: Record<string, number> = {}
+    for (const p of tagRows) {
+      for (const t of p.tags) {
+        if (t) tagCount[t] = (tagCount[t] ?? 0) + 1
+      }
+    }
+    const topTags = Object.entries(tagCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 16)
+      .map(([t]) => t)
+
+    return { topTags, recentCreators, totalUsers }
+  },
+  ['homepage-static'],
+  { revalidate: 300 } // 5 minutes
+)
+
 export default async function HomePage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp      = await searchParams
   const tab     = sp.tab  ?? 'terbaru'
   const type    = sp.type ?? 'all'
   const tag     = sp.tag  ?? ''
-  const session = await getServerSession(authOptions)
 
-  const baseWhere = {
-    published: true,
-    isPrivate: false,
-    ...(type !== 'all' ? { type } : {}),
-    ...(tag ? { tags: { has: tag } } : {}),
-  }
-
-  let where = baseWhere as Record<string, unknown>
-  if (tab === 'diikuti' && session) {
-    where = { ...baseWhere, author: { followers: { some: { followerId: session.user.id } } } }
-  }
-
-  const orderBy = tab === 'trending'
-    ? [{ viewCount: 'desc' as const }, { likeCount: 'desc' as const }]
-    : { publishedAt: 'desc' as const }
-
-  // Fetch posts, tags, and recent creators in parallel
-  const [rawPosts, tagRows, recentCreators, totalUsers, totalPosts] = await Promise.all([
+  // Run session + initial posts + cached static data in parallel
+  const [session, { topTags, recentCreators, totalUsers }, rawPosts] = await Promise.all([
+    getServerSession(authOptions),
+    getCachedSiteData(),
     db.post.findMany({
-      where, orderBy,
+      where: {
+        published: true, isPrivate: false,
+        ...(type !== 'all' ? { type } : {}),
+        ...(tag ? { tags: { has: tag } } : {}),
+      },
+      orderBy: tab === 'trending'
+        ? [{ viewCount: 'desc' as const }, { likeCount: 'desc' as const }]
+        : { publishedAt: 'desc' as const },
       take: TAKE + 1,
       select: {
         id: true, slug: true, title: true, description: true, type: true,
@@ -47,30 +77,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         author: { select: { username: true, name: true, profilePic: true } },
       },
     }),
-    db.post.findMany({
-      where: { published: true, isPrivate: false, ...(type !== 'all' ? { type } : {}) },
-      select: { tags: true },
-    }),
-    db.user.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 18,
-      select: { username: true, name: true, profilePic: true, _count: { select: { posts: { where: { published: true } } } } },
-    }),
-    db.user.count(),
-    db.post.count({ where: { published: true, isPrivate: false } }),
   ])
-
-  // Collect + count tags, sort by frequency
-  const tagCount: Record<string, number> = {}
-  for (const p of tagRows) {
-    for (const t of p.tags) {
-      if (t) tagCount[t] = (tagCount[t] ?? 0) + 1
-    }
-  }
-  const topTags = Object.entries(tagCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 16)
-    .map(([t]) => t)
 
   const hasMore    = rawPosts.length > TAKE
   const posts      = hasMore ? rawPosts.slice(0, TAKE) : rawPosts
