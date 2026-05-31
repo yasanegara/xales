@@ -81,10 +81,15 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id as string
         session.user.username = token.username as string
-        session.user.role = (token.role as string) ?? 'user'
-        // Fetch profilePic fresh from DB — not stored in JWT to avoid oversized cookies
-        const dbUser = await db.user.findUnique({ where: { id: token.id as string }, select: { profilePic: true } })
+        // Always fetch role + profilePic fresh from DB so role changes take effect immediately
+        const dbUser = await db.user.findUnique({
+          where: { id: token.id as string },
+          select: { profilePic: true, role: true, banned: true },
+        })
+        session.user.role = dbUser?.role ?? 'user'
         session.user.profilePic = dbUser?.profilePic ?? null
+        // Block banned users
+        if (dbUser?.banned) return { ...session, user: { ...session.user, id: '' } }
       }
       return session
     },
