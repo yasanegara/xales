@@ -43,6 +43,8 @@ model User {
   collections     Collection[]
   driveFolders    DriveFolder[]
   driveFiles      DriveFile[]
+  invites         Invite[]      @relation("InviteOwner")
+  invitedBy       Invite?       @relation("InvitedUser")
   discounts       Discount[]
   bundles         Bundle[]
   followers       Follow[]        @relation("following")
@@ -404,6 +406,19 @@ model CollectionItem {
   addedAt      DateTime   @default(now())
 
   @@unique([collectionId, itemType, itemId])
+}
+
+// ── Invite system ───────────────────────────────────────────────────
+
+model Invite {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  owner       User      @relation("InviteOwner", fields: [ownerId], references: [id])
+  ownerId     String
+  invitedUser User?     @relation("InvitedUser", fields: [invitedUserId], references: [id])
+  invitedUserId String? @unique
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
 }
 
 // ── Drive (personal file manager) ───────────────────────────────────

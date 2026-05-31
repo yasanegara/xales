@@ -16,6 +16,7 @@ const NAV = [
   { href: '/dashboard/bundles',     label: 'Bundle',             icon: '🗂' },
   { href: '/dashboard/discounts',   label: 'Kode Diskon',        icon: '%' },
   { href: '/dashboard/affiliate',   label: 'Affiliate',          icon: '↗' },
+  { href: '/dashboard/invite',      label: 'Undang Teman',       icon: '✉️' },
   { href: '/dashboard/settings',    label: 'Settings',           icon: '⚙' },
 ]
 

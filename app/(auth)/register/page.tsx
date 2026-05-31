@@ -22,12 +22,17 @@ export default function RegisterPage() {
   const [from, setFrom] = useState('/dashboard')
   const [fromParam, setFromParam] = useState('')
 
+  const [inviteCode, setInviteCode] = useState('')
+  const [inviteValid, setInviteValid] = useState<boolean | null>(null)
+
   // Read from URL on mount for reliability
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const fromQuery = params.get('from')
     setFrom(safeFrom(fromQuery))
     setFromParam(fromQuery ?? '')
+    const inv = params.get('invite')
+    if (inv) setInviteCode(inv.toUpperCase())
   }, [])
 
   const [form, setForm] = useState({ name: '', username: '', email: '', password: '' })
@@ -57,7 +62,7 @@ export default function RegisterPage() {
     const res = await fetch('/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, inviteCode: inviteCode || undefined }),
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error); setLoading(false); return }
@@ -134,6 +139,26 @@ export default function RegisterPage() {
                 />
               </div>
             ))}
+
+            {/* Invite code */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', color: '#6e6a65', marginBottom: '0.5rem' }}>
+                Kode Undangan <span style={{ color: '#9c9690', fontWeight: 400 }}>(opsional)</span>
+              </label>
+              <input
+                type="text"
+                value={inviteCode}
+                onChange={e => setInviteCode(e.target.value.toUpperCase())}
+                placeholder="Contoh: A1B2C3D4"
+                style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.1em',
+                  borderColor: inviteCode && inviteValid === false ? '#fca5a5' : '#e5e0d8' }}
+              />
+              {inviteCode && (
+                <p style={{ fontSize: '0.75rem', color: '#9c9690', marginTop: '0.25rem' }}>
+                  Masukkan kode undangan dari temanmu jika ada
+                </p>
+              )}
+            </div>
 
             {error && (
               <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '6px', padding: '0.75rem', color: '#dc2626', fontSize: '0.875rem', marginBottom: '1rem' }}>
