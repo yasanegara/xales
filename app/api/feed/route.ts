@@ -51,5 +51,10 @@ export async function GET(req: NextRequest) {
   const hasMore = posts.length > TAKE
   if (hasMore) posts.pop()
 
-  return NextResponse.json({ posts, hasMore, nextCursor: posts[posts.length - 1]?.id ?? null })
+  const res = NextResponse.json({ posts, hasMore, nextCursor: posts[posts.length - 1]?.id ?? null })
+  // Cache public feed (non-diikuti) for 30s at CDN/edge
+  if (tab !== 'diikuti') {
+    res.headers.set('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
+  }
+  return res
 }

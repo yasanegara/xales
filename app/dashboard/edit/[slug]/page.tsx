@@ -50,7 +50,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
   const handleSubmit = async (published: boolean) => {
     if (!form) return
     if (form.isPremium && !form.price) { setError('Isi harga untuk konten premium'); return }
-    setLoading(true)
+    setLoading(true) // optimistic: immediately show loading state
     setError('')
     const res = await fetch(`/api/posts/${slug}`, {
       method: 'PUT',
