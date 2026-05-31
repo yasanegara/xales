@@ -46,10 +46,20 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
   const [urlInput, setUrlInput] = useState('')
 
   const handleCoverFile = (file: File) => {
-    if (file.size > 5 * 1024 * 1024) { alert('Cover maks 5MB'); return }
-    const reader = new FileReader()
-    reader.onload = (e) => set({ coverImage: e.target!.result as string })
-    reader.readAsDataURL(file)
+    if (file.size > 10 * 1024 * 1024) { alert('Cover maks 10MB'); return }
+    const img = new Image()
+    const objectUrl = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+      const MAX_W = 1280, MAX_H = 720
+      const scale = Math.min(1, MAX_W / img.width, MAX_H / img.height)
+      const canvas = document.createElement('canvas')
+      canvas.width  = Math.round(img.width  * scale)
+      canvas.height = Math.round(img.height * scale)
+      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+      set({ coverImage: canvas.toDataURL('image/jpeg', 0.82) })
+    }
+    img.src = objectUrl
   }
 
   const applyCoverUrl = () => {
