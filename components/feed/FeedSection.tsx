@@ -77,6 +77,8 @@ export default function FeedSection({ initialPosts, initialHasMore, initialCurso
     setTab(newTab)
     setType(newType)
     setTag(newTag)
+    setPosts([])       // clear instantly → skeleton muncul seketika
+    setHasMore(false)
     syncUrl(newTab, newType, newTag)
     fetchFeed(newTab, newType, newTag)
   }, [fetchFeed, syncUrl])
@@ -183,7 +185,7 @@ export default function FeedSection({ initialPosts, initialHasMore, initialCurso
             </p>
           </div>
         ) : (
-          <div style={{ opacity: fetching ? 0.5 : 1, transition: 'opacity 0.15s' }}>
+          <div>
             <div className="feed-grid">
               {posts.map(post => <DiscoverCard key={post.id} post={post} />)}
             </div>
