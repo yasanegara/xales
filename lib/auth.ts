@@ -72,7 +72,14 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.username = (user as unknown as { username: string }).username
-        token.role = (user as unknown as { role: string }).role ?? 'user'
+      }
+      // Always refresh role from DB so middleware stays in sync
+      if (token.id) {
+        const dbUser = await db.user.findUnique({
+          where: { id: token.id as string },
+          select: { role: true },
+        })
+        token.role = dbUser?.role ?? 'user'
       }
       return token
     },
