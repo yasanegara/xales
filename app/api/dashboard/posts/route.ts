@@ -10,6 +10,12 @@ export async function GET() {
   const posts = await db.post.findMany({
     where: { authorId: session.user.id },
     orderBy: { updatedAt: 'desc' },
+    select: {
+      id: true, slug: true, title: true, type: true,
+      published: true, isPrivate: true, isPremium: true, price: true,
+      viewCount: true, likeCount: true, createdAt: true, updatedAt: true,
+      // intentionally exclude: content, coverImage (large @db.Text fields)
+    },
   })
 
   return NextResponse.json({ posts })

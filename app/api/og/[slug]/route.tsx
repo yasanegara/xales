@@ -30,9 +30,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     ? post.description.length > 110 ? post.description.slice(0, 110) + '…' : post.description
     : null
 
-  const coverSrc = post.coverImage?.startsWith('data:') || post.coverImage?.startsWith('http')
+  // Use HTTP URL for cover so ImageResponse doesn't need to handle large base64 strings
+  const coverSrc = post.coverImage?.startsWith('http')
     ? post.coverImage
-    : null
+    : post.coverImage?.startsWith('data:')
+      ? `${baseUrl}/api/cover/${slug}`
+      : null
 
   const titleLen  = post.title.length
   const titleSize = coverSrc

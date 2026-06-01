@@ -98,27 +98,59 @@ export default async function PostPage({ params, searchParams }: Props) {
 
   if (!post || !post.published) notFound()
 
-  const isAuthor  = session?.user?.id === post.authorId
+  const isAuthor   = session?.user?.id === post.authorId
   const isMarkdown = post.type === 'markdown'
 
   // Private posts only accessible by author
   if (post.isPrivate && !isAuthor) notFound()
-  let isPurchased = false
-  if (post.isPremium && session && !isAuthor) {
-    // Check direct purchase OR bundle purchase containing this post
-    const [purchase, bundleAccess] = await Promise.all([
-      db.purchase.findFirst({ where: { userId: session.user.id, postId: post.id, status: 'paid' } }),
-      db.bundlePurchase.findFirst({
-        where: {
-          userId: session.user.id, status: 'paid',
-          bundle: { items: { some: { postId: post.id } } },
-        },
-      }),
-    ])
-    isPurchased = !!(purchase || bundleAccess)
-  }
 
-  const canRead = !post.isPremium || isAuthor || isPurchased
+  // Run purchase check + related posts + gifts in parallel
+  const needsPurchaseCheck = post.isPremium && !!session && !isAuthor
+  const [purchaseResults, relatedPosts, sentGifts] = await Promise.all([
+    needsPurchaseCheck
+      ? Promise.all([
+          db.purchase.findFirst({ where: { userId: session!.user.id, postId: post.id, status: 'paid' } }),
+          db.bundlePurchase.findFirst({
+            where: {
+              userId: session!.user.id, status: 'paid',
+              bundle: { items: { some: { postId: post.id } } },
+            },
+          }),
+        ])
+      : Promise.resolve([null, null] as [null, null]),
+    isMarkdown ? db.post.findMany({
+      where: {
+        published: true, isPrivate: false, id: { not: post.id },
+        OR: [
+          ...(post.tags.length > 0 ? [{ tags: { hasSome: post.tags } }] : []),
+          ...(post.category ? [{ category: post.category }] : []),
+          { authorId: post.authorId },
+        ],
+      },
+      orderBy: { viewCount: 'desc' },
+      take: 6,
+      select: {
+        id: true, slug: true, title: true, type: true,
+        coverImage: true, isPremium: true, viewCount: true,
+        publishedAt: true, createdAt: true,
+        author: { select: { username: true, name: true } },
+      },
+    }) : Promise.resolve([]),
+    isMarkdown ? db.sentGift.findMany({
+      where: { postId: post.id },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      include: {
+        sender: { select: { username: true, name: true, profilePic: true } },
+        giftItem: true,
+      },
+    }) : Promise.resolve([]),
+  ])
+
+  const isPurchased = needsPurchaseCheck ? !!(purchaseResults[0] || purchaseResults[1]) : false
+  const canRead     = !post.isPremium || isAuthor || isPurchased
+  const authorName  = post.author.name ?? `@${post.author.username}`
+  const headings    = isMarkdown && canRead ? extractHeadings(post.content) : []
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -139,7 +171,6 @@ export default async function PostPage({ params, searchParams }: Props) {
         <Navbar />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <div className="article-container">
-          {/* Post header teaser */}
           <div style={{ marginBottom: '2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
               <span style={{ background: post.type === 'html' ? '#ecfdf5' : '#eff6ff', color: post.type === 'html' ? '#059669' : '#2563eb', fontSize: '0.7rem', fontWeight: 600, padding: '0.2rem 0.6rem', borderRadius: '4px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
@@ -157,7 +188,7 @@ export default async function PostPage({ params, searchParams }: Props) {
             )}
             {post.coverImage && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={post.coverImage} alt={post.title} style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: '10px', marginBottom: '1.5rem' }} />
+              <img src={post.coverImage} alt={post.title} style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '10px', marginBottom: '1.5rem' }} />
             )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingTop: '1rem', borderTop: '1px solid #e5e0d8' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '7px', background: '#f0ede8', border: '1px solid #e5e0d8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8125rem', fontWeight: 700, color: '#6e6a65', overflow: 'hidden', flexShrink: 0 }}>
@@ -167,13 +198,9 @@ export default async function PostPage({ params, searchParams }: Props) {
                   : (post.author.name?.[0] ?? post.author.username[0]).toUpperCase()
                 }
               </div>
-              <span style={{ fontSize: '0.875rem', color: '#1a1a1a', fontWeight: 500 }}>
-                {post.author.name ?? `@${post.author.username}`}
-              </span>
+              <span style={{ fontSize: '0.875rem', color: '#1a1a1a', fontWeight: 500 }}>{authorName}</span>
             </div>
           </div>
-
-          {/* Login gate card */}
           <div style={{ background: 'linear-gradient(150deg, #faf7f2 0%, #ede8e0 100%)', border: '1px solid #e5e0d8', borderRadius: '14px', padding: '2.5rem 2rem', textAlign: 'center' }}>
             <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔒</div>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1a1a1a', marginBottom: '0.625rem' }}>
@@ -184,55 +211,14 @@ export default async function PostPage({ params, searchParams }: Props) {
               Buat akun gratis dan akses ribuan konten menarik.
             </p>
             <div style={{ display: 'flex', gap: '0.875rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <a href={`/login?from=${encodeURIComponent(postUrl)}`} style={{ display: 'inline-block', background: '#1a1a1a', color: '#f7f5f2', fontWeight: 600, fontSize: '0.9375rem', padding: '0.75rem 2rem', borderRadius: '8px', textDecoration: 'none' }}>
-                Masuk
-              </a>
-              <a href={`/register?from=${encodeURIComponent(postUrl)}`} style={{ display: 'inline-block', background: '#ffffff', color: '#1a1a1a', fontWeight: 600, fontSize: '0.9375rem', padding: '0.75rem 2rem', borderRadius: '8px', border: '1px solid #e5e0d8', textDecoration: 'none' }}>
-                Daftar gratis
-              </a>
+              <a href={`/login?from=${encodeURIComponent(postUrl)}`} style={{ display: 'inline-block', background: '#1a1a1a', color: '#f7f5f2', fontWeight: 600, fontSize: '0.9375rem', padding: '0.75rem 2rem', borderRadius: '8px', textDecoration: 'none' }}>Masuk</a>
+              <a href={`/register?from=${encodeURIComponent(postUrl)}`} style={{ display: 'inline-block', background: '#ffffff', color: '#1a1a1a', fontWeight: 600, fontSize: '0.9375rem', padding: '0.75rem 2rem', borderRadius: '8px', border: '1px solid #e5e0d8', textDecoration: 'none' }}>Daftar gratis</a>
             </div>
           </div>
         </div>
       </>
     )
   }
-
-  // Extract ?ref= from the request — passed via searchParams
-  const headings  = isMarkdown && canRead ? extractHeadings(post.content) : []
-  const authorName = post.author.name ?? `@${post.author.username}`
-
-  // Related posts — same tags or same category, exclude current
-  const relatedPosts = isMarkdown ? await db.post.findMany({
-    where: {
-      published: true,
-      isPrivate: false,
-      id: { not: post.id },
-      OR: [
-        ...(post.tags.length > 0 ? [{ tags: { hasSome: post.tags } }] : []),
-        ...(post.category ? [{ category: post.category }] : []),
-        { authorId: post.authorId },
-      ],
-    },
-    orderBy: { viewCount: 'desc' },
-    take: 6,
-    select: {
-      id: true, slug: true, title: true, type: true,
-      coverImage: true, isPremium: true, viewCount: true,
-      publishedAt: true, createdAt: true,
-      author: { select: { username: true, name: true } },
-    },
-  }) : []
-
-  // Gifts sent on this post (for GiftPanel initial data)
-  const sentGifts = isMarkdown ? await db.sentGift.findMany({
-    where: { postId: post.id },
-    orderBy: { createdAt: 'desc' },
-    take: 50,
-    include: {
-      sender: { select: { username: true, name: true, profilePic: true } },
-      giftItem: true,
-    },
-  }) : []
 
   // App type: full-screen iframe, no platform chrome
   if (post.type === 'html' && canRead) {
