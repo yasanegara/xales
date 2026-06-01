@@ -36,7 +36,7 @@ export default function BuyModal({ slug, title, price, postType, authorName, aut
   const [payerName, setPayerName] = useState('')
   const [payerWa, setPayerWa] = useState('')
   const [discountCode, setDiscountCode] = useState('')
-  const [discountInfo, setDiscountInfo] = useState<{ value: number; type: string; final: number } | null>(null)
+  const [discountInfo, setDiscountInfo] = useState<{ value: number; type: string; final: number; savings: number } | null>(null)
   const [discountError, setDiscountError] = useState('')
   const [checkingDiscount, setCheckingDiscount] = useState(false)
   const [buying, setBuying] = useState(false)
@@ -56,9 +56,11 @@ export default function BuyModal({ slug, title, price, postType, authorName, aut
     setCheckingDiscount(true)
     setDiscountError('')
     setDiscountInfo(null)
-    // Just validate code exists on server via dry-run
+    const res = await fetch(`/api/discount/validate?code=${encodeURIComponent(discountCode.trim())}&slug=${encodeURIComponent(slug)}`)
+    const data = await res.json()
     setCheckingDiscount(false)
-    setDiscountInfo({ value: 0, type: 'percent', final: price })
+    if (!data.valid) { setDiscountError(data.error ?? 'Kode tidak valid'); return }
+    setDiscountInfo({ value: data.value, type: data.type, final: data.finalPrice, savings: data.savings })
   }
 
   const handleSubmit = async () => {
@@ -130,13 +132,19 @@ export default function BuyModal({ slug, title, price, postType, authorName, aut
                   <span>Harga {postType === 'html' ? 'App' : 'Artikel'}</span>
                   <span>Rp {formatIDR(step === 'payment' ? finalAmount - serviceFee : price)}</span>
                 </div>
+                {(step === 'form' && discountInfo) && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#059669' }}>
+                    <span>Diskon kode ({discountInfo.type === 'percent' ? `${discountInfo.value}%` : `Rp ${formatIDR(discountInfo.value)}`})</span>
+                    <span>− Rp {formatIDR(discountInfo.savings)}</span>
+                  </div>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#6e6a65' }}>
                   <span>Biaya layanan</span>
                   <span>Rp {formatIDR(step === 'payment' ? serviceFee : 1000)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 700, color: '#1a1a1a', paddingTop: '0.375rem', borderTop: '1px solid #e5e0d8', marginTop: '0.125rem' }}>
                   <span>Total</span>
-                  <span>Rp {formatIDR(step === 'payment' ? finalAmount : price + 1000)}</span>
+                  <span>Rp {formatIDR(step === 'payment' ? finalAmount : (discountInfo ? discountInfo.final + 1000 : price + 1000))}</span>
                 </div>
               </div>
             </div>
@@ -201,7 +209,11 @@ export default function BuyModal({ slug, title, price, postType, authorName, aut
                     </button>
                   </div>
                   {discountError && <p style={{ color: '#dc2626', fontSize: '0.8125rem', marginTop: '0.375rem' }}>{discountError}</p>}
-                  {discountInfo && <p style={{ color: '#059669', fontSize: '0.8125rem', marginTop: '0.375rem' }}>✓ Kode diskon akan diterapkan</p>}
+                  {discountInfo && (
+                    <p style={{ color: '#059669', fontSize: '0.8125rem', marginTop: '0.375rem' }}>
+                      ✓ Hemat Rp {formatIDR(discountInfo.savings)} — bayar Rp {formatIDR(discountInfo.final + 1000)}
+                    </p>
+                  )}
                 </div>
 
                 {refCode && (

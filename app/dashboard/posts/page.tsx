@@ -12,6 +12,7 @@ interface Post {
   title: string
   type: string
   published: boolean
+  isPremium: boolean
   viewCount: number
   likeCount: number
   createdAt: string
@@ -162,6 +163,11 @@ export default function PostsPage() {
                   </Link>
                 )}
                 <Link href={`/dashboard/edit/${post.slug}`} style={{ fontSize: '0.8125rem', color: '#0070f3', textDecoration: 'none' }}>Edit</Link>
+                {post.isPremium && (
+                  <Link href={`/dashboard/discounts?post=${post.slug}`} style={{ fontSize: '0.8125rem', color: '#7c3aed', textDecoration: 'none' }}>
+                    Voucher
+                  </Link>
+                )}
                 <button onClick={() => togglePublish(post.slug, post.published)} style={{ fontSize: '0.8125rem', color: post.published ? '#d97706' : '#059669', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                   {post.published ? 'Unpublish' : 'Publish'}
                 </button>

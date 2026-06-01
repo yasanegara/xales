@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { formatDate } from '@/lib/utils'
 
 interface Discount {
@@ -16,14 +17,25 @@ interface Discount {
   createdAt: string
 }
 
+interface PremiumPost {
+  id: string
+  slug: string
+  title: string
+  price: number
+}
+
 function formatIDR(n: number) {
   return new Intl.NumberFormat('id-ID').format(n)
 }
 
 export default function DiscountsPage() {
+  const searchParams = useSearchParams()
+  const preselectedSlug = searchParams.get('post') ?? ''
+
   const [discounts, setDiscounts] = useState<Discount[]>([])
+  const [premiumPosts, setPremiumPosts] = useState<PremiumPost[]>([])
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({ code: '', type: 'percent' as 'percent' | 'fixed', value: '', maxUses: '', expiresAt: '' })
+  const [form, setForm] = useState({ code: '', type: 'percent' as 'percent' | 'fixed', value: '', postId: '', maxUses: '', expiresAt: '' })
   const [msg, setMsg] = useState('')
   const [creating, setCreating] = useState(false)
   const [showForm, setShowForm] = useState(false)
@@ -35,7 +47,22 @@ export default function DiscountsPage() {
     setLoading(false)
   }
 
-  useEffect(() => { fetchDiscounts() }, [])
+  useEffect(() => {
+    fetchDiscounts()
+    fetch('/api/dashboard/posts')
+      .then(r => r.json())
+      .then(data => {
+        const premium = (data.posts ?? []).filter((p: any) => p.isPremium && p.price)
+        setPremiumPosts(premium)
+        if (preselectedSlug) {
+          const match = premium.find((p: PremiumPost) => p.slug === preselectedSlug)
+          if (match) {
+            setForm(f => ({ ...f, postId: match.id }))
+            setShowForm(true)
+          }
+        }
+      })
+  }, [preselectedSlug])
 
   const create = async () => {
     if (!form.code || !form.value) { setMsg('Kode dan nilai wajib diisi'); return }
@@ -48,6 +75,7 @@ export default function DiscountsPage() {
         code: form.code.toUpperCase(),
         type: form.type,
         value: parseInt(form.value),
+        postId: form.postId || null,
         maxUses: form.maxUses ? parseInt(form.maxUses) : null,
         expiresAt: form.expiresAt || null,
       }),
@@ -56,7 +84,7 @@ export default function DiscountsPage() {
     setCreating(false)
     if (!res.ok) { setMsg(data.error); return }
     setMsg('✓ Kode diskon dibuat!')
-    setForm({ code: '', type: 'percent', value: '', maxUses: '', expiresAt: '' })
+    setForm({ code: '', type: 'percent', value: '', postId: '', maxUses: '', expiresAt: '' })
     setShowForm(false)
     fetchDiscounts()
   }
@@ -84,6 +112,29 @@ export default function DiscountsPage() {
       {showForm && (
         <div style={{ background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1a1a1a', marginBottom: '1.25rem' }}>Kode Diskon Baru</h2>
+
+          {/* Post selector */}
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={labelStyle}>Berlaku untuk</label>
+            <select
+              value={form.postId}
+              onChange={e => setForm({ ...form, postId: e.target.value })}
+              style={{ ...inputStyle, cursor: 'pointer' }}
+            >
+              <option value="">Semua konten premium saya</option>
+              {premiumPosts.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.title} — Rp {formatIDR(p.price)}
+                </option>
+              ))}
+            </select>
+            {premiumPosts.length === 0 && (
+              <p style={{ fontSize: '0.75rem', color: '#9c9690', marginTop: '0.25rem' }}>
+                Belum ada konten premium — voucher berlaku untuk semua konten.
+              </p>
+            )}
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
             <div>
               <label style={labelStyle}>Kode *</label>
@@ -147,7 +198,12 @@ export default function DiscountsPage() {
             </div>
             {discounts.map((d, i) => (
               <div key={d.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto auto auto', gap: '1rem', padding: '1rem 1.25rem', borderBottom: i < discounts.length - 1 ? '1px solid #f0ede8' : 'none', alignItems: 'center' }}>
-                <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.08em' }}>{d.code}</span>
+                <div>
+                  <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.08em' }}>{d.code}</span>
+                  <div style={{ fontSize: '0.7rem', color: '#9c9690', marginTop: '0.125rem' }}>
+                    {d.post ? d.post.title : 'Semua konten'}
+                  </div>
+                </div>
                 <span style={{ color: '#1a1a1a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
                   {d.type === 'percent' ? `${d.value}%` : `Rp ${formatIDR(d.value)}`}
                 </span>
