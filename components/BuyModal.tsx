@@ -46,9 +46,15 @@ export default function BuyModal({ slug, title, price, postType, authorName, aut
   const [finalAmount, setFinalAmount] = useState(price)
   const [error, setError] = useState('')
 
-  const handleOpen = () => {
+  const handleOpen = async () => {
     setStep('form')
     setOpen(true)
+    // Fetch actual service fee from server (reads from DB, not hardcoded)
+    try {
+      const res = await fetch(`/api/fee?type=${encodeURIComponent(postType)}`)
+      const data = await res.json()
+      if (typeof data.serviceFee === 'number') setServiceFee(data.serviceFee)
+    } catch { /* keep 0 as fallback */ }
   }
 
   const checkDiscount = async () => {
@@ -140,11 +146,11 @@ export default function BuyModal({ slug, title, price, postType, authorName, aut
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#6e6a65' }}>
                   <span>Biaya layanan</span>
-                  <span>Rp {formatIDR(step === 'payment' ? serviceFee : 1000)}</span>
+                  <span>Rp {formatIDR(step === 'payment' ? serviceFee : serviceFee)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 700, color: '#1a1a1a', paddingTop: '0.375rem', borderTop: '1px solid #e5e0d8', marginTop: '0.125rem' }}>
                   <span>Total</span>
-                  <span>Rp {formatIDR(step === 'payment' ? finalAmount : (discountInfo ? discountInfo.final + 1000 : price + 1000))}</span>
+                  <span>Rp {formatIDR(step === 'payment' ? finalAmount : (discountInfo ? discountInfo.final + serviceFee : price + serviceFee))}</span>
                 </div>
               </div>
             </div>
@@ -211,7 +217,7 @@ export default function BuyModal({ slug, title, price, postType, authorName, aut
                   {discountError && <p style={{ color: '#dc2626', fontSize: '0.8125rem', marginTop: '0.375rem' }}>{discountError}</p>}
                   {discountInfo && (
                     <p style={{ color: '#059669', fontSize: '0.8125rem', marginTop: '0.375rem' }}>
-                      ✓ Hemat Rp {formatIDR(discountInfo.savings)} — bayar Rp {formatIDR(discountInfo.final + 1000)}
+                      ✓ Hemat Rp {formatIDR(discountInfo.savings)} — bayar Rp {formatIDR(discountInfo.final + serviceFee)}
                     </p>
                   )}
                 </div>
