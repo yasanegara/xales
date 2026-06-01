@@ -23,8 +23,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { extractHeadings } from '@/lib/headings'
 import { formatDate, readingTime } from '@/lib/utils'
-
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://xales.id'
+import { getBaseUrl } from '@/lib/base-url'
 
 // Pre-render top 100 articles at build time (graceful fallback if DB unreachable)
 export async function generateStaticParams() {
@@ -45,6 +44,7 @@ type Props = { params: Promise<{ username: string; slug: string }>; searchParams
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username, slug } = await params
+  const BASE_URL = await getBaseUrl()
   const post = await db.post.findUnique({
     where: { slug },
     select: { title: true, description: true, coverImage: true, tags: true, publishedAt: true, author: { select: { name: true, username: true } } },
@@ -86,7 +86,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PostPage({ params, searchParams }: Props) {
   const { slug } = await params
   const { ref: refCode } = await searchParams
-  const session = await getServerSession(authOptions)
+  const [session, BASE_URL] = await Promise.all([getServerSession(authOptions), getBaseUrl()])
 
   const post = await db.post.findUnique({
     where: { slug },

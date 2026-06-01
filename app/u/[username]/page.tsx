@@ -5,17 +5,17 @@ import Navbar from '@/components/Navbar'
 import { db } from '@/lib/prisma'
 import ProfileHeader from './ProfileHeader'
 import ProfileGrid from './ProfileGrid'
+import { getBaseUrl } from '@/lib/base-url'
 
 type Props = { params: Promise<{ username: string }> }
 
 function formatIDR(n: number) { return new Intl.NumberFormat('id-ID').format(n) }
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://xales.id'
-
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params
+  const BASE_URL = await getBaseUrl()
   const user = await db.user.findUnique({
     where: { username },
     select: { name: true, bio: true, profilePic: true, _count: { select: { posts: true } } },
