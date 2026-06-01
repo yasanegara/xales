@@ -93,7 +93,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
   }
 
-  const serviceFee = getServiceFee(post.type)
+  const serviceFee = await getServiceFee(post.type)
   const totalAmount = finalAmount + serviceFee
 
   const purchase = await db.purchase.create({

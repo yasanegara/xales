@@ -454,3 +454,11 @@ model DriveFile {
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 }
+
+// ── Platform configuration (key-value store) ────────────────────────
+
+model Config {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

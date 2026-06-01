@@ -22,6 +22,7 @@ const NAV = [
 
 const ADMIN_NAV = [
   { href: '/admin',              label: 'Admin Panel',      icon: '🛡' },
+  { href: '/admin/fees',         label: 'Fee & Biaya',      icon: '⚖' },
   { href: '/admin/withdrawals',  label: 'Pencairan Dana',   icon: '💸' },
   { href: '/admin/gifts',        label: 'Katalog Hadiah',   icon: '🎁' },
 ]
