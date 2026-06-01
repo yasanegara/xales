@@ -73,8 +73,8 @@ export function DiscoverCard({ post }: { post: FeedPost }) {
         transition: 'border-color 0.18s, box-shadow 0.18s',
         transform: hovered ? 'translateY(-2px)' : 'none',
       }}>
-        {/* Cover 4:3 */}
-        <div style={{ aspectRatio: '4/3', position: 'relative', overflow: 'hidden', background: fallback }}>
+        {/* Cover 1:1 */}
+        <div style={{ aspectRatio: '1/1', position: 'relative', overflow: 'hidden', background: fallback }}>
           {post.coverImage && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={post.coverImage} alt={post.title} loading="lazy" decoding="async"

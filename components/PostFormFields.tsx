@@ -51,12 +51,14 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
     const objectUrl = URL.createObjectURL(file)
     img.onload = () => {
       URL.revokeObjectURL(objectUrl)
-      const MAX_W = 1280, MAX_H = 720
-      const scale = Math.min(1, MAX_W / img.width, MAX_H / img.height)
+      // Center-crop to square then cap at 1024px
+      const side = Math.min(img.width, img.height)
+      const sx   = (img.width  - side) / 2
+      const sy   = (img.height - side) / 2
+      const out  = Math.min(side, 1024)
       const canvas = document.createElement('canvas')
-      canvas.width  = Math.round(img.width  * scale)
-      canvas.height = Math.round(img.height * scale)
-      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+      canvas.width = canvas.height = out
+      canvas.getContext('2d')!.drawImage(img, sx, sy, side, side, 0, 0, out, out)
       set({ coverImage: canvas.toDataURL('image/jpeg', 0.82) })
     }
     img.src = objectUrl
@@ -111,7 +113,7 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
             <img
               src={form.coverImage}
               alt="Cover"
-              style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+              style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
             />
             <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', display: 'flex', gap: '0.375rem' }}>
               <button type="button" onClick={() => coverInputRef.current?.click()}
@@ -131,7 +133,7 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
           >
             <span style={{ fontSize: '1.75rem' }}>🖼</span>
             <span style={{ fontSize: '0.875rem', color: '#9c9690' }}>Klik untuk upload cover</span>
-            <span style={{ fontSize: '0.75rem', color: '#b0a898' }}>JPG, PNG · maks 5MB · rasio 16:9 ideal</span>
+            <span style={{ fontSize: '0.75rem', color: '#b0a898' }}>JPG, PNG · maks 10MB · otomatis dipotong 1:1</span>
           </div>
         )}
 
