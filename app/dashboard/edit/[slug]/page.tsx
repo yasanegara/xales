@@ -1,17 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import PostFormFields, { type PostFormData } from '@/components/PostFormFields'
 
 export default function EditPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const router = useRouter()
   const { data: session } = useSession()
   const [slug, setSlug] = useState('')
   const [form, setForm] = useState<PostFormData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
 
   useEffect(() => {
     params.then(async ({ slug: s }) => {
@@ -50,7 +49,7 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
   const handleSubmit = async (published: boolean) => {
     if (!form) return
     if (form.isPremium && !form.price) { setError('Isi harga untuk konten premium'); return }
-    setLoading(true) // optimistic: immediately show loading state
+    setLoading(true)
     setError('')
     const res = await fetch(`/api/posts/${slug}`, {
       method: 'PUT',
@@ -75,23 +74,23 @@ export default function EditPostPage({ params }: { params: Promise<{ slug: strin
     const data = await res.json()
     setLoading(false)
     if (!res.ok) { setError(data.error); return }
-    if (published && session?.user.username) {
-      router.push(`/@${session.user.username}/${slug}`)
-    } else {
-      router.push('/dashboard/posts')
-    }
-    router.refresh()
+    setSuccessMsg(published ? 'Tersimpan & dipublish ✓' : 'Draft tersimpan ✓')
+    setTimeout(() => setSuccessMsg(''), 3000)
   }
 
   if (!form) return <div style={{ color: '#6e6a65', padding: '4rem', textAlign: 'center' }}>Loading...</div>
+
+  const postUrl = session?.user.username ? `/@${session.user.username}/${slug}` : undefined
 
   return (
     <PostFormFields
       form={form}
       onChange={setForm}
       error={error}
+      successMsg={successMsg}
       loading={loading}
       isEdit
+      postUrl={postUrl}
       onSaveDraft={() => handleSubmit(false)}
       onPublish={() => handleSubmit(true)}
     />

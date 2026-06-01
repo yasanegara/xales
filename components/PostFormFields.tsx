@@ -27,8 +27,10 @@ interface Props {
   form: PostFormData
   onChange: (form: PostFormData) => void
   error?: string
+  successMsg?: string
   loading?: boolean
   isEdit?: boolean
+  postUrl?: string
   onSaveDraft: () => void
   onPublish: () => void
 }
@@ -39,7 +41,7 @@ export function formatIDR(value: string) {
   return new Intl.NumberFormat('id-ID').format(num)
 }
 
-export default function PostFormFields({ form, onChange, error, loading, isEdit, onSaveDraft, onPublish }: Props) {
+export default function PostFormFields({ form, onChange, error, successMsg, loading, isEdit, postUrl, onSaveDraft, onPublish }: Props) {
   const set = (patch: Partial<PostFormData>) => onChange({ ...form, ...patch })
   const coverInputRef = useRef<HTMLInputElement>(null)
   const [urlMode, setUrlMode] = useState(false)
@@ -354,16 +356,29 @@ export default function PostFormFields({ form, onChange, error, loading, isEdit,
         </div>
       )}
 
+      {/* Success toast */}
+      {successMsg && (
+        <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '6px', padding: '0.75rem 1rem', color: '#15803d', fontSize: '0.875rem', fontWeight: 500, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {successMsg}
+        </div>
+      )}
+
       {/* Actions */}
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
         <button type="button" onClick={onSaveDraft} disabled={loading}
           style={{ background: '#ffffff', border: '1px solid #e5e0d8', color: '#1a1a1a', padding: '0.625rem 1.5rem', borderRadius: '8px', fontSize: '0.9375rem', fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer' }}>
           {loading ? '...' : 'Save Draft'}
         </button>
         <button type="button" onClick={onPublish} disabled={loading}
           style={{ background: '#1a1a1a', border: 'none', color: '#f7f5f2', padding: '0.625rem 1.5rem', borderRadius: '8px', fontSize: '0.9375rem', fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer' }}>
-          {loading ? 'Saving...' : isEdit ? 'Update' : 'Publish'}
+          {loading ? 'Menyimpan...' : isEdit ? 'Update' : 'Publish'}
         </button>
+        {isEdit && postUrl && (
+          <a href={postUrl} target="_blank" rel="noopener noreferrer"
+            style={{ fontSize: '0.875rem', color: '#6e6a65', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem', marginLeft: '0.25rem' }}>
+            Buka ↗
+          </a>
+        )}
       </div>
     </div>
   )
