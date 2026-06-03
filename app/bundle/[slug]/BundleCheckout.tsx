@@ -4,6 +4,19 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
+declare global {
+  interface Window {
+    snap?: {
+      pay: (token: string, options: {
+        onSuccess: (result: unknown) => void
+        onPending: (result: unknown) => void
+        onError: (result: unknown) => void
+        onClose: () => void
+      }) => void
+    }
+  }
+}
+
 interface BundleItem {
   label: string
   type: 'article' | 'app'
@@ -29,36 +42,74 @@ function formatIDR(n: number) { return new Intl.NumberFormat('id-ID').format(n) 
 export default function BundleCheckout({ slug, title, description, price, discount, effectivePrice, authorName, isPurchased: initialPurchased, items }: Props) {
   const router = useRouter()
   const { data: session } = useSession()
-  const [step, setStep] = useState<'info' | 'form' | 'payment'>('info')
+  const [step, setStep] = useState<'info' | 'form'>('info')
   const [payerName, setPayerName] = useState('')
   const [payerWa, setPayerWa] = useState('')
   const [buying, setBuying] = useState(false)
   const [error, setError] = useState('')
   const [purchased, setPurchased] = useState(initialPurchased)
-  const [paymentInfo, setPaymentInfo] = useState<{ bankName?: string | null; bankAccount?: string | null; bankHolder?: string | null; qrisImage?: string | null; waNumber?: string | null } | null>(null)
-  const [orderId, setOrderId] = useState('')
-  const [finalAmount, setFinalAmount] = useState(effectivePrice)
 
   const handleBuy = async () => {
     if (!payerName.trim()) { setError('Isi nama kamu terlebih dahulu'); return }
     if (!payerWa.trim()) { setError('Isi nomor WhatsApp kamu'); return }
     setError(''); setBuying(true)
-    const res = await fetch(`/api/bundles/${slug}/purchase`, {
+
+    // Step 1: create pending order
+    const orderRes = await fetch(`/api/bundles/${slug}/purchase`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ payerName, payerWa }),
     })
-    const data = await res.json()
+    const orderData = await orderRes.json()
+    if (!orderRes.ok && orderRes.status !== 201) {
+      setBuying(false)
+      setError(orderData.error ?? 'Terjadi kesalahan')
+      return
+    }
+    if (orderData.alreadyOwned) { setPurchased(true); setBuying(false); return }
+
+    // Step 2: get Snap token
+    const tokenRes = await fetch('/api/midtrans/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: orderData.orderId, orderType: 'bundle' }),
+    })
+    const tokenData = await tokenRes.json()
     setBuying(false)
-    if (!res.ok && res.status !== 201) { setError(data.error ?? 'Terjadi kesalahan'); return }
-    if (data.alreadyOwned) { setPurchased(true); return }
-    setPaymentInfo(data.paymentInfo)
-    setOrderId(data.orderId)
-    setFinalAmount(data.amount ?? effectivePrice)
-    setStep('payment')
+
+    if (!tokenRes.ok || !tokenData.token) {
+      setError(tokenData.error ?? 'Gagal membuat sesi pembayaran')
+      return
+    }
+
+    // Step 3: open Snap popup
+    if (!window.snap) {
+      setError('Snap.js belum dimuat, coba refresh halaman')
+      return
+    }
+
+    const finalOrderId = orderData.orderId
+
+    window.snap.pay(tokenData.token, {
+      onSuccess: async () => {
+        await fetch('/api/midtrans/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: finalOrderId, orderType: 'bundle' }),
+        })
+        setPurchased(true)
+      },
+      onPending: () => setPurchased(true),
+      onError: () => setError('Pembayaran gagal, silakan coba lagi'),
+      onClose: () => { /* user tutup popup */ },
+    })
   }
 
-  const inputStyle = { width: '100%', background: '#fafaf8', border: '1px solid #e5e0d8', borderRadius: '8px', padding: '0.625rem 0.875rem', fontSize: '0.9375rem', color: '#1a1a1a', outline: 'none', boxSizing: 'border-box' as const }
+  const inputStyle = {
+    width: '100%', background: '#fafaf8', border: '1px solid #e5e0d8',
+    borderRadius: '8px', padding: '0.625rem 0.875rem', fontSize: '0.9375rem',
+    color: '#1a1a1a', outline: 'none', boxSizing: 'border-box' as const,
+  }
 
   return (
     <div className="grid-chart-sidebar" style={{ gap: '2rem' }}>
@@ -143,40 +194,12 @@ export default function BundleCheckout({ slug, title, description, price, discou
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button onClick={() => setStep('info')} style={{ flex: 1, background: '#f7f5f2', border: '1px solid #e5e0d8', color: '#6e6a65', borderRadius: '8px', padding: '0.75rem', fontSize: '0.9375rem', cursor: 'pointer' }}>Kembali</button>
                   <button onClick={handleBuy} disabled={buying} style={{ flex: 2, background: buying ? '#6e6a65' : '#1a1a1a', color: '#f7f5f2', border: 'none', borderRadius: '8px', padding: '0.75rem', fontSize: '0.9375rem', fontWeight: 600, cursor: buying ? 'not-allowed' : 'pointer' }}>
-                    {buying ? 'Memproses...' : 'Lanjut →'}
+                    {buying ? 'Memproses...' : `Bayar Rp ${formatIDR(effectivePrice)} →`}
                   </button>
                 </div>
-              </div>
-            )}
-
-            {step === 'payment' && (
-              <div>
-                <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '0.75rem', marginBottom: '1rem', fontSize: '0.875rem', color: '#92400e' }}>
-                  Transfer <strong>Rp {formatIDR(finalAmount)}</strong> ke salah satu metode di bawah.
-                </div>
-                {paymentInfo?.bankAccount && (
-                  <div style={{ border: '1px solid #e5e0d8', borderRadius: '8px', padding: '0.875rem', marginBottom: '0.75rem' }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6e6a65', textTransform: 'uppercase', marginBottom: '0.375rem' }}>Transfer Bank</div>
-                    <div style={{ fontWeight: 700, color: '#1a1a1a' }}>{paymentInfo.bankName}</div>
-                    <div style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', margin: '0.2rem 0' }}>{paymentInfo.bankAccount}</div>
-                    <div style={{ fontSize: '0.875rem', color: '#6e6a65' }}>a.n. {paymentInfo.bankHolder}</div>
-                  </div>
-                )}
-                {paymentInfo?.qrisImage && (
-                  <div style={{ border: '1px solid #e5e0d8', borderRadius: '8px', padding: '0.875rem', marginBottom: '0.75rem', textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6e6a65', textTransform: 'uppercase', marginBottom: '0.5rem' }}>QRIS</div>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={paymentInfo.qrisImage} alt="QRIS" style={{ width: '150px', height: '150px', objectFit: 'contain' }} />
-                  </div>
-                )}
-                {paymentInfo?.waNumber && (
-                  <a href={`https://wa.me/62${paymentInfo.waNumber.replace(/^0/, '')}?text=${encodeURIComponent(`Halo, saya ${payerName} (WA: +62${payerWa}) ingin membeli bundle: ${title} — Order ID: ${orderId}`)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: '#25d366', color: '#fff', borderRadius: '8px', padding: '0.625rem', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-                    💬 Konfirmasi via WhatsApp
-                  </a>
-                )}
-                <p style={{ fontSize: '0.75rem', color: '#9c9690', textAlign: 'center' }}>Akses dibuka setelah penjual memverifikasi</p>
+                <p style={{ fontSize: '0.75rem', color: '#9c9690', textAlign: 'center', marginTop: '0.625rem' }}>
+                  Pembayaran aman via Midtrans
+                </p>
               </div>
             )}
           </>

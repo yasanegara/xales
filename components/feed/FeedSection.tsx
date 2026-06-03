@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useTransition, useEffect, useRef } from 'react'
+import { useState, useCallback, useTransition, useEffect, useRef, Fragment } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { DiscoverCard, type FeedPost } from './FeedCard'
 import Link from 'next/link'
@@ -130,24 +130,20 @@ export default function FeedSection({ initialPosts, initialHasMore, initialCurso
           }}>
             {TABS.map(t => {
               if (t.needsAuth && !hasSession) return null
-              return pill(tab === t.key, () => changeFilter(t.key, type, tag), t.label, 'dark')
+              return <Fragment key={t.key}>{pill(tab === t.key, () => changeFilter(t.key, type, tag), t.label, 'dark')}</Fragment>
             })}
 
             <span style={{ flexShrink: 0, color: '#d5c9b0', padding: '0 0.25rem', fontSize: '0.75rem' }}>|</span>
 
-            {TYPES.map(t => pill(
-              type === t.value,
-              () => changeFilter(tab, t.value, ''),
-              t.label, 'light'
+            {TYPES.map(t => (
+              <Fragment key={t.value}>{pill(type === t.value, () => changeFilter(tab, t.value, ''), t.label, 'light')}</Fragment>
             ))}
 
             {topTags.length > 0 && (
               <>
                 <span style={{ flexShrink: 0, color: '#d5c9b0', padding: '0 0.25rem', fontSize: '0.75rem' }}>|</span>
-                {topTags.map(t => pill(
-                  tag === t,
-                  () => changeFilter(tab, type, tag === t ? '' : t),
-                  `#${t}`, 'dark'
+                {topTags.map(t => (
+                  <Fragment key={t}>{pill(tag === t, () => changeFilter(tab, type, tag === t ? '' : t), `#${t}`, 'dark')}</Fragment>
                 ))}
               </>
             )}

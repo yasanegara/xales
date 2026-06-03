@@ -125,28 +125,30 @@ model Purchase {
   postId     String
   amount     Int
   serviceFee Int      @default(0)
-  status     String   @default("pending")
-  orderId    String   @unique
-  refCode    String?
-  payerName  String?
-  payerWa    String?
-  createdAt  DateTime @default(now())
+  status      String   @default("pending")
+  orderId     String   @unique
+  midtransId  String?
+  refCode     String?
+  payerName   String?
+  payerWa     String?
+  createdAt   DateTime @default(now())
 
   @@unique([userId, postId])
 }
 
 model FilePurchase {
-  id         String   @id @default(cuid())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  file       PostFile @relation(fields: [fileId], references: [id])
-  fileId     String
-  amount     Int
-  status     String   @default("pending")
-  orderId    String   @unique
-  payerName  String?
-  payerWa    String?
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  file        PostFile @relation(fields: [fileId], references: [id])
+  fileId      String
+  amount      Int
+  status      String   @default("pending")
+  orderId     String   @unique
+  midtransId  String?
+  payerName   String?
+  payerWa     String?
+  createdAt   DateTime @default(now())
 
   @@unique([userId, fileId])
 }
@@ -181,17 +183,18 @@ model BundleItem {
 }
 
 model BundlePurchase {
-  id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  bundle    Bundle   @relation(fields: [bundleId], references: [id])
-  bundleId  String
-  amount    Int
-  status    String   @default("pending")
-  orderId   String   @unique
-  payerName String?
-  payerWa   String?
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  bundle      Bundle   @relation(fields: [bundleId], references: [id])
+  bundleId    String
+  amount      Int
+  status      String   @default("pending")
+  orderId     String   @unique
+  midtransId  String?
+  payerName   String?
+  payerWa     String?
+  createdAt   DateTime @default(now())
 
   @@unique([userId, bundleId])
 }
