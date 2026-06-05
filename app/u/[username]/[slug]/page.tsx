@@ -18,6 +18,8 @@ import GiftPanel from '@/components/GiftPanel'
 import CommentSection from '@/components/CommentSection'
 import ViewTracker from './ViewTracker'
 import AppShareButton from '@/components/AppShareButton'
+import FloatingArticleBar from '@/components/FloatingArticleBar'
+import NoteSelectionPopup from '@/components/NoteSelectionPopup'
 import { db } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -383,9 +385,11 @@ export default async function PostPage({ params, searchParams }: Props) {
         <div style={{ borderTop: '1px solid #e5e0d8', paddingTop: '2rem' }}>
           {canRead ? (
             <>
-              <ReadingWrapper isMarkdown={isMarkdown}>
-                <PostViewer type={post.type} content={post.content} title={post.title} />
-              </ReadingWrapper>
+              <NoteSelectionPopup>
+                <ReadingWrapper isMarkdown={isMarkdown}>
+                  <PostViewer type={post.type} content={post.content} title={post.title} />
+                </ReadingWrapper>
+              </NoteSelectionPopup>
 
               {/* File downloads for readers who have access */}
               {post.files.length > 0 && (
@@ -514,6 +518,16 @@ export default async function PostPage({ params, searchParams }: Props) {
           )}
         </div>
       </div>
+
+      {/* Floating action bar — scroll-to-top, bookmark, save, share, note */}
+      {isMarkdown && (
+        <FloatingArticleBar
+          slug={post.slug}
+          title={post.title}
+          description={post.description}
+          authorUsername={post.author.username}
+        />
+      )}
     </>
   )
 }

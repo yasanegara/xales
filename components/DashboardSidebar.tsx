@@ -11,6 +11,7 @@ const NAV = [
   { href: '/dashboard/earnings',    label: 'Saldo & Penghasilan', icon: '💰' },
   { href: '/dashboard/orders',      label: 'Pesanan',            icon: '📦' },
   { href: '/dashboard/library',     label: 'Library',            icon: '★' },
+  { href: '/dashboard/notes',       label: 'Catatan Saya',       icon: '✏' },
   { href: '/dashboard/gifts',       label: 'Gift Diterima',      icon: '🎁' },
   { href: '/dashboard/gift-wallet', label: 'Gift Wallet',        icon: '💳' },
   { href: '/dashboard/bundles',     label: 'Bundle',             icon: '🗂' },
