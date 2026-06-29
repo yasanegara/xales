@@ -61,6 +61,7 @@ export async function createSnapToken({
     },
     enabled_payments: [
       'bca_va', 'bni_va', 'bri_va', 'permata_va', 'mandiri_bill', 'other_va',
+      'gopay', 'qris',
     ],
     callbacks: {
       finish: `${appUrl}/payment/finish`,
