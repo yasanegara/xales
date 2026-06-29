@@ -8,7 +8,7 @@ export async function GET() {
   if (session?.user?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const withdrawals = await db.withdrawal.findMany({
-    include: { user: { select: { username: true, name: true, email: true } } },
+    include: { user: { select: { username: true, name: true, email: true, waNumber: true } } },
     orderBy: { createdAt: 'desc' },
   })
 
