@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react'
 
 function formatIDR(n: number) { return 'Rp ' + new Intl.NumberFormat('id-ID').format(n) }
 function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-const STATUS: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  pending:  { label: 'Menunggu',      color: '#92400e', bg: '#fffbeb', border: '#fde68a' },
-  approved: { label: 'Disetujui',     color: '#065f46', bg: '#ecfdf5', border: '#6ee7b7' },
-  paid:     { label: 'Sudah Dibayar', color: '#1d4ed8', bg: '#eff6ff', border: '#93c5fd' },
-  rejected: { label: 'Ditolak',       color: '#dc2626', bg: '#fef2f2', border: '#fca5a5' },
+const STATUS: Record<string, { label: string; color: string; bg: string }> = {
+  pending:  { label: 'Menunggu',      color: '#92400e', bg: '#fef3c7' },
+  approved: { label: 'Disetujui',     color: '#065f46', bg: '#d1fae5' },
+  paid:     { label: 'Sudah Dibayar', color: '#1d4ed8', bg: '#dbeafe' },
+  rejected: { label: 'Ditolak',       color: '#dc2626', bg: '#fee2e2' },
 }
 
 const STATUS_OPTIONS = [
@@ -31,8 +31,6 @@ interface Withdrawal {
 export default function AdminWithdrawalsPage() {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([])
   const [loading, setLoading] = useState(true)
-  const [expanded, setExpanded] = useState<string | null>(null)
-  const [notes, setNotes] = useState<Record<string, string>>({})
   const [selectedStatus, setSelectedStatus] = useState<Record<string, string>>({})
   const [processing, setProcessing] = useState<string | null>(null)
   const [filter, setFilter] = useState<string>('all')
@@ -41,11 +39,11 @@ export default function AdminWithdrawalsPage() {
     setLoading(true)
     fetch('/api/admin/withdrawals')
       .then(r => r.json())
-      .then(d => {
+      .then((d: Withdrawal[]) => {
         setWithdrawals(d)
-        const initStatus: Record<string, string> = {}
-        d.forEach((w: Withdrawal) => { initStatus[w.id] = w.status })
-        setSelectedStatus(initStatus)
+        const init: Record<string, string> = {}
+        d.forEach(w => { init[w.id] = w.status })
+        setSelectedStatus(init)
         setLoading(false)
       })
   }
@@ -59,10 +57,9 @@ export default function AdminWithdrawalsPage() {
     await fetch(`/api/admin/withdrawals/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, adminNote: notes[id] ?? '' }),
+      body: JSON.stringify({ status }),
     })
     setProcessing(null)
-    setExpanded(null)
     load()
   }
 
@@ -70,160 +67,137 @@ export default function AdminWithdrawalsPage() {
   const pendingCount = withdrawals.filter(w => w.status === 'pending').length
   const pendingTotal = withdrawals.filter(w => w.status === 'pending').reduce((s, w) => s + w.amount, 0)
 
-  const inputStyle: React.CSSProperties = {
-    background: '#fafaf8', border: '1px solid #e5e0d8', borderRadius: '6px',
-    padding: '0.5rem 0.75rem', fontSize: '0.8125rem', outline: 'none',
-    width: '100%', boxSizing: 'border-box',
-  }
-
   if (loading) return <div style={{ padding: '2rem', color: '#9c9690' }}>Memuat...</div>
 
   return (
-    <div style={{ maxWidth: '900px' }}>
+    <div>
       {/* Header */}
-      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a1a1a' }}>Permintaan Pencairan</h1>
-          <p style={{ color: '#6e6a65', marginTop: '0.25rem', fontSize: '0.875rem' }}>
-            {pendingCount > 0
-              ? `${pendingCount} menunggu · Total pending ${formatIDR(pendingTotal)}`
-              : `${withdrawals.length} total withdrawal`}
+          <p style={{ color: '#6e6a65', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+            {pendingCount > 0 ? `${pendingCount} menunggu · Total ${formatIDR(pendingTotal)}` : `${withdrawals.length} total`}
           </p>
         </div>
-
-        {/* Filter */}
         <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
           {['all', 'pending', 'approved', 'paid', 'rejected'].map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              style={{
-                padding: '0.375rem 0.875rem', borderRadius: '6px', fontSize: '0.8125rem', fontWeight: 500,
-                cursor: 'pointer', border: '1px solid',
-                background: filter === f ? '#1a1a1a' : '#ffffff',
-                color: filter === f ? '#f0ede8' : '#6e6a65',
-                borderColor: filter === f ? '#1a1a1a' : '#e5e0d8',
-              }}
-            >
+            <button key={f} onClick={() => setFilter(f)} style={{
+              padding: '0.375rem 0.875rem', borderRadius: '6px', fontSize: '0.8125rem',
+              fontWeight: 500, cursor: 'pointer', border: '1px solid',
+              background: filter === f ? '#1a1a1a' : '#ffffff',
+              color: filter === f ? '#f0ede8' : '#6e6a65',
+              borderColor: filter === f ? '#1a1a1a' : '#e5e0d8',
+            }}>
               {f === 'all' ? 'Semua' : STATUS[f]?.label}
-              {f !== 'all' && (
-                <span style={{ marginLeft: '0.35rem', opacity: 0.7 }}>
-                  ({withdrawals.filter(w => w.status === f).length})
-                </span>
-              )}
+              {' '}
+              <span style={{ opacity: 0.6 }}>({f === 'all' ? withdrawals.length : withdrawals.filter(w => w.status === f).length})</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* List */}
+      {/* Table */}
       {filtered.length === 0 ? (
         <div style={{ background: '#fff', border: '1px solid #e5e0d8', borderRadius: '10px', padding: '3rem', textAlign: 'center', color: '#9c9690' }}>
-          Tidak ada withdrawal dengan status ini.
+          Tidak ada data.
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-          {filtered.map(w => {
+        <div style={{ background: '#fff', border: '1px solid #e5e0d8', borderRadius: '12px', overflow: 'hidden' }}>
+          {/* Table header */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px 180px 100px 130px 80px', gap: '0', borderBottom: '2px solid #e5e0d8', padding: '0.625rem 1rem', background: '#f7f5f2' }}>
+            {['Kreator', 'Nominal', 'Bank', 'Tanggal', 'Status', 'Aksi'].map(h => (
+              <span key={h} style={{ fontSize: '0.7rem', fontWeight: 700, color: '#6e6a65', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{h}</span>
+            ))}
+          </div>
+
+          {filtered.map((w, i) => {
             const st = STATUS[w.status] ?? STATUS.pending
-            const isOpen = expanded === w.id
+            const changed = selectedStatus[w.id] !== w.status
+            const busy = processing === w.id
+
             return (
-              <div
-                key={w.id}
-                style={{ background: '#fff', border: `1px solid ${isOpen ? '#1a1a1a' : st.border}`, borderRadius: '12px', overflow: 'hidden', transition: 'border-color 0.15s' }}
-              >
-                {/* Row header — click to expand */}
-                <div
-                  onClick={() => setExpanded(isOpen ? null : w.id)}
-                  style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem', cursor: 'pointer', flexWrap: 'wrap' }}
-                >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.2rem' }}>
-                      <span style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#1a1a1a' }}>{formatIDR(w.amount)}</span>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 600, background: st.bg, color: st.color, padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
-                        {st.label}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.8125rem', color: '#4a4540' }}>
-                      {w.user.name ?? `@${w.user.username}`}
-                      <span style={{ color: '#9c9690' }}> · @{w.user.username} · {w.user.email}</span>
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: '#9c9690', marginTop: '0.1rem' }}>
-                      {w.bankName} · <strong style={{ color: '#4a4540' }}>{w.bankAccount}</strong> · a.n. {w.bankHolder} · {formatDate(w.createdAt)}
-                    </div>
-                    {w.adminNote && (
-                      <div style={{ fontSize: '0.75rem', color: '#6e6a65', marginTop: '0.2rem' }}>Catatan: {w.adminNote}</div>
-                    )}
+              <div key={w.id} style={{
+                display: 'grid', gridTemplateColumns: '1fr 120px 180px 100px 130px 80px',
+                gap: '0', alignItems: 'center',
+                padding: '0.75rem 1rem',
+                borderBottom: i < filtered.length - 1 ? '1px solid #f0ede8' : 'none',
+                background: w.status === 'pending' ? '#fffdf7' : '#fff',
+              }}>
+                {/* Kreator */}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {w.user.name ?? `@${w.user.username}`}
                   </div>
-                  <span style={{ fontSize: '0.8125rem', color: '#9c9690', flexShrink: 0 }}>{isOpen ? '▲' : '▼'}</span>
+                  <div style={{ fontSize: '0.75rem', color: '#9c9690', display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.1rem' }}>
+                    <span>@{w.user.username}</span>
+                    {w.user.waNumber && (
+                      <a
+                        href={`https://wa.me/62${w.user.waNumber.replace(/^0/, '').replace(/^62/, '')}?text=${encodeURIComponent(
+                          `Halo ${w.user.name ?? w.user.username}! Update pencairan *${formatIDR(w.amount)}*: ${STATUS[selectedStatus[w.id] ?? w.status]?.label ?? st.label}. Cek: https://tweak.my.id/dashboard/earnings`
+                        )}`}
+                        target="_blank" rel="noopener noreferrer"
+                        style={{ color: '#059669', textDecoration: 'none', fontSize: '0.7rem', fontWeight: 600 }}
+                      >
+                        💬 WA
+                      </a>
+                    )}
+                    <a
+                      href={`mailto:${w.user.email}`}
+                      style={{ color: '#2563eb', textDecoration: 'none', fontSize: '0.7rem', fontWeight: 600 }}
+                    >
+                      ✉️
+                    </a>
+                  </div>
                 </div>
 
-                {/* Expanded actions */}
-                {isOpen && (
-                  <div style={{ padding: '0 1.25rem 1.25rem', borderTop: '1px solid #f0ede8', paddingTop: '1rem', background: '#fafaf8' }}>
-                    {/* Notifikasi manual */}
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.875rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#9c9690', fontWeight: 600 }}>NOTIFIKASI:</span>
-                      {w.user.waNumber && (
-                        <a
-                          href={`https://wa.me/62${w.user.waNumber.replace(/^0/, '').replace(/^62/, '')}?text=${encodeURIComponent(
-                            `Halo ${w.user.name ?? w.user.username}!\n\nUpdate pencairan kamu sebesar *${formatIDR(w.amount)}*:\n\nStatus: ${st.label}\n\nCek riwayat: https://tweak.my.id/dashboard/earnings`
-                          )}`}
-                          target="_blank" rel="noopener noreferrer"
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.75rem', borderRadius: '6px', background: '#dcfce7', color: '#15803d', fontSize: '0.8125rem', fontWeight: 600, textDecoration: 'none', border: '1px solid #86efac' }}
-                        >
-                          💬 Kirim WA
-                        </a>
-                      )}
-                      <a
-                        href={`mailto:${w.user.email}?subject=${encodeURIComponent('Update Pencairan Dana — Tweak')}&body=${encodeURIComponent(
-                          `Halo ${w.user.name ?? w.user.username},\n\nPencairan kamu sebesar ${formatIDR(w.amount)} — Status: ${st.label}.\n\nCek di: https://tweak.my.id/dashboard/earnings\n\nSalam,\nTim Tweak`
-                        )}`}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.75rem', borderRadius: '6px', background: '#eff6ff', color: '#1d4ed8', fontSize: '0.8125rem', fontWeight: 600, textDecoration: 'none', border: '1px solid #93c5fd' }}
-                      >
-                        ✉️ Kirim Email
-                      </a>
-                    </div>
+                {/* Nominal */}
+                <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#1a1a1a' }}>
+                  {formatIDR(w.amount)}
+                </div>
 
-                    {/* Status change */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem', marginBottom: '0.625rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#6e6a65', marginBottom: '0.375rem' }}>Ubah Status</label>
-                        <select
-                          value={selectedStatus[w.id] ?? w.status}
-                          onChange={e => setSelectedStatus(s => ({ ...s, [w.id]: e.target.value }))}
-                          style={{ ...inputStyle, cursor: 'pointer' }}
-                        >
-                          {STATUS_OPTIONS.map(o => (
-                            <option key={o.value} value={o.value}>{o.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#6e6a65', marginBottom: '0.375rem' }}>Catatan Admin</label>
-                        <input
-                          value={notes[w.id] ?? (w.adminNote ?? '')}
-                          onChange={e => setNotes(n => ({ ...n, [w.id]: e.target.value }))}
-                          placeholder="Opsional"
-                          style={inputStyle}
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => act(w.id)}
-                      disabled={processing === w.id || selectedStatus[w.id] === w.status}
-                      style={{
-                        padding: '0.5rem 1.5rem', borderRadius: '8px', border: 'none',
-                        background: (processing === w.id || selectedStatus[w.id] === w.status) ? '#e5e0d8' : '#1a1a1a',
-                        color: (processing === w.id || selectedStatus[w.id] === w.status) ? '#9c9690' : '#f0ede8',
-                        fontWeight: 600, fontSize: '0.875rem',
-                        cursor: (processing === w.id || selectedStatus[w.id] === w.status) ? 'not-allowed' : 'pointer',
-                      }}
-                    >
-                      {processing === w.id ? 'Menyimpan...' : 'Simpan Status'}
-                    </button>
+                {/* Bank */}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '0.8125rem', color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {w.bankName}
                   </div>
-                )}
+                  <div style={{ fontSize: '0.75rem', color: '#9c9690', fontFamily: 'monospace' }}>{w.bankAccount}</div>
+                </div>
+
+                {/* Tanggal */}
+                <div style={{ fontSize: '0.75rem', color: '#9c9690' }}>{formatDate(w.createdAt)}</div>
+
+                {/* Status dropdown */}
+                <select
+                  value={selectedStatus[w.id] ?? w.status}
+                  onChange={e => setSelectedStatus(s => ({ ...s, [w.id]: e.target.value }))}
+                  style={{
+                    background: STATUS[selectedStatus[w.id] ?? w.status]?.bg ?? st.bg,
+                    color: STATUS[selectedStatus[w.id] ?? w.status]?.color ?? st.color,
+                    border: '1px solid transparent', borderRadius: '6px',
+                    padding: '0.35rem 0.5rem', fontSize: '0.75rem', fontWeight: 600,
+                    cursor: 'pointer', outline: 'none', width: '100%',
+                  }}
+                >
+                  {STATUS_OPTIONS.map(o => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+
+                {/* Simpan */}
+                <button
+                  onClick={() => act(w.id)}
+                  disabled={!changed || busy}
+                  style={{
+                    marginLeft: '0.5rem', padding: '0.375rem 0.625rem', borderRadius: '6px', border: 'none',
+                    background: changed && !busy ? '#1a1a1a' : '#e5e0d8',
+                    color: changed && !busy ? '#f0ede8' : '#9c9690',
+                    fontWeight: 600, fontSize: '0.75rem',
+                    cursor: changed && !busy ? 'pointer' : 'not-allowed',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {busy ? '...' : 'Simpan'}
+                </button>
               </div>
             )
           })}
