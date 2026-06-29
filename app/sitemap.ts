@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 import { db } from '@/lib/prisma'
 
-const BASE = 'https://xales.id'
+const BASE = 'https://tweak.my.id'
 
 export const revalidate = 3600 // rebuild sitemap every hour
 

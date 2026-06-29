@@ -23,7 +23,7 @@ export default function AppShareButton({ title, slug, authorUsername, affiliateE
 
   const baseUrl  = typeof window !== 'undefined'
     ? `${window.location.origin}/@${authorUsername}/${slug}`
-    : `https://xales.id/@${authorUsername}/${slug}`
+    : `https://tweak.my.id/@${authorUsername}/${slug}`
   const shareUrl = showAffiliate ? `${baseUrl}?ref=${myUsername}` : baseUrl
 
   useEffect(() => {

@@ -47,7 +47,7 @@ export async function notifyCreatorNewOrder(opts: {
     `💵 ${IDR(opts.amount)}\n\n` +
     `Order ID: \`${opts.orderId}\`\n\n` +
     `Segera cek dashboard untuk konfirmasi pembayaran:\n` +
-    `https://xales.id/dashboard/orders`
+    `https://tweak.my.id/dashboard/orders`
   await sendWA(opts.creatorWa, msg)
 }
 
@@ -82,7 +82,7 @@ export async function notifyWithdrawalSubmitted(opts: {
     `Halo ${opts.creatorName}!\n` +
     `Permintaan pencairan sebesar *${IDR(opts.amount)}* sedang diproses.\n\n` +
     `Estimasi: 1×24 jam kerja.\n` +
-    `Cek status: https://xales.id/dashboard/earnings`
+    `Cek status: https://tweak.my.id/dashboard/earnings`
   await sendWA(opts.creatorWa, msg)
 }
 
@@ -97,6 +97,6 @@ export async function notifyWithdrawalPaid(opts: {
     `🎉 *Dana sudah ditransfer!*\n\n` +
     `Halo ${opts.creatorName}!\n` +
     `Pencairan sebesar *${IDR(opts.amount)}* sudah dikirim ke rekeningmu.\n\n` +
-    `Cek riwayat: https://xales.id/dashboard/earnings`
+    `Cek riwayat: https://tweak.my.id/dashboard/earnings`
   await sendWA(opts.creatorWa, msg)
 }

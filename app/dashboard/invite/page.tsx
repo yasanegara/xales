@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-const BASE = typeof window !== 'undefined' ? window.location.origin : 'https://xales.id'
+const BASE = typeof window !== 'undefined' ? window.location.origin : 'https://tweak.my.id'
 
 interface Invite {
   id: string; code: string; usedAt: string | null; createdAt: string

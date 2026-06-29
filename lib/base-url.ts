@@ -9,11 +9,11 @@ import { headers } from 'next/headers'
 export async function getBaseUrl(): Promise<string> {
   try {
     const h = await headers()
-    const host  = h.get('x-forwarded-host') ?? h.get('host') ?? 'xales.id'
+    const host  = h.get('x-forwarded-host') ?? h.get('host') ?? 'tweak.my.id'
     const proto = h.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https')
     return `${proto}://${host}`
   } catch {
     // headers() throws when called outside a request (e.g. generateStaticParams at build time)
-    return process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? 'https://xales.id'
+    return process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? 'https://tweak.my.id'
   }
 }

@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/prisma'
 import { notifyBuyerConfirmed } from '@/lib/notify'
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://xales.id'
+const BASE = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://tweak.my.id'
 
 // POST /api/orders/activate — creator activates a pending purchase
 export async function POST(req: NextRequest) {

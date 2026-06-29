@@ -14,7 +14,7 @@ interface DFile {
 }
 interface Crumb { id: string; name: string }
 
-const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://xales.id'
+const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://tweak.my.id'
 
 // ── Helpers ────────────────────────────────────────────────────────────
 function fmtSize(b: number) {

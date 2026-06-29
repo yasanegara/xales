@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/dashboard/', '/admin/', '/api/', '/login', '/register'],
       },
     ],
-    sitemap: 'https://xales.id/sitemap.xml',
-    host: 'https://xales.id',
+    sitemap: 'https://tweak.my.id/sitemap.xml',
+    host: 'https://tweak.my.id',
   }
 }

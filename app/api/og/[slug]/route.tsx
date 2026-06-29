@@ -8,7 +8,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const fwdHost  = req.headers.get('x-forwarded-host')
   const fwdProto = req.headers.get('x-forwarded-proto') ?? 'https'
   const rawHost  = new URL(req.url).host
-  const host     = (fwdHost ?? (rawHost.includes('localhost') ? 'xales.id' : rawHost)) || 'xales.id'
+  const host     = (fwdHost ?? (rawHost.includes('localhost') ? 'tweak.my.id' : rawHost)) || 'tweak.my.id'
   const proto    = fwdHost ? fwdProto : 'https'
   const baseUrl  = `${proto}://${host}`
 
@@ -80,7 +80,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
             <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={`${baseUrl}/tweak-icon.png`} alt="" width={22} height={22} style={{ borderRadius: '4px' }} />
-              <span style={{ fontSize: '18px', fontWeight: 700, color: 'rgba(255,255,255,0.85)', fontFamily: '-apple-system, sans-serif' }}>xales.id</span>
+              <span style={{ fontSize: '18px', fontWeight: 700, color: 'rgba(255,255,255,0.85)', fontFamily: '-apple-system, sans-serif' }}>tweak.my.id</span>
             </div>
           </div>
         </div>
@@ -109,7 +109,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`${baseUrl}/tweak-icon.png`} alt="" width={28} height={28} style={{ borderRadius: '6px' }} />
-            <span style={{ fontSize: '22px', fontWeight: 700, color: '#ffffff' }}>xales.id</span>
+            <span style={{ fontSize: '22px', fontWeight: 700, color: '#ffffff' }}>tweak.my.id</span>
           </div>
         </div>
       </div>

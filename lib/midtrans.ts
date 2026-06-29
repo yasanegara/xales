@@ -38,7 +38,7 @@ export async function createSnapToken({
     clientKey,
   })
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://xales.id'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tweak.my.id'
   const isLocalhost = appUrl.includes('localhost') || appUrl.includes('127.0.0.1')
 
   const parameter = {
