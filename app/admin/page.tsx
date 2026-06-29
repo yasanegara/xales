@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { db } from '@/lib/prisma'
 import { formatDate } from '@/lib/utils'
 import Link from 'next/link'
+import WithdrawalActions from './WithdrawalActions'
 
 export const metadata = { title: 'Admin · Tweak' }
 
@@ -98,31 +99,7 @@ export default async function AdminPage() {
           </h2>
           <Link href="/admin/withdrawals" style={{ fontSize: '0.8125rem', color: '#0070f3', textDecoration: 'none' }}>Kelola →</Link>
         </div>
-        {pendingWithdrawals.length === 0 ? (
-          <div style={{ padding: '1.5rem', textAlign: 'center', color: '#9c9690', fontSize: '0.875rem' }}>Tidak ada permintaan yang menunggu</div>
-        ) : (
-          <div>
-            {pendingWithdrawals.map((w, i) => (
-              <div key={w.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1.25rem', borderBottom: i < pendingWithdrawals.length - 1 ? '1px solid #f0ede8' : 'none', gap: '1rem', flexWrap: 'wrap' }}>
-                <div>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1a1a1a' }}>
-                    @{w.user.username} {w.user.name ? `(${w.user.name})` : ''}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#9c9690' }}>
-                    {w.bankName} · {w.bankAccount} · a.n. {w.bankHolder} · {formatDate(w.createdAt)}
-                  </div>
-                </div>
-                <span style={{ fontWeight: 700, color: '#d97706', fontSize: '0.9375rem', flexShrink: 0 }}>
-                  Rp {formatIDR(w.amount)}
-                </span>
-              </div>
-            ))}
-            <div style={{ padding: '0.75rem 1.25rem', borderTop: '1px solid #e5e0d8', display: 'flex', justifyContent: 'space-between', background: '#fafaf8' }}>
-              <span style={{ fontSize: '0.8125rem', color: '#6e6a65' }}>Total pending</span>
-              <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1a1a1a' }}>Rp {formatIDR(totalPendingWithdraw)}</span>
-            </div>
-          </div>
-        )}
+        <WithdrawalActions withdrawals={pendingWithdrawals} totalPending={totalPendingWithdraw} />
       </div>
 
       {/* Two column: recent users + recent purchases */}
