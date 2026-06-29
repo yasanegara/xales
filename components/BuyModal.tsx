@@ -46,6 +46,7 @@ export default function BuyModal({ slug, title, price, postType, authorName, ref
   const [buying, setBuying] = useState(false)
   const [serviceFee, setServiceFee] = useState(0)
   const [error, setError] = useState('')
+  const [pending, setPending] = useState(false)
 
   const handleOpen = async () => {
     setOpen(true)
@@ -122,7 +123,7 @@ export default function BuyModal({ slug, title, price, postType, authorName, ref
         setOpen(false)
         onSuccess()
       },
-      onPending: () => { setOpen(false); onSuccess() },
+      onPending: () => { setBuying(false); setPending(true) },
       onError: () => setError('Pembayaran gagal, silakan coba lagi'),
       onClose: () => { /* user tutup popup */ },
     })
@@ -188,8 +189,19 @@ export default function BuyModal({ slug, title, price, postType, authorName, ref
               </div>
             </div>
 
-            {/* Login gate */}
-            {!session ? (
+            {/* Pending state */}
+            {pending ? (
+              <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>⏳</div>
+                <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: '0.5rem' }}>Menunggu pembayaran</div>
+                <p style={{ fontSize: '0.875rem', color: '#6e6a65', lineHeight: 1.6 }}>
+                  Selesaikan pembayaran sesuai instruksi, lalu refresh halaman ini untuk mengakses konten.
+                </p>
+                <button onClick={() => setOpen(false)} style={{ marginTop: '1rem', background: '#f0ede8', border: 'none', borderRadius: '8px', padding: '0.625rem 1.25rem', fontSize: '0.875rem', cursor: 'pointer', color: '#1a1a1a' }}>
+                  Tutup
+                </button>
+              </div>
+            ) : !session ? (
               <div style={{ textAlign: 'center', padding: '1rem 0' }}>
                 <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🔐</div>
                 <p style={{ fontSize: '0.9375rem', color: '#4a4540', lineHeight: 1.65, marginBottom: '1.5rem' }}>

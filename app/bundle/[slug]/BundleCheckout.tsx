@@ -48,6 +48,7 @@ export default function BundleCheckout({ slug, title, description, price, discou
   const [buying, setBuying] = useState(false)
   const [error, setError] = useState('')
   const [purchased, setPurchased] = useState(initialPurchased)
+  const [pending, setPending] = useState(false)
 
   const handleBuy = async () => {
     if (!payerName.trim()) { setError('Isi nama kamu terlebih dahulu'); return }
@@ -99,7 +100,7 @@ export default function BundleCheckout({ slug, title, description, price, discou
         })
         setPurchased(true)
       },
-      onPending: () => setPurchased(true),
+      onPending: () => { setBuying(false); setPending(true) },
       onError: () => setError('Pembayaran gagal, silakan coba lagi'),
       onClose: () => { /* user tutup popup */ },
     })
@@ -148,6 +149,14 @@ export default function BundleCheckout({ slug, title, description, price, discou
             <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✓</div>
             <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: '0.25rem' }}>Sudah dibeli!</div>
             <div style={{ fontSize: '0.875rem', color: '#6e6a65' }}>Klik item di kiri untuk mengakses</div>
+          </div>
+        ) : pending ? (
+          <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>⏳</div>
+            <div style={{ fontWeight: 700, color: '#1a1a1a', marginBottom: '0.5rem' }}>Menunggu pembayaran</div>
+            <p style={{ fontSize: '0.875rem', color: '#6e6a65', lineHeight: 1.6 }}>
+              Selesaikan pembayaran sesuai instruksi, lalu refresh halaman ini untuk mengakses bundle.
+            </p>
           </div>
         ) : (
           <>
