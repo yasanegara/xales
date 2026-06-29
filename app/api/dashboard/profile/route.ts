@@ -10,6 +10,18 @@ export async function PUT(req: NextRequest) {
   const body = await req.json()
   const { name, bio, status, profilePic, affiliateRate, bankName, bankAccount, bankHolder, qrisImage, waNumber, waMessage } = body
 
+  // Validate WA number: Indonesian mobile, 9-13 digits, starts with 08x/628x/8x
+  if (waNumber !== undefined && waNumber) {
+    const digits = String(waNumber).replace(/\D/g, '')
+    const normalized = digits.replace(/^0/, '').replace(/^62/, '')
+    if (!/^8\d{7,11}$/.test(normalized)) {
+      return NextResponse.json(
+        { error: 'Nomor WhatsApp tidak valid. Gunakan format 08xx atau 628xx (9–13 digit).' },
+        { status: 400 }
+      )
+    }
+  }
+
   const updated = await db.user.update({
     where: { id: session.user.id },
     data: {

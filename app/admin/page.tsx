@@ -62,7 +62,7 @@ export default async function AdminPage() {
       where: { status: 'pending' },
       orderBy: { createdAt: 'asc' },
       take: 10,
-      include: { user: { select: { username: true, name: true } } },
+      include: { user: { select: { username: true, name: true, email: true, waNumber: true } } },
     }),
     db.withdrawal.aggregate({ where: { status: 'pending' }, _sum: { amount: true } }),
   ])

@@ -11,7 +11,7 @@ interface Withdrawal {
   bankAccount: string
   bankHolder: string
   createdAt: Date
-  user: { username: string; name: string | null }
+  user: { username: string; name: string | null; email: string; waNumber: string | null }
 }
 
 function formatIDR(n: number) { return new Intl.NumberFormat('id-ID').format(n) }
@@ -72,6 +72,33 @@ export default function WithdrawalActions({ withdrawals, totalPending }: { withd
           {/* Expanded actions */}
           {expanded === w.id && (
             <div style={{ padding: '0 1.25rem 1rem', background: '#fafaf8' }}>
+              {/* Notifikasi manual */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.625rem' }}>
+                {w.user.waNumber && (
+                  <a
+                    href={`https://wa.me/62${w.user.waNumber.replace(/^0/, '').replace(/^62/, '')}?text=${encodeURIComponent(
+                      `Halo ${w.user.name ?? w.user.username}!\n\nPencairan kamu sebesar *Rp ${formatIDR(w.amount)}* sedang diproses.\n\nEstimasi transfer: 1×24 jam kerja.\n\nTweak — tweak.my.id`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.75rem', borderRadius: '6px', background: '#dcfce7', color: '#15803d', fontSize: '0.8125rem', fontWeight: 600, textDecoration: 'none', border: '1px solid #86efac' }}
+                  >
+                    💬 Kirim WA
+                  </a>
+                )}
+                <a
+                  href={`mailto:${w.user.email}?subject=${encodeURIComponent('Update Pencairan Dana — Tweak')}&body=${encodeURIComponent(
+                    `Halo ${w.user.name ?? w.user.username},\n\nPencairan kamu sebesar Rp ${formatIDR(w.amount)} sedang diproses.\n\nEstimasi transfer: 1×24 jam kerja.\n\nSalam,\nTim Tweak`
+                  )}`}
+                  onClick={e => e.stopPropagation()}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.75rem', borderRadius: '6px', background: '#eff6ff', color: '#1d4ed8', fontSize: '0.8125rem', fontWeight: 600, textDecoration: 'none', border: '1px solid #93c5fd' }}
+                >
+                  ✉️ Kirim Email
+                </a>
+                <span style={{ fontSize: '0.75rem', color: '#9c9690', alignSelf: 'center', marginLeft: '0.25rem' }}>{w.user.email}</span>
+              </div>
+
               <input
                 value={notes[w.id] ?? ''}
                 onChange={e => setNotes(n => ({ ...n, [w.id]: e.target.value }))}

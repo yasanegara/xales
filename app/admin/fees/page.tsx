@@ -15,13 +15,20 @@ function formatIDR(n: number) {
 export default function AdminFeesPage() {
   const [fees, setFees] = useState<Fees | null>(null)
   const [form, setForm] = useState<Fees | null>(null)
+  const [tweakWa, setTweakWa] = useState('')
+  const [tweakWaInput, setTweakWaInput] = useState('')
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
 
   useEffect(() => {
     fetch('/api/admin/config')
       .then(r => r.json())
-      .then(d => { setFees(d.fees); setForm(d.fees) })
+      .then(d => {
+        setFees(d.fees)
+        setForm(d.fees)
+        setTweakWa(d.tweakWa ?? '')
+        setTweakWaInput(d.tweakWa ?? '')
+      })
   }, [])
 
   const save = async () => {
@@ -31,13 +38,15 @@ export default function AdminFeesPage() {
     const res = await fetch('/api/admin/config', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, tweakWa: tweakWaInput }),
     })
     const data = await res.json()
     setSaving(false)
     if (!res.ok) { setMsg(data.error ?? 'Gagal menyimpan'); return }
     setFees(data.fees)
     setForm(data.fees)
+    setTweakWa(data.tweakWa ?? '')
+    setTweakWaInput(data.tweakWa ?? '')
     setMsg('✓ Tersimpan')
     setTimeout(() => setMsg(''), 3000)
   }
@@ -125,6 +134,40 @@ export default function AdminFeesPage() {
             <span>Kreator terima (setelah withdraw fee)</span>
             <span>Rp {formatIDR(50000 - form.transaction_fee)}</span>
           </div>
+        </div>
+      </div>
+
+      {/* Kontak Resmi */}
+      <div style={{ marginTop: '2rem' }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#1a1a1a', marginBottom: '0.25rem' }}>Kontak Resmi Tweak</h2>
+        <p style={{ fontSize: '0.8125rem', color: '#6e6a65', marginBottom: '1rem' }}>
+          Nomor WA ini dipakai admin untuk menghubungi kreator terkait pencairan atau masalah akun.
+        </p>
+        <div style={{ background: '#ffffff', border: '1px solid #e5e0d8', borderRadius: '12px', padding: '1.25rem' }}>
+          <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#6e6a65', marginBottom: '0.5rem' }}>Nomor WhatsApp Tweak</label>
+          <div style={{ position: 'relative', maxWidth: '320px' }}>
+            <span style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#6e6a65', fontSize: '0.875rem', pointerEvents: 'none' }}>+62</span>
+            <input
+              type="text"
+              value={tweakWaInput.replace(/^(0|62)/, '')}
+              onChange={e => setTweakWaInput(e.target.value.replace(/\D/g, ''))}
+              placeholder="81234567890"
+              style={{ width: '100%', background: '#fafaf8', border: '1px solid #e5e0d8', borderRadius: '8px', padding: '0.625rem 0.875rem 0.625rem 2.75rem', fontSize: '0.9375rem', color: '#1a1a1a', outline: 'none', fontFamily: 'monospace', boxSizing: 'border-box' }}
+            />
+          </div>
+          {tweakWa && tweakWaInput !== tweakWa && (
+            <div style={{ fontSize: '0.75rem', color: '#d97706', marginTop: '0.375rem' }}>Saat ini: {tweakWa}</div>
+          )}
+          {tweakWa && (
+            <a
+              href={`https://wa.me/62${tweakWa.replace(/^0/, '').replace(/^62/, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'inline-block', marginTop: '0.5rem', fontSize: '0.8125rem', color: '#059669', textDecoration: 'none' }}
+            >
+              ↗ Cek di WhatsApp
+            </a>
+          )}
         </div>
       </div>
 
