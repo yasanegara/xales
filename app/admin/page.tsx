@@ -32,6 +32,8 @@ export default async function AdminPage() {
     newUsersToday,
     recentUsers,
     recentPurchases,
+    pendingWithdrawals,
+    pendingWithdrawalAgg,
   ] = await Promise.all([
     db.user.count(),
     db.user.count({ where: { banned: true } }),
@@ -55,9 +57,17 @@ export default async function AdminPage() {
         post: { select: { title: true, author: { select: { username: true } } } },
       },
     }),
+    db.withdrawal.findMany({
+      where: { status: 'pending' },
+      orderBy: { createdAt: 'asc' },
+      take: 10,
+      include: { user: { select: { username: true, name: true } } },
+    }),
+    db.withdrawal.aggregate({ where: { status: 'pending' }, _sum: { amount: true } }),
   ])
 
   const totalRevenue = revenueAgg._sum.amount ?? 0
+  const totalPendingWithdraw = pendingWithdrawalAgg._sum.amount ?? 0
 
   return (
     <div>
@@ -71,8 +81,48 @@ export default async function AdminPage() {
         <StatCard label="Total Revenue" value={`Rp ${formatIDR(totalRevenue)}`} sub={`${totalPurchases} transaksi`} accent />
         <StatCard label="Total Users" value={totalUsers} sub={`+${newUsersToday} hari ini`} />
         <StatCard label="Total Posts" value={totalPosts} sub={`${publishedPosts} published`} />
+        <StatCard label="Pencairan Pending" value={pendingWithdrawals.length} sub={pendingWithdrawals.length > 0 ? `Rp ${formatIDR(totalPendingWithdraw)}` : 'Tidak ada'} />
         <StatCard label="Banned Users" value={bannedUsers} />
-        <StatCard label="Admin Users" value={adminUsers} />
+      </div>
+
+      {/* Pending withdrawals */}
+      <div style={{ background: '#ffffff', border: `1px solid ${pendingWithdrawals.length > 0 ? '#fde68a' : '#e5e0d8'}`, borderRadius: '10px', overflow: 'hidden', marginBottom: '1.5rem' }}>
+        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #e5e0d8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1a1a1a' }}>
+            Permintaan Pencairan
+            {pendingWithdrawals.length > 0 && (
+              <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', fontWeight: 700, background: '#fef3c7', color: '#d97706', borderRadius: '4px', padding: '0.15rem 0.5rem' }}>
+                {pendingWithdrawals.length} PENDING
+              </span>
+            )}
+          </h2>
+          <Link href="/admin/withdrawals" style={{ fontSize: '0.8125rem', color: '#0070f3', textDecoration: 'none' }}>Kelola →</Link>
+        </div>
+        {pendingWithdrawals.length === 0 ? (
+          <div style={{ padding: '1.5rem', textAlign: 'center', color: '#9c9690', fontSize: '0.875rem' }}>Tidak ada permintaan yang menunggu</div>
+        ) : (
+          <div>
+            {pendingWithdrawals.map((w, i) => (
+              <div key={w.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1.25rem', borderBottom: i < pendingWithdrawals.length - 1 ? '1px solid #f0ede8' : 'none', gap: '1rem', flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1a1a1a' }}>
+                    @{w.user.username} {w.user.name ? `(${w.user.name})` : ''}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#9c9690' }}>
+                    {w.bankName} · {w.bankAccount} · a.n. {w.bankHolder} · {formatDate(w.createdAt)}
+                  </div>
+                </div>
+                <span style={{ fontWeight: 700, color: '#d97706', fontSize: '0.9375rem', flexShrink: 0 }}>
+                  Rp {formatIDR(w.amount)}
+                </span>
+              </div>
+            ))}
+            <div style={{ padding: '0.75rem 1.25rem', borderTop: '1px solid #e5e0d8', display: 'flex', justifyContent: 'space-between', background: '#fafaf8' }}>
+              <span style={{ fontSize: '0.8125rem', color: '#6e6a65' }}>Total pending</span>
+              <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1a1a1a' }}>Rp {formatIDR(totalPendingWithdraw)}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Two column: recent users + recent purchases */}
