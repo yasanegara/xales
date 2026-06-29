@@ -10,7 +10,7 @@ const NAV = [
   { href: '/dashboard/drive',       label: 'Drive',              icon: '🗄' },
   { href: '/dashboard/earnings',    label: 'Saldo & Penghasilan', icon: '💰' },
   { href: '/dashboard/orders',      label: 'Pesanan',            icon: '📦' },
-  { href: '/dashboard/library',     label: 'Library',            icon: '★' },
+  { href: '/dashboard/library',     label: 'Pembelian Kamu',     icon: '★' },
   { href: '/dashboard/notes',       label: 'Catatan Saya',       icon: '✏' },
   { href: '/dashboard/gifts',       label: 'Gift Diterima',      icon: '🎁' },
   { href: '/dashboard/gift-wallet', label: 'Gift Wallet',        icon: '💳' },
