@@ -428,6 +428,7 @@ export default async function PostPage({ params, searchParams }: Props) {
               slug={post.slug}
               title={post.title}
               price={post.price!}
+              description={post.description}
               authorName={authorName}
               authorUsername={post.author.username}
               authorWaNumber={post.author.waNumber}
@@ -435,7 +436,7 @@ export default async function PostPage({ params, searchParams }: Props) {
               refCode={refCode}
               files={post.files}
               isPurchased={false}
-              preview={post.content?.slice(0, 600) ?? ''}
+              preview={post.content?.slice(0, 1000) ?? ''}
               postType={post.type}
               coverImage={post.coverImage}
             />

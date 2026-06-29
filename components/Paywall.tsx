@@ -19,6 +19,7 @@ interface Props {
   slug: string
   title: string
   price: number
+  description?: string | null
   authorName: string
   authorUsername: string
   authorWaNumber?: string | null
@@ -87,7 +88,7 @@ function AppScreenshotPreview({ coverImage, title }: { coverImage?: string | nul
   )
 }
 
-export default function Paywall({ slug, title, price, authorName, authorWaNumber, authorWaMessage, refCode, files = [], isPurchased: initialPurchased = false, preview = '', postType, coverImage }: Props) {
+export default function Paywall({ slug, title, price, description, authorName, authorWaNumber, authorWaMessage, refCode, files = [], isPurchased: initialPurchased = false, preview = '', postType, coverImage }: Props) {
   const router = useRouter()
   const [purchased, setPurchased] = useState(initialPurchased)
 
@@ -118,12 +119,12 @@ export default function Paywall({ slug, title, price, authorName, authorWaNumber
         <AppScreenshotPreview coverImage={coverImage} title={title} />
       ) : (
         plainPreview && (
-          <div style={{ position: 'relative', marginBottom: '0', maxHeight: '8rem', overflow: 'hidden' }}>
+          <div style={{ position: 'relative', marginBottom: '0', maxHeight: '16rem', overflow: 'hidden' }}>
             <p style={{ fontSize: '1rem', color: '#4a4540', lineHeight: 1.8, margin: 0 }}>
               {plainPreview}
             </p>
             <div style={{
-              position: 'absolute', bottom: 0, left: 0, right: 0, height: '5rem',
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: '8rem',
               background: 'linear-gradient(to bottom, transparent, #f7f5f2)',
             }} />
           </div>
@@ -141,11 +142,17 @@ export default function Paywall({ slug, title, price, authorName, authorWaNumber
           <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1a1a1a', marginBottom: '0.5rem' }}>
             {isApp ? 'Buka Akses App' : 'Konten Premium'}
           </h3>
-          <p style={{ color: '#6e6a65', fontSize: '0.9375rem', marginBottom: '0.5rem', lineHeight: 1.6 }}>
-            {isApp
-              ? 'Beli sekali, gunakan selamanya.'
-              : 'Artikel ini memerlukan pembelian untuk dibaca seluruhnya.'}
-          </p>
+          {description ? (
+            <p style={{ color: '#4a4540', fontSize: '0.9375rem', lineHeight: 1.65, marginBottom: '1rem', fontStyle: 'italic' }}>
+              &ldquo;{description}&rdquo;
+            </p>
+          ) : (
+            <p style={{ color: '#6e6a65', fontSize: '0.9375rem', marginBottom: '1rem', lineHeight: 1.6 }}>
+              {isApp
+                ? 'Beli sekali, gunakan selamanya.'
+                : 'Artikel ini memerlukan pembelian untuk dibaca seluruhnya.'}
+            </p>
+          )}
           <p style={{ color: '#9c9690', fontSize: '0.875rem', marginBottom: '2rem' }}>
             oleh <strong style={{ color: '#1a1a1a' }}>{authorName}</strong>
           </p>
