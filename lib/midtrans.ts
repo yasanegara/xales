@@ -59,6 +59,9 @@ export async function createSnapToken({
       first_name: buyerName,
       email: buyerEmail,
     },
+    enabled_payments: [
+      'bca_va', 'bni_va', 'bri_va', 'permata_va', 'mandiri_bill', 'other_va',
+    ],
     callbacks: {
       finish: `${appUrl}/payment/finish`,
     },
