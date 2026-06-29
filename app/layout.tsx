@@ -15,9 +15,9 @@ const midtransClientKey = process.env.MIDTRANS_ENV === 'production'
   : process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY_SANDBOX
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
-const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono' })
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono', preload: false })
 const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-brand' })
-const caveat = Caveat({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-hand' })
+const caveat = Caveat({ subsets: ['latin'], weight: ['600'], variable: '--font-hand', preload: false })
 
 export const metadata: Metadata = {
   title: { default: 'Tweak — Creator Publishing Platform', template: '%s | Tweak' },
